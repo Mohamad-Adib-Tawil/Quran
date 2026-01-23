@@ -81,7 +81,7 @@ class _DownloadedTab extends StatelessWidget {
                       final audioCubit = context.read<AudioCubit>();
                       final messenger = ScaffoldMessenger.of(context);
                       try {
-                        await audioCubit.prepareAndPlaySurah(s);
+                        await audioCubit.playSurah(s);
                       } catch (e) {
                         if (!context.mounted) return;
                         messenger.showSnackBar(

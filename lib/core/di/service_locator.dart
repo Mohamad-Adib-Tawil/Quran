@@ -29,13 +29,14 @@ Future<void> setupLocator() async {
   // Initialize AudioRemoteDataSource with asset mapping and optional baseUrl fallback
   final audioRemote = AudioRemoteDataSource();
   audioRemote.configure(
-    baseUrl: 'https://quran.devmmnd.com/quran-audio/',
+    // Prefer a reliable public host as primary
+    baseUrl: 'https://server8.mp3quran.net/afs/',
     fallbackBaseUrls: const [
-      // HTTP variant (some networks/hosts may only be reachable via IPv4/HTTP)
-      'http://quran.devmmnd.com/quran-audio/',
-      // Public reciter hosts (zero-padded 3-digit files)
-      'https://server8.mp3quran.net/afs/', // Mishary Alafasy
+      // Another public reciter host (zero-padded 3-digit files)
       'https://server7.mp3quran.net/sds/', // Abdul Rahman AlSudais
+      // Original host as fallback (HTTPS then HTTP)
+      'https://quran.devmmnd.com/quran-audio/',
+      'http://quran.devmmnd.com/quran-audio/',
     ],
   );
   await audioRemote.loadFromAssets();
