@@ -109,6 +109,12 @@ class AudioCubit extends Cubit<AudioState> {
     emit(state.copyWith(onComplete: behavior));
   }
 
+  // Set current surah context without preparing or downloading
+  void selectSurah(int surah) {
+    if (surah < 1 || surah > 114) return;
+    emit(state.copyWith(currentSurah: surah));
+  }
+
   Future<void> _startDownloadFlow(int surah) async {
     // reset any previous download subscription
     await _dlSub?.cancel();
