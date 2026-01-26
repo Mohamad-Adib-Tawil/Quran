@@ -113,7 +113,10 @@ flutter_native_splash:
   android: true
   ios: true
   color: "#ffffff"
-  image: "assets/splash/Splash Screen app.jpg"
+  background_image: "assets/splash/Splash Screen app.jpg"
+  ios_content_mode: "scaleAspectFill"
   android_12:
+    # Android 12 doesn't support full-screen background images.
+    # The image will be centered per OS constraints.
     image: "assets/splash/Splash Screen app.jpg"
     icon_background_color: "#ffffff"
