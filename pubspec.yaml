@@ -54,6 +54,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -98,3 +100,20 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# App icon configuration using flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/home/صورة الشيخ احمد كراسي الشخصية.png"
+  adaptive_icon_background: "#ffffff"
+
+# Native splash configuration using flutter_native_splash
+flutter_native_splash:
+  android: true
+  ios: true
+  color: "#ffffff"
+  image: "assets/splash/Splash Screen app.jpg"
+  android_12:
+    image: "assets/splash/Splash Screen app.jpg"
+    icon_background_color: "#ffffff"
