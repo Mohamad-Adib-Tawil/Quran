@@ -8,6 +8,7 @@ class SettingsCubit extends Cubit<SettingsState> {
   static const _keyTheme = 'themeMode';
   static const _keyFontScale = 'fontScale';
   static const _keyVerseEnd = 'verseEndSymbol';
+  static const _keyLocale = 'localeCode';
 
   final SharedPreferences _prefs;
   SettingsCubit(this._prefs) : super(SettingsState.initial()) {
@@ -18,11 +19,13 @@ class SettingsCubit extends Cubit<SettingsState> {
     final themeStr = _prefs.getString(_keyTheme);
     final fontScale = _prefs.getDouble(_keyFontScale) ?? state.fontScale;
     final verseEnd = _prefs.getBool(_keyVerseEnd) ?? state.verseEndSymbol;
+    final locale = _prefs.getString(_keyLocale);
 
     emit(state.copyWith(
       themeMode: _parseTheme(themeStr) ?? state.themeMode,
       fontScale: fontScale,
       verseEndSymbol: verseEnd,
+      localeCode: locale,
     ));
   }
 
@@ -63,5 +66,10 @@ class SettingsCubit extends Cubit<SettingsState> {
   void toggleVerseEndSymbol(bool value) {
     _prefs.setBool(_keyVerseEnd, value);
     emit(state.copyWith(verseEndSymbol: value));
+  }
+
+  void setLocale(String code) {
+    _prefs.setString(_keyLocale, code);
+    emit(state.copyWith(localeCode: code));
   }
 }
