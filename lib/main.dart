@@ -6,11 +6,11 @@ import 'core/di/service_locator.dart';
 import 'core/theme/app_theme.dart';
 import 'features/settings/cubit/settings_cubit.dart';
 import 'features/settings/cubit/settings_state.dart';
-import 'features/quran/presentation/pages/surah_list_page.dart';
 import 'features/quran/presentation/cubit/quran_cubit.dart';
 import 'features/audio/presentation/cubit/audio_cubit.dart';
 import 'features/audio/domain/repositories/audio_download_repository.dart';
 import 'features/audio/domain/repositories/audio_repository.dart' as audio_domain;
+import 'features/splash/presentation/pages/app_splash_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +41,7 @@ class QuranApp extends StatelessWidget {
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
             themeMode: settings.themeMode,
-            home: const SurahListPage(),
+            home: const AppSplashPage(),
           );
         },
       ),

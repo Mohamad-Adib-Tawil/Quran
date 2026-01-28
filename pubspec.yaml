@@ -69,6 +69,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/audio/audio_urls.json
+    - assets/splash/Splash Screen app.jpg
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -116,7 +117,6 @@ flutter_native_splash:
   background_image: "assets/splash/Splash Screen app.jpg"
   ios_content_mode: "scaleAspectFill"
   android_12:
-    # Android 12 doesn't support full-screen background images.
-    # The image will be centered per OS constraints.
-    image: "assets/splash/Splash Screen app.jpg"
+    # Android 12 uses a centered image. Use the same logo as the app icon.
+    image: "assets/home/صورة الشيخ احمد كراسي الشخصية.png"
     icon_background_color: "#ffffff"
