@@ -66,9 +66,7 @@ class _SurahListPageState extends State<SurahListPage> {
           basmalaColor: textColor.withValues(alpha: 0.85),
           basmalaFontSize: 28.0,
         ),
-        ayahStyle: AyahAudioStyle.defaults(isDark: isDark, context: context)
-            .copyWith(dialogWidth: 320, readersTabText: 'القراء')
-            .copyWith(),
+        // لا نمرر AyahAudioStyle حتى لا تُنشّط منظومة الصوت الداخلية للحزمة
         topBarStyle: QuranTopBarStyle.defaults(isDark: isDark, context: context).copyWith(
           showAudioButton: false,
           showFontsButton: true,

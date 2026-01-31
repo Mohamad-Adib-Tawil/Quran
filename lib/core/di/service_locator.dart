@@ -33,18 +33,11 @@ Future<void> setupLocator() async {
 
   // Data sources
   sl.registerLazySingleton<QuranLocalDataSource>(() => QuranLocalDataSource());
-  // Initialize AudioRemoteDataSource with asset mapping and optional baseUrl fallback
+  // Initialize AudioRemoteDataSource to use JSON mapping ONLY (no external fallbacks)
   final audioRemote = AudioRemoteDataSource();
   audioRemote.configure(
-    // Prefer a reliable public host as primary
-    baseUrl: 'https://server8.mp3quran.net/afs/',
-    fallbackBaseUrls: const [
-      // Another public reciter host (zero-padded 3-digit files)
-      'https://server7.mp3quran.net/sds/', // Abdul Rahman AlSudais
-      // Original host as fallback (HTTPS then HTTP)
-      'https://quran.devmmnd.com/quran-audio/',
-      'http://quran.devmmnd.com/quran-audio/',
-    ],
+    baseUrl: null,
+    fallbackBaseUrls: const [],
   );
   await audioRemote.loadFromAssets();
   sl.registerSingleton<AudioRemoteDataSource>(audioRemote);
