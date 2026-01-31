@@ -6,18 +6,20 @@ import 'package:just_audio/just_audio.dart' show ProcessingState; // for complet
 import '../../domain/repositories/audio_repository.dart';
 import '../../domain/repositories/audio_download_repository.dart';
 import 'audio_state.dart';
+import '../../../../services/audio_url_catalog_service.dart';
 
 /// Handles playback only. No network logic here.
 class AudioCubit extends Cubit<AudioState> {
   final AudioRepository _repo;
   final AudioDownloadRepository _downloadRepo;
+  final AudioUrlCatalogService _catalog;
   StreamSubscription? _posSub;
   StreamSubscription? _durSub;
   StreamSubscription? _stateSub;
   StreamSubscription? _dlSub;
   int? _lastRequestedSurah;
 
-  AudioCubit(this._repo, this._downloadRepo) : super(AudioState.initial()) {
+  AudioCubit(this._repo, this._downloadRepo, this._catalog) : super(AudioState.initial()) {
     _bind();
   }
 
@@ -70,8 +72,8 @@ class AudioCubit extends Cubit<AudioState> {
       return;
     }
     if (state.url == null && state.currentSurah != null) {
-      // No source loaded yet: try to play current surah via unified flow (auto-download if needed)
-      await playSurah(state.currentSurah!, from: state.position);
+      // لا يوجد مصدر مُحمّل: شغّل مباشرة من كتالوج JSON (بث)
+      await playFromCatalog(state.currentSurah!);
       return;
     }
     await play();
@@ -113,6 +115,37 @@ class AudioCubit extends Cubit<AudioState> {
   void selectSurah(int surah) {
     if (surah < 1 || surah > 114) return;
     emit(state.copyWith(currentSurah: surah));
+  }
+
+  // Play directly from catalog JSON URL (no download). Used by Home screen.
+  Future<void> playFromCatalog(int surah) async {
+    try {
+      final url = _catalog.urlForSurah(surah);
+      if (url == null) {
+        throw StateError('لا يوجد رابط صوت لهذه السورة في الكتالوج');
+      }
+      emit(state.copyWith(phase: AudioPhase.preparing, errorMessage: null));
+      await _repo.setUrl(url);
+      emit(state.copyWith(url: url, currentSurah: surah));
+      await _repo.play();
+      emit(state.copyWith(phase: AudioPhase.playing));
+    } catch (e) {
+      emit(state.copyWith(phase: AudioPhase.error, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> playNextFromCatalog() async {
+    final s = state.currentSurah ?? 1;
+    if (s < 114) {
+      await playFromCatalog(s + 1);
+    }
+  }
+
+  Future<void> playPrevFromCatalog() async {
+    final s = state.currentSurah ?? 1;
+    if (s > 1) {
+      await playFromCatalog(s - 1);
+    }
   }
 
   Future<void> _startDownloadFlow(int surah) async {

@@ -13,6 +13,8 @@ import '../../features/audio/data/repositories/audio_download_repository_impl.da
 import '../../features/quran/data/datasources/quran_local_data_source.dart';
 import '../../features/quran/data/repositories/quran_repository_impl.dart';
 import '../../features/quran/domain/repositories/quran_repository.dart';
+import '../../services/audio_session_manager.dart';
+import '../../services/audio_url_catalog_service.dart';
 
 final sl = GetIt.instance;
 
@@ -23,6 +25,11 @@ Future<void> setupLocator() async {
   // Async singletons
   final prefs = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(prefs);
+  sl.registerLazySingleton<AudioSessionManager>(() => AudioSessionManager(sl<SharedPreferences>()));
+  // Audio catalog from local JSON
+  final audioCatalog = AudioUrlCatalogService();
+  await audioCatalog.load();
+  sl.registerSingleton<AudioUrlCatalogService>(audioCatalog);
 
   // Data sources
   sl.registerLazySingleton<QuranLocalDataSource>(() => QuranLocalDataSource());

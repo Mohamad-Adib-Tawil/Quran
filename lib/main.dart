@@ -11,6 +11,8 @@ import 'features/audio/presentation/cubit/audio_cubit.dart';
 import 'features/audio/domain/repositories/audio_download_repository.dart';
 import 'features/audio/domain/repositories/audio_repository.dart' as audio_domain;
 import 'features/splash/presentation/pages/app_splash_page.dart';
+import 'services/audio_url_catalog_service.dart';
+import 'services/audio_session_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,10 +30,18 @@ class QuranApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => SettingsCubit(sl())),
         BlocProvider(create: (_) => QuranCubit(sl())),
-        BlocProvider(create: (_) => AudioCubit(
-              sl<audio_domain.AudioRepository>(),
-              sl<AudioDownloadRepository>(),
-            )),
+        BlocProvider(create: (_) {
+          final cubit = AudioCubit(
+            sl<audio_domain.AudioRepository>(),
+            sl<AudioDownloadRepository>(),
+            sl<AudioUrlCatalogService>(),
+          );
+          // Attach and restore last session (non-blocking)
+          final session = sl<AudioSessionManager>();
+          session.attach(cubit);
+          session.restoreIfNeeded(cubit);
+          return cubit;
+        }),
       ],
       child: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, settings) {
