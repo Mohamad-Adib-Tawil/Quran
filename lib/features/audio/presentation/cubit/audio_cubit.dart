@@ -124,6 +124,11 @@ class AudioCubit extends Cubit<AudioState> {
       if (url == null) {
         throw StateError('لا يوجد رابط صوت لهذه السورة في الكتالوج');
       }
+      // منع أي مصدر آخر غير المسموح به
+      const allowedPrefix = 'https://quran.devmmnd.com/quran-audio/';
+      if (!url.startsWith(allowedPrefix)) {
+        throw StateError('مصدر الصوت غير مسموح. يجب أن يبدأ بـ $allowedPrefix');
+      }
       emit(state.copyWith(phase: AudioPhase.preparing, errorMessage: null));
       await _repo.setUrl(url);
       emit(state.copyWith(url: url, currentSurah: surah));
