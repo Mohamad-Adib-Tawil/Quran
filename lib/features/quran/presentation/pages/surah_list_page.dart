@@ -3,9 +3,44 @@ import 'package:quran_library/quran_library.dart';
 import 'package:quran/features/audio/presentation/widgets/mini_player.dart';
 import 'package:quran/features/audio/presentation/pages/audio_downloads_page.dart';
 import 'package:quran/features/audio/presentation/widgets/surah_auto_sync.dart';
+import 'package:quran/features/quran/presentation/navigation/quran_open_target.dart';
 
-class SurahListPage extends StatelessWidget {
-  const SurahListPage({super.key});
+class SurahListPage extends StatefulWidget {
+  final QuranOpenTarget? openTarget;
+  const SurahListPage({super.key, this.openTarget});
+
+  @override
+  State<SurahListPage> createState() => _SurahListPageState();
+}
+
+class _SurahListPageState extends State<SurahListPage> {
+  bool _applied = false;
+  final Key _screenKey = UniqueKey();
+
+  @override
+  void initState() {
+    super.initState();
+    // نفّذ القفزة للهدف بعد أول إطار لضمان تهيئة الكنترولرز داخليًا
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_applied) return;
+      final t = widget.openTarget;
+      if (t != null) {
+        switch (t.type) {
+          case QuranOpenTargetType.surah:
+            QuranLibrary().jumpToSurah(t.number);
+            break;
+          case QuranOpenTargetType.juz:
+            QuranLibrary().jumpToJoz(t.number);
+            break;
+          case QuranOpenTargetType.hizb:
+            QuranLibrary().jumpToHizb(t.number);
+            break;
+        }
+      }
+      _applied = true;
+      setState(() {}); // لإعادة بناء الشاشة بعد تطبيق القفزة
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +49,7 @@ class SurahListPage extends StatelessWidget {
     final textColor = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black;
     return Scaffold(
       body: QuranLibraryScreen(
+        key: _screenKey, // مفتاح فريد يمنع إعادة استخدام Controllers قديمة
         parentContext: context,
         withPageView: true,
         useDefaultAppBar: true,

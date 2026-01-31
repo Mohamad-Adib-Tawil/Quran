@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quran/features/quran/presentation/pages/surah_list_page.dart';
+import 'package:quran/features/home/presentation/pages/home_screen.dart';
 import 'package:quran/features/settings/cubit/settings_cubit.dart';
 import 'package:quran/features/settings/presentation/pages/language_select_page.dart';
 
@@ -24,7 +24,7 @@ class _AppSplashPageState extends State<AppSplashPage> {
       final locale = context.read<SettingsCubit>().state.localeCode;
       final next = (locale == null || locale.isEmpty)
           ? const LanguageSelectPage()
-          : const SurahListPage();
+          : const HomeScreen();
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => next),
       );

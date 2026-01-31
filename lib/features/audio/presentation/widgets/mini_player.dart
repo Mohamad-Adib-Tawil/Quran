@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_library/quran_library.dart';
 
 import '../cubit/audio_cubit.dart';
 import '../cubit/audio_state.dart';
@@ -69,6 +70,11 @@ class MiniAudioPlayer extends StatelessWidget {
             return Row(
               children: [
                 IconButton(
+                  icon: const Icon(Icons.skip_previous),
+                  onPressed: () => context.read<AudioCubit>().playPrevFromCatalog(),
+                  tooltip: 'السابق',
+                ),
+                IconButton(
                   icon: Icon(state.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill),
                   color: Theme.of(context).colorScheme.primary,
                   iconSize: 36,
@@ -80,6 +86,18 @@ class MiniAudioPlayer extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (state.currentSurah != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: Text(
+                            QuranLibrary()
+                                .getSurahInfo(surahNumber: (state.currentSurah! - 1))
+                                .name,
+                            style: Theme.of(context).textTheme.labelMedium,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       Slider(
                         value: durationMs == 0 ? 0 : positionMs.toDouble(),
                         min: 0,
@@ -102,6 +120,11 @@ class MiniAudioPlayer extends StatelessWidget {
                   icon: const Icon(Icons.stop_circle_outlined),
                   onPressed: () => context.read<AudioCubit>().stop(),
                   tooltip: 'إيقاف',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.skip_next),
+                  onPressed: () => context.read<AudioCubit>().playNextFromCatalog(),
+                  tooltip: 'التالي',
                 ),
               ],
             );
