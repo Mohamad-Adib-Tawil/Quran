@@ -14,6 +14,7 @@ import 'package:quran/features/home/presentation/widgets/home_search_field.dart'
 import 'package:quran/features/quran/presentation/widgets/list/surah_list_item.dart';
 import 'package:quran/features/quran/presentation/widgets/list/list_divider.dart';
 import 'package:quran/features/quran/presentation/widgets/list/juz_list_item.dart';
+import '../../../quran/presentation/pages/surah_details_page.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
 
@@ -111,6 +112,22 @@ class _HomeViewState extends State<_HomeView> {
                               Navigator.of(ctx).push(
                                 MaterialPageRoute(
                                   builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(s)),
+                                ),
+                              );
+                            },
+                            onLongPress: () {
+                              if (!ctx.mounted) return;
+                              Navigator.of(ctx).push(
+                                MaterialPageRoute(
+                                  builder: (_) => SurahDetailsPage(surahNumber: s),
+                                ),
+                              );
+                            },
+                            onInfo: () {
+                              if (!ctx.mounted) return;
+                              Navigator.of(ctx).push(
+                                MaterialPageRoute(
+                                  builder: (_) => SurahDetailsPage(surahNumber: s),
                                 ),
                               );
                             },
