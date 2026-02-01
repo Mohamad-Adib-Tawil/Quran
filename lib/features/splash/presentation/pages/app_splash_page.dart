@@ -46,6 +46,26 @@ class _AppSplashPageState extends State<AppSplashPage> {
           Image.asset(
             'assets/splash/Splash Screen app.jpg',
             fit: BoxFit.cover,
+            errorBuilder: (context, error, stack) {
+              return Container(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFF0CAF60), Color(0xFF0A8A4C)],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+                child: Center(
+                  child: Text(
+                    'القرآن الكريم',
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineMedium
+                        ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

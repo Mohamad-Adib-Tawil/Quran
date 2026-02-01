@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/di/service_locator.dart';
 import 'core/theme/app_theme.dart';
@@ -51,6 +52,17 @@ class QuranApp extends StatelessWidget {
             theme: AppTheme.light(),
             darkTheme: AppTheme.dark(),
             themeMode: settings.themeMode,
+            locale: settings.localeCode != null ? Locale(settings.localeCode!) : null,
+            supportedLocales: const [
+              Locale('ar'),
+              Locale('de'),
+              Locale('en'),
+            ],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
             home: const AppSplashPage(),
           );
         },
