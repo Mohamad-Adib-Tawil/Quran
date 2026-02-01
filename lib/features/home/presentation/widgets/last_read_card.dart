@@ -4,6 +4,7 @@ import 'package:quran/core/theme/design_tokens.dart';
 import 'package:quran/core/theme/app_colors.dart';
 import 'package:quran/features/quran/presentation/pages/surah_list_page.dart';
 import 'package:quran/features/quran/presentation/navigation/quran_open_target.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LastReadCard extends StatelessWidget {
   final int surah;
@@ -48,7 +49,12 @@ class LastReadCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.play_circle_fill, color: Colors.white, size: 36),
+            SvgPicture.asset(
+              'assets/figma/icons/play.svg',
+              width: 36,
+              height: 36,
+              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            ),
           ],
         ),
       ),

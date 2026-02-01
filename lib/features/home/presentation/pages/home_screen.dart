@@ -5,7 +5,7 @@ import 'package:quran_library/quran_library.dart';
 import '../../../audio/presentation/widgets/mini_player.dart';
 import '../../../quran/presentation/pages/surah_list_page.dart';
 import '../../../quran/presentation/navigation/quran_open_target.dart';
-import '../../../settings/presentation/pages/language_select_page.dart';
+import '../../../settings/presentation/pages/settings_page.dart';
 import 'package:quran/services/last_read_service.dart';
 import 'package:quran/core/di/service_locator.dart';
 import 'package:quran/features/home/presentation/widgets/last_read_card.dart';
@@ -65,7 +65,7 @@ class _HomeViewState extends State<_HomeView> {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const LanguageSelectPage(),
+                    builder: (_) => const SettingsPage(),
                   ),
                 );
               },
