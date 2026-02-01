@@ -7,12 +7,15 @@ class SurahListItem extends StatelessWidget {
   final String title;
   final String? subtitle;
   final VoidCallback? onTap;
-  const SurahListItem({super.key, required this.surahNumber, required this.title, this.subtitle, this.onTap});
+  final VoidCallback? onLongPress;
+  final VoidCallback? onInfo;
+  const SurahListItem({super.key, required this.surahNumber, required this.title, this.subtitle, this.onTap, this.onLongPress, this.onInfo});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      onLongPress: onLongPress,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
@@ -31,6 +34,12 @@ class SurahListItem extends StatelessWidget {
                 ],
               ),
             ),
+            if (onInfo != null)
+              IconButton(
+                icon: const Icon(Icons.info_outline, color: Colors.grey),
+                onPressed: onInfo,
+                tooltip: 'تفاصيل',
+              ),
             const Icon(Icons.chevron_right, color: Colors.grey),
           ],
         ),
