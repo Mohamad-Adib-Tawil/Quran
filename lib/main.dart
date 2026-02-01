@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'core/di/service_locator.dart';
 import 'core/theme/app_theme.dart';
@@ -46,24 +47,30 @@ class QuranApp extends StatelessWidget {
       ],
       child: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, settings) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'القرآن الكريم',
-            theme: AppTheme.light(),
-            darkTheme: AppTheme.dark(),
-            themeMode: settings.themeMode,
-            locale: settings.localeCode != null ? Locale(settings.localeCode!) : null,
-            supportedLocales: const [
-              Locale('ar'),
-              Locale('de'),
-              Locale('en'),
-            ],
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            home: const AppSplashPage(),
+          return ScreenUtilInit(
+            designSize: const Size(390, 844), // iPhone 12-like baseline
+            minTextAdapt: true,
+            builder: (context, child) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                title: 'القرآن الكريم',
+                theme: AppTheme.light(),
+                darkTheme: AppTheme.dark(),
+                themeMode: settings.themeMode,
+                locale: settings.localeCode != null ? Locale(settings.localeCode!) : null,
+                supportedLocales: const [
+                  Locale('ar'),
+                  Locale('de'),
+                  Locale('en'),
+                ],
+                localizationsDelegates: const [
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                home: const AppSplashPage(),
+              );
+            },
           );
         },
       ),
