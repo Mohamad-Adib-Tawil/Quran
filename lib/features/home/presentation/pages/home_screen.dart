@@ -6,10 +6,14 @@ import '../../../audio/presentation/widgets/mini_player.dart';
 import '../../../quran/presentation/pages/surah_list_page.dart';
 import '../../../quran/presentation/navigation/quran_open_target.dart';
 import '../../../settings/presentation/pages/language_select_page.dart';
-import 'package:quran/core/theme/design_tokens.dart';
 import 'package:quran/services/last_read_service.dart';
 import 'package:quran/core/di/service_locator.dart';
-import 'package:quran/core/theme/app_colors.dart';
+import 'package:quran/features/home/presentation/widgets/last_read_card.dart';
+import 'package:quran/features/home/presentation/widgets/home_tab_bar.dart';
+import 'package:quran/features/home/presentation/widgets/home_search_field.dart';
+import 'package:quran/features/quran/presentation/widgets/list/surah_list_item.dart';
+import 'package:quran/features/quran/presentation/widgets/list/list_divider.dart';
+import 'package:quran/features/quran/presentation/widgets/list/juz_list_item.dart';
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
 
@@ -25,55 +29,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _LastReadCard extends StatelessWidget {
-  final LastRead lastRead;
-  const _LastReadCard({required this.lastRead});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final info = QuranLibrary().getSurahInfo(surahNumber: lastRead.surah - 1);
-    return InkWell(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(lastRead.surah)),
-          ),
-        );
-      },
-      borderRadius: BorderRadius.circular(AppRadius.xl),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          gradient: const LinearGradient(
-            colors: [AppColors.primary, AppColors.primaryDark],
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-          ),
-          boxShadow: AppShadows.soft(AppColors.primary),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('آخر المقروء', style: theme.textTheme.labelLarge?.copyWith(color: Colors.white70)),
-                  const SizedBox(height: 6),
-                  Text(info.name, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text('الآية ${lastRead.ayah}', style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white)),
-                ],
-              ),
-            ),
-            const Icon(Icons.play_circle_fill, color: Colors.white, size: 36),
-          ],
-        ),
-      ),
-    );
-  }
-}
+ 
 
 class _HomeView extends StatefulWidget {
   const _HomeView();
@@ -116,40 +72,21 @@ class _HomeViewState extends State<_HomeView> {
               icon: const Icon(Icons.settings),
             ),
           ],
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'السور'),
-              Tab(text: 'الأجزاء'),
-              Tab(text: 'الأحزاب'),
-            ],
-          ),
+          bottom: const HomeTabBar(),
         ),
         body: Column(
           children: [
             if (_lastRead != null)
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
-                child: _LastReadCard(lastRead: _lastRead!),
+                child: LastReadCard(surah: _lastRead!.surah, ayah: _lastRead!.ayah),
               ),
             // Mini player header
             const Material(elevation: 2, child: Padding(padding: EdgeInsets.all(8), child: MiniAudioPlayer())),
             // Search field
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              child: TextField(
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: 'ابحث عن سورة',
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.l),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                onChanged: (v) => context.read<HomeCubit>().setQuery(v),
-              ),
+              child: HomeSearchField(onChanged: (v) => context.read<HomeCubit>().setQuery(v)),
             ),
             Expanded(
               child: TabBarView(
@@ -160,23 +97,20 @@ class _HomeViewState extends State<_HomeView> {
                       final surahs = state.filteredSurahs;
                       return ListView.separated(
                         itemCount: surahs.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        separatorBuilder: (_, __) => const ListDivider(),
                         itemBuilder: (ctx, i) {
                           final s = surahs[i];
                           final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
-                          return ListTile(
-                            leading: CircleAvatar(child: Text('$s')),
-                            title: Text(info.name),
-                            subtitle: Text(info.name),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () async {
+                          return SurahListItem(
+                            surahNumber: s,
+                            title: info.name,
+                            subtitle: info.name,
+                            onTap: () {
                               if (!ctx.mounted) return;
-                              _setLastRead(s, 1); // fire-and-forget to avoid async gap with context usage
+                              _setLastRead(s, 1);
                               Navigator.of(ctx).push(
                                 MaterialPageRoute(
-                                  builder: (_) => SurahListPage(
-                                    openTarget: QuranOpenTarget.surah(s),
-                                  ),
+                                  builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(s)),
                                 ),
                               );
                             },
@@ -188,20 +122,17 @@ class _HomeViewState extends State<_HomeView> {
                   // Juz tab
                   ListView.separated(
                     itemCount: QuranLibrary.allJoz.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    separatorBuilder: (_, __) => const ListDivider(),
                     itemBuilder: (ctx, i) {
                       final j = QuranLibrary.allJoz[i];
-                      return ListTile(
-                        leading: const Icon(Icons.menu_book_outlined),
-                        title: Text('الجزء ${i + 1}'),
-                        subtitle: Text(j),
-                        onTap: () async {
+                      return JuzListItem(
+                        index: i + 1,
+                        subtitle: j,
+                        onTap: () {
                           if (!ctx.mounted) return;
                           Navigator.of(ctx).push(
                             MaterialPageRoute(
-                              builder: (_) => SurahListPage(
-                                openTarget: QuranOpenTarget.juz(i + 1),
-                              ),
+                              builder: (_) => SurahListPage(openTarget: QuranOpenTarget.juz(i + 1)),
                             ),
                           );
                         },
@@ -211,20 +142,17 @@ class _HomeViewState extends State<_HomeView> {
                   // Hizb tab (quarters)
                   ListView.separated(
                     itemCount: QuranLibrary.allHizb.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    separatorBuilder: (_, __) => const ListDivider(),
                     itemBuilder: (ctx, i) {
                       final h = QuranLibrary.allHizb[i];
-                      return ListTile(
-                        leading: const Icon(Icons.view_week_outlined),
-                        title: Text('الحزب ${i + 1}'),
-                        subtitle: Text(h),
-                        onTap: () async {
+                      return HizbListItem(
+                        index: i + 1,
+                        subtitle: h,
+                        onTap: () {
                           if (!ctx.mounted) return;
                           Navigator.of(ctx).push(
                             MaterialPageRoute(
-                              builder: (_) => SurahListPage(
-                                openTarget: QuranOpenTarget.hizb(i + 1),
-                              ),
+                              builder: (_) => SurahListPage(openTarget: QuranOpenTarget.hizb(i + 1)),
                             ),
                           );
                         },
