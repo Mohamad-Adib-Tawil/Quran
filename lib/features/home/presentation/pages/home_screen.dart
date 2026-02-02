@@ -15,6 +15,8 @@ import 'package:quran/features/quran/presentation/widgets/list/surah_list_item.d
 import 'package:quran/features/quran/presentation/widgets/list/list_divider.dart';
 import 'package:quran/features/quran/presentation/widgets/list/juz_list_item.dart';
 import '../../../quran/presentation/pages/surah_details_page.dart';
+import '../../../quran/presentation/cubit/quran_cubit.dart';
+import '../../../quran/presentation/cubit/quran_state.dart' as qs;
 import '../cubit/home_cubit.dart';
 import '../cubit/home_state.dart';
 
@@ -95,40 +97,57 @@ class _HomeViewState extends State<_HomeView> {
                   // Surahs tab
                   BlocBuilder<HomeCubit, HomeState>(
                     builder: (context, state) {
-                      final surahs = state.filteredSurahs;
-                      return ListView.separated(
-                        itemCount: surahs.length,
-                        separatorBuilder: (_, __) => const ListDivider(),
-                        itemBuilder: (ctx, i) {
-                          final s = surahs[i];
-                          final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
-                          return SurahListItem(
-                            surahNumber: s,
-                            title: info.name,
-                            subtitle: info.name,
-                            onTap: () {
-                              if (!ctx.mounted) return;
-                              _setLastRead(s, 1);
-                              Navigator.of(ctx).push(
-                                MaterialPageRoute(
-                                  builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(s)),
-                                ),
-                              );
-                            },
-                            onLongPress: () {
-                              if (!ctx.mounted) return;
-                              Navigator.of(ctx).push(
-                                MaterialPageRoute(
-                                  builder: (_) => SurahDetailsPage(surahNumber: s),
-                                ),
-                              );
-                            },
-                            onInfo: () {
-                              if (!ctx.mounted) return;
-                              Navigator.of(ctx).push(
-                                MaterialPageRoute(
-                                  builder: (_) => SurahDetailsPage(surahNumber: s),
-                                ),
+                      final numbers = state.filteredSurahs;
+                      return BlocBuilder<QuranCubit, qs.QuranState>(
+                        builder: (context, qState) {
+                          final meta = qState.surahs;
+                          return ListView.separated(
+                            itemCount: numbers.length,
+                            separatorBuilder: (_, __) => const ListDivider(),
+                            itemBuilder: (ctx, i) {
+                              final s = numbers[i];
+                              String title;
+                              String? subtitle;
+                              if (meta.isNotEmpty && s - 1 < meta.length) {
+                                final m = meta[s - 1];
+                                title = m.nameArabic;
+                                final isMadani = m.revelation.toLowerCase().contains('mad');
+                                final revAr = isMadani ? 'مدنية' : 'مكية';
+                                subtitle = '$revAr • ${m.verseCount} آية';
+                              } else {
+                                final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
+                                title = info.name;
+                                subtitle = null;
+                              }
+                              return SurahListItem(
+                                surahNumber: s,
+                                title: title,
+                                subtitle: subtitle,
+                                onTap: () {
+                                  if (!ctx.mounted) return;
+                                  _setLastRead(s, 1);
+                                  Navigator.of(ctx).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(s)),
+                                    ),
+                                  );
+                                },
+                                onLongPress: () {
+                                  if (!ctx.mounted) return;
+                                  Navigator.of(ctx).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => SurahDetailsPage(surahNumber: s),
+                                    ),
+                                  );
+                                },
+                                onInfo: () {
+                                  if (!ctx.mounted) return;
+                                  Navigator.of(ctx).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => SurahDetailsPage(surahNumber: s),
+                                    ),
+                                  );
+                                },
                               );
                             },
                           );

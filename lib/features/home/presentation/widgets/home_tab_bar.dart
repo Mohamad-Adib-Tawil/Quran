@@ -14,11 +14,11 @@ class HomeTabBar extends StatelessWidget implements PreferredSizeWidget {
     return TabBar(
       labelStyle: FigmaTypography.body15(),
       unselectedLabelStyle: FigmaTypography.body15(),
-      labelColor: scheme.onSurface,
-      unselectedLabelColor: scheme.onSurface.withValues(alpha: 0.7),
+      labelColor: FigmaPalette.primary,
+      unselectedLabelColor: scheme.onSurface.withValues(alpha: 0.6),
       indicator: UnderlineTabIndicator(
         borderSide: const BorderSide(width: 3, color: FigmaPalette.primary),
-        insets: const EdgeInsets.symmetric(horizontal: 24),
+        insets: const EdgeInsets.symmetric(horizontal: 20),
       ),
       tabs: const [
         Tab(text: 'السور'),
