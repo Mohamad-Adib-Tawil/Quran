@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran/features/home/presentation/pages/home_screen.dart';
 import 'package:quran/features/settings/cubit/settings_cubit.dart';
 import 'package:quran/features/settings/presentation/pages/language_select_page.dart';
+import 'package:quran/core/theme/figma_palette.dart';
 
 class AppSplashPage extends StatefulWidget {
   const AppSplashPage({super.key});
@@ -50,7 +51,7 @@ class _AppSplashPageState extends State<AppSplashPage> {
               return Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFF0CAF60), Color(0xFF0A8A4C)],
+                    colors: [FigmaPalette.primary, FigmaPalette.primaryDark],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
