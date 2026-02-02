@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:audio_session/audio_session.dart';
 
 import 'core/di/service_locator.dart';
 import 'core/theme/app_theme.dart';
@@ -18,9 +20,19 @@ import 'services/audio_session_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await QuranLibrary.init();
-  await setupLocator();
-  runApp(const QuranApp());
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    // TODO: Forward to crash reporting service if integrated
+  };
+  await runZonedGuarded(() async {
+    final session = await AudioSession.instance;
+    await session.configure(const AudioSessionConfiguration.music());
+    await QuranLibrary.init();
+    await setupLocator();
+    runApp(const QuranApp());
+  }, (Object error, StackTrace stack) {
+    // TODO: Forward to crash reporting service if integrated
+  });
 }
 
 class QuranApp extends StatelessWidget {

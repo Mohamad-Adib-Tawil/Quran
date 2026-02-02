@@ -28,7 +28,7 @@ class _SurahAutoSyncState extends State<SurahAutoSync> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(milliseconds: 700), (_) => _tick());
+    _timer = Timer.periodic(const Duration(milliseconds: 1200), (_) => _tick());
   }
 
   void _tick() async {
