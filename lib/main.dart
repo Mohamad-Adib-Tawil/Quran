@@ -80,6 +80,14 @@ class QuranApp extends StatelessWidget {
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
                 ],
+                builder: (context, child) {
+                  final scale = settings.fontScale;
+                  final mq = MediaQuery.of(context);
+                  return MediaQuery(
+                    data: mq.copyWith(textScaler: TextScaler.linear(scale)),
+                    child: child ?? const SizedBox.shrink(),
+                  );
+                },
                 home: const AppSplashPage(),
               );
             },
