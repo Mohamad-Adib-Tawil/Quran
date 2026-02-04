@@ -2,9 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:audio_session/audio_session.dart';
+import 'core/localization/localization_service.dart';
+import 'core/localization/app_localization_ext.dart';
 
 import 'core/di/service_locator.dart';
 import 'core/theme/app_theme.dart';
@@ -65,23 +66,16 @@ class QuranApp extends StatelessWidget {
             builder: (context, child) {
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
-                title: 'القرآن الكريم',
+                onGenerateTitle: (ctx) => ctx.tr.appTitle,
                 theme: AppTheme.light(),
                 darkTheme: AppTheme.dark(),
                 themeMode: settings.themeMode,
-                locale: settings.localeCode != null ? Locale(settings.localeCode!) : null,
-                supportedLocales: const [
-                  Locale('ar'),
-                  Locale('de'),
-                  Locale('en'),
-                ],
-                localizationsDelegates: const [
-                  GlobalMaterialLocalizations.delegate,
-                  GlobalWidgetsLocalizations.delegate,
-                  GlobalCupertinoLocalizations.delegate,
-                ],
+                locale: LocalizationService.localeFromCode(settings.localeCode),
+                supportedLocales: LocalizationService.supportedLocales,
+                localizationsDelegates: LocalizationService.localizationsDelegates,
                 builder: (context, child) {
-                  final scale = settings.fontScale;
+                  // Freeze font scale feature temporarily
+                  const scale = 1.0;
                   final mq = MediaQuery.of(context);
                   return MediaQuery(
                     data: mq.copyWith(textScaler: TextScaler.linear(scale)),
