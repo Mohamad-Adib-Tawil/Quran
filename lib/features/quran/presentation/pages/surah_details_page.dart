@@ -6,6 +6,7 @@ import 'package:quran_app/core/theme/design_tokens.dart';
 import 'package:quran_app/features/quran/presentation/navigation/quran_open_target.dart';
 import 'package:quran_app/features/quran/presentation/pages/surah_list_page.dart';
 import 'package:quran_library/quran_library.dart';
+import 'package:quran_app/core/assets/app_assets.dart';
 
 class SurahDetailsPage extends StatelessWidget {
   final int surahNumber; // 1-based
@@ -23,7 +24,7 @@ class SurahDetailsPage extends StatelessWidget {
           const SizedBox(height: 16),
           _PrimaryAction(
             label: 'القراءة',
-            iconPath: 'assets/figma/icons/bookmark.svg',
+            iconPath: AppAssets.icQuranGreen,
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -76,12 +77,7 @@ class _HeaderCard extends StatelessWidget {
           Expanded(
             child: Text(title, style: FigmaTypography.title19(color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
           ),
-          SvgPicture.asset(
-            'assets/figma/icons/play.svg',
-            width: 28,
-            height: 28,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-          ),
+          SvgPicture.asset(AppAssets.icPlayMini, width: 28, height: 28, colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn)),
         ],
       ),
     );

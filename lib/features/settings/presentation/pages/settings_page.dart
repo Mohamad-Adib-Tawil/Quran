@@ -5,6 +5,8 @@ import 'package:quran_app/core/theme/figma_typography.dart';
 import '../../cubit/settings_cubit.dart';
 import '../../cubit/settings_state.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:quran_app/core/assets/app_assets.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -19,7 +21,7 @@ class SettingsPage extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.symmetric(vertical: 8),
             children: [
-              _SectionTitle(title: t.appearance)
+              _SectionTitle(title: t.appearance, iconSvg: AppAssets.icSettingsGreen)
                   ,
               RadioListTile<ThemeMode>(
                 title: Text(t.light),
@@ -40,7 +42,7 @@ class SettingsPage extends StatelessWidget {
                 onChanged: (v) => context.read<SettingsCubit>().setTheme(v!),
               ),
               const Divider(height: 24),
-              _SectionTitle(title: t.language)
+              _SectionTitle(title: t.language, iconSvg: AppAssets.icLanguage)
                   ,
               RadioListTile<String>(
                 title: Text(t.arabic),
@@ -92,13 +94,22 @@ class SettingsPage extends StatelessWidget {
 
 class _SectionTitle extends StatelessWidget {
   final String title;
-  const _SectionTitle({required this.title});
+  final String? iconSvg;
+  const _SectionTitle({required this.title, this.iconSvg});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Text(title, style: FigmaTypography.body15(color: FigmaPalette.textDark)),
+      child: Row(
+        children: [
+          if (iconSvg != null) ...[
+            SvgPicture.asset(iconSvg!, width: 20, height: 20),
+            const SizedBox(width: 8),
+          ],
+          Text(title, style: FigmaTypography.body15(color: FigmaPalette.textDark)),
+        ],
+      ),
     );
   }
 }
