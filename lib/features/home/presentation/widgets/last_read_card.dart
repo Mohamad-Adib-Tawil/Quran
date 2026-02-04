@@ -42,25 +42,35 @@ class LastReadCard extends StatelessWidget {
           ),
           boxShadow: AppShadows.soft(AppColors.primary),
         ),
-        child: Row(
+        child: Stack(
           children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(t.lastRead, style: theme.textTheme.labelLarge?.copyWith(color: Colors.white70)),
-                  const SizedBox(height: 6),
-                  Text(info.name, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text(t.ayahNumber('$ayah'), style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white)),
-                ],
+            Positioned.fill(
+              child: Opacity(
+                opacity: 0.15,
+                child: Image.asset(AppAssets.imgLastReadBg, fit: BoxFit.cover),
               ),
             ),
-            SvgPicture.asset(
-              AppAssets.icPlayMini,
-              width: 36,
-              height: 36,
-              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t.lastRead, style: theme.textTheme.labelLarge?.copyWith(color: Colors.white70)),
+                      const SizedBox(height: 6),
+                      Text(info.name, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 4),
+                      Text(t.ayahNumber('$ayah'), style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white)),
+                    ],
+                  ),
+                ),
+                SvgPicture.asset(
+                  AppAssets.icPlayMini,
+                  width: 36,
+                  height: 36,
+                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                ),
+              ],
             ),
           ],
         ),

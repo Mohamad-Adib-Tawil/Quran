@@ -9,6 +9,7 @@ import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
+import 'package:quran_app/features/settings/presentation/pages/settings_page.dart';
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});
@@ -66,6 +67,26 @@ class _FavoritesPageState extends State<FavoritesPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(t.favoritesTitle),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: SvgPicture.asset(AppAssets.icSearch, width: 22, height: 22),
+            tooltip: t.searchSurahHint,
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SettingsPage()),
+              );
+            },
+            icon: SvgPicture.asset(AppAssets.icSettingsGreen, width: 22, height: 22),
+            tooltip: t.settings,
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: SvgPicture.asset(AppAssets.icMenu, width: 22, height: 22),
+          ),
+        ],
       ),
       body: _favorites.isEmpty
           ? Center(child: Text(t.noFavorites))

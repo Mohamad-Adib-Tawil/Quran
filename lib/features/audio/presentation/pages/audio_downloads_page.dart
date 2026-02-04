@@ -4,6 +4,7 @@ import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
+import 'package:quran_app/features/settings/presentation/pages/settings_page.dart';
 
 import '../../domain/repositories/audio_download_repository.dart';
 import '../cubit/audio_download_cubit.dart';
@@ -34,6 +35,26 @@ class _AudioDownloadsView extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(t.manageAudio),
+          actions: [
+            IconButton(
+              onPressed: () {},
+              icon: SvgPicture.asset(AppAssets.icSearch, width: 22, height: 22),
+              tooltip: t.searchSurahHint,
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SettingsPage()),
+                );
+              },
+              icon: SvgPicture.asset(AppAssets.icSettingsGreen, width: 22, height: 22),
+              tooltip: t.settings,
+            ),
+            IconButton(
+              onPressed: () {},
+              icon: SvgPicture.asset(AppAssets.icMenu, width: 22, height: 22),
+            ),
+          ],
           bottom: TabBar(
             tabs: [
               Tab(text: t.downloadedTab),

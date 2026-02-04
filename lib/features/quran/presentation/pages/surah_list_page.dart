@@ -5,6 +5,9 @@ import 'package:quran_app/features/audio/presentation/pages/audio_downloads_page
 import 'package:quran_app/features/audio/presentation/widgets/surah_auto_sync.dart';
 import 'package:quran_app/features/quran/presentation/navigation/quran_open_target.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:quran_app/core/assets/app_assets.dart';
+import 'package:quran_app/features/settings/presentation/pages/settings_page.dart';
 
 class SurahListPage extends StatefulWidget {
   final QuranOpenTarget? openTarget;
@@ -50,6 +53,29 @@ class _SurahListPageState extends State<SurahListPage> {
     final primary = Theme.of(context).colorScheme.primary;
     final textColor = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black;
     return Scaffold(
+      appBar: AppBar(
+        title: Text(t.appTitle),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: SvgPicture.asset(AppAssets.icSearch, width: 22, height: 22),
+            tooltip: t.searchSurahHint,
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SettingsPage()),
+              );
+            },
+            icon: SvgPicture.asset(AppAssets.icSettingsGreen, width: 22, height: 22),
+            tooltip: t.settings,
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: SvgPicture.asset(AppAssets.icMenu, width: 22, height: 22),
+          ),
+        ],
+      ),
       body: QuranLibraryScreen(
         key: _screenKey, // مفتاح فريد يمنع إعادة استخدام Controllers قديمة
         parentContext: context,
@@ -96,7 +122,7 @@ class _SurahListPageState extends State<SurahListPage> {
             MaterialPageRoute(builder: (_) => const AudioDownloadsPage()),
           );
         },
-        icon: const Icon(Icons.library_music),
+        icon: SvgPicture.asset(AppAssets.icDownloadGreen, width: 20, height: 20),
         label: Text(t.manageAudio),
       ),
     );
