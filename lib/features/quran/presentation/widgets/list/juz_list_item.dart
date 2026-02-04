@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:quran/core/theme/figma_palette.dart';
-import 'package:quran/core/theme/figma_typography.dart';
+import 'package:quran_app/core/theme/figma_palette.dart';
+import 'package:quran_app/core/theme/figma_typography.dart';
+import 'package:quran_app/core/localization/app_localization_ext.dart';
 
 class JuzListItem extends StatelessWidget {
   final int index; // 1-based
@@ -10,19 +11,20 @@ class JuzListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.tr;
     return InkWell(
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
           children: [
-            _Pill(label: 'الجزء $index'),
+            _Pill(label: '${t.juzName} $index'),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('الجزء $index', style: FigmaTypography.body15(color: Theme.of(context).colorScheme.onSurface)),
+                  Text('${t.juzName} $index', style: FigmaTypography.body15(color: Theme.of(context).colorScheme.onSurface)),
                   if (subtitle != null) ...[
                     const SizedBox(height: 4),
                     Text(subtitle!, style: FigmaTypography.caption12(color: Theme.of(context).hintColor), maxLines: 1, overflow: TextOverflow.ellipsis),
@@ -46,19 +48,20 @@ class HizbListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.tr;
     return InkWell(
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
           children: [
-            _Pill(label: 'الحزب $index'),
+            _Pill(label: '${t.hizbName} $index'),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('الحزب $index', style: FigmaTypography.body15(color: Theme.of(context).colorScheme.onSurface)),
+                  Text('${t.hizbName} $index', style: FigmaTypography.body15(color: Theme.of(context).colorScheme.onSurface)),
                   if (subtitle != null) ...[
                     const SizedBox(height: 4),
                     Text(subtitle!, style: FigmaTypography.caption12(color: Theme.of(context).hintColor), maxLines: 1, overflow: TextOverflow.ellipsis),
