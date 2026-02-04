@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:quran/core/theme/design_tokens.dart';
-import 'package:quran/core/theme/figma_palette.dart';
+import 'package:quran_app/core/theme/design_tokens.dart';
+import 'package:quran_app/core/theme/figma_palette.dart';
 
 class HomeSearchField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
