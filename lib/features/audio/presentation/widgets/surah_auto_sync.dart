@@ -28,7 +28,8 @@ class _SurahAutoSyncState extends State<SurahAutoSync> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(milliseconds: 1200), (_) => _tick());
+    // Faster tick to make audio context update feel immediate with reading
+    _timer = Timer.periodic(const Duration(milliseconds: 300), (_) => _tick());
   }
 
   void _tick() async {
