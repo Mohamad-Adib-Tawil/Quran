@@ -76,153 +76,192 @@ class _HomeViewState extends State<_HomeView> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(t.appTitle),
-          actions: [
-            IconButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const SettingsPage(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.settings),
+        body: NestedScrollView(
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            SliverAppBar(
+              title: Text(t.appTitle),
+              pinned: true,
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const SettingsPage(),
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.settings),
+                ),
+              ],
+            ),
+            if (_lastRead != null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
+                  child: LastReadCard(surah: _lastRead!.surah, ayah: _lastRead!.ayah),
+                ),
+              ),
+            const SliverToBoxAdapter(
+              child: Material(
+                elevation: 2,
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: MiniAudioPlayer(),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                child: HomeSearchField(
+                  onChanged: (v) => context.read<HomeCubit>().setQuery(v),
+                  hintText: t.searchSurahHint,
+                ),
+              ),
+            ),
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _TabBarDelegate(const HomeTabBar()),
             ),
           ],
-          bottom: const HomeTabBar(),
-        ),
-        body: Column(
-          children: [
-            if (_lastRead != null)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
-                child: LastReadCard(surah: _lastRead!.surah, ayah: _lastRead!.ayah),
-              ),
-            // Mini player header
-            const Material(elevation: 2, child: Padding(padding: EdgeInsets.all(8), child: MiniAudioPlayer())),
-            // Search field
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              child: HomeSearchField(onChanged: (v) => context.read<HomeCubit>().setQuery(v), hintText: t.searchSurahHint),
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  // Surahs tab
-                  BlocBuilder<HomeCubit, HomeState>(
-                    builder: (context, state) {
-                      final numbers = state.filteredSurahs;
-                      return BlocBuilder<QuranCubit, qs.QuranState>(
-                        builder: (context, qState) {
-                          final meta = qState.surahs;
-                          return ListView.separated(
-                            itemCount: numbers.length,
-                            separatorBuilder: (context, index) => const ListDivider(),
-                            itemBuilder: (ctx, i) {
-                              final s = numbers[i];
-                              String title;
-                              String? subtitle;
-                              if (meta.isNotEmpty && s - 1 < meta.length) {
-                                final m = meta[s - 1];
-                                title = m.nameArabic;
-                                final isMadani = m.revelation.toLowerCase().contains('mad');
-                                final revAr = isMadani ? t.madani : t.makki;
-                                subtitle = '$revAr • ${m.verseCount} آية';
-                              } else {
-                                final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
-                                title = info.name;
-                                subtitle = null;
-                              }
-                              return SurahListItem(
-                                surahNumber: s,
-                                title: title,
-                                subtitle: subtitle,
-                                onTap: () {
-                                  if (!ctx.mounted) return;
-                                  _setLastRead(s, 1);
-                                  // keep audio in sync with last-read selection without auto-play
-                                  context.read<AudioCubit>().selectSurah(s);
-                                  Navigator.of(ctx).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(s)),
-                                    ),
-                                  );
-                                },
-                                onLongPress: () {
-                                  if (!ctx.mounted) return;
-                                  Navigator.of(ctx).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => SurahDetailsPage(surahNumber: s),
-                                    ),
-                                  );
-                                },
-                                onInfo: () {
-                                  if (!ctx.mounted) return;
-                                  Navigator.of(ctx).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => SurahDetailsPage(surahNumber: s),
-                                    ),
-                                  );
-                                },
-                                trailing: IconButton(
-                                  tooltip: _isFavorite(s) ? t.removeFromFavorites : t.addToFavorites,
-                                  icon: Icon(_isFavorite(s) ? Icons.star : Icons.star_border, color: _isFavorite(s) ? Colors.amber : Colors.grey),
-                                  onPressed: () => _toggleFavorite(s),
+          body: TabBarView(
+            children: [
+              // Surahs tab
+              BlocBuilder<HomeCubit, HomeState>(
+                builder: (context, state) {
+                  final numbers = state.filteredSurahs;
+                  return BlocBuilder<QuranCubit, qs.QuranState>(
+                    builder: (context, qState) {
+                      final meta = qState.surahs;
+                      return ListView.separated(
+                        padding: EdgeInsets.zero,
+                        itemCount: numbers.length,
+                        separatorBuilder: (context, index) => const ListDivider(),
+                        itemBuilder: (ctx, i) {
+                          final s = numbers[i];
+                          String title;
+                          String? subtitle;
+                          if (meta.isNotEmpty && s - 1 < meta.length) {
+                            final m = meta[s - 1];
+                            title = m.nameArabic;
+                            final isMadani = m.revelation.toLowerCase().contains('mad');
+                            final revAr = isMadani ? t.madani : t.makki;
+                            subtitle = '$revAr • ${m.verseCount} آية';
+                          } else {
+                            final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
+                            title = info.name;
+                            subtitle = null;
+                          }
+                          return SurahListItem(
+                            surahNumber: s,
+                            title: title,
+                            subtitle: subtitle,
+                            onTap: () {
+                              if (!ctx.mounted) return;
+                              _setLastRead(s, 1);
+                              context.read<AudioCubit>().selectSurah(s);
+                              Navigator.of(ctx).push(
+                                MaterialPageRoute(
+                                  builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(s)),
                                 ),
                               );
                             },
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  // Juz tab
-                  ListView.separated(
-                    itemCount: QuranLibrary.allJoz.length,
-                    separatorBuilder: (context, index) => const ListDivider(),
-                    itemBuilder: (ctx, i) {
-                      final j = QuranLibrary.allJoz[i];
-                      return JuzListItem(
-                        index: i + 1,
-                        subtitle: j,
-                        onTap: () {
-                          if (!ctx.mounted) return;
-                          Navigator.of(ctx).push(
-                            MaterialPageRoute(
-                              builder: (_) => SurahListPage(openTarget: QuranOpenTarget.juz(i + 1)),
+                            onLongPress: () {
+                              if (!ctx.mounted) return;
+                              Navigator.of(ctx).push(
+                                MaterialPageRoute(
+                                  builder: (_) => SurahDetailsPage(surahNumber: s),
+                                ),
+                              );
+                            },
+                            onInfo: () {
+                              if (!ctx.mounted) return;
+                              Navigator.of(ctx).push(
+                                MaterialPageRoute(
+                                  builder: (_) => SurahDetailsPage(surahNumber: s),
+                                ),
+                              );
+                            },
+                            trailing: IconButton(
+                              tooltip: _isFavorite(s) ? t.removeFromFavorites : t.addToFavorites,
+                              icon: Icon(_isFavorite(s) ? Icons.star : Icons.star_border, color: _isFavorite(s) ? Colors.amber : Colors.grey),
+                              onPressed: () => _toggleFavorite(s),
                             ),
                           );
                         },
                       );
                     },
-                  ),
-                  // Hizb tab (quarters)
-                  ListView.separated(
-                    itemCount: QuranLibrary.allHizb.length,
-                    separatorBuilder: (context, index) => const ListDivider(),
-                    itemBuilder: (ctx, i) {
-                      final h = QuranLibrary.allHizb[i];
-                      return HizbListItem(
-                        index: i + 1,
-                        subtitle: h,
-                        onTap: () {
-                          if (!ctx.mounted) return;
-                          Navigator.of(ctx).push(
-                            MaterialPageRoute(
-                              builder: (_) => SurahListPage(openTarget: QuranOpenTarget.hizb(i + 1)),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
+                  );
+                },
               ),
-            ),
-          ],
+              // Juz tab
+              ListView.separated(
+                padding: EdgeInsets.zero,
+                itemCount: QuranLibrary.allJoz.length,
+                separatorBuilder: (context, index) => const ListDivider(),
+                itemBuilder: (ctx, i) {
+                  final j = QuranLibrary.allJoz[i];
+                  return JuzListItem(
+                    index: i + 1,
+                    subtitle: j,
+                    onTap: () {
+                      if (!ctx.mounted) return;
+                      Navigator.of(ctx).push(
+                        MaterialPageRoute(
+                          builder: (_) => SurahListPage(openTarget: QuranOpenTarget.juz(i + 1)),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+              // Hizb tab (quarters)
+              ListView.separated(
+                padding: EdgeInsets.zero,
+                itemCount: QuranLibrary.allHizb.length,
+                separatorBuilder: (context, index) => const ListDivider(),
+                itemBuilder: (ctx, i) {
+                  final h = QuranLibrary.allHizb[i];
+                  return HizbListItem(
+                    index: i + 1,
+                    subtitle: h,
+                    onTap: () {
+                      if (!ctx.mounted) return;
+                      Navigator.of(ctx).push(
+                        MaterialPageRoute(
+                          builder: (_) => SurahListPage(openTarget: QuranOpenTarget.hizb(i + 1)),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+class _TabBarDelegate extends SliverPersistentHeaderDelegate {
+  final PreferredSizeWidget tabBar;
+  const _TabBarDelegate(this.tabBar);
+
+  @override
+  double get minExtent => tabBar.preferredSize.height;
+
+  @override
+  double get maxExtent => tabBar.preferredSize.height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Theme.of(context).colorScheme.surface,
+      child: tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _TabBarDelegate oldDelegate) => false;
 }
