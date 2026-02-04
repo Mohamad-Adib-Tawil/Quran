@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:quran_app/core/theme/figma_palette.dart';
 import 'package:quran_app/core/theme/figma_typography.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:quran_app/core/assets/app_assets.dart';
 
 class SurahListItem extends StatelessWidget {
   final int surahNumber;
@@ -58,14 +59,16 @@ class _NumberPill extends StatelessWidget {
   const _NumberPill({required this.number});
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: FigmaPalette.surface,
-        border: Border.all(color: FigmaPalette.divider),
-        borderRadius: BorderRadius.circular(8),
+    return SizedBox(
+      width: 28,
+      height: 28,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SvgPicture.asset(AppAssets.icSurahNumberBg, width: 28, height: 28),
+          Text('$number', style: FigmaTypography.body13(color: Theme.of(context).colorScheme.onSurface)),
+        ],
       ),
-      child: Text('$number', style: FigmaTypography.body13(color: Theme.of(context).colorScheme.onSurface)),
     );
   }
 }
