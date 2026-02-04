@@ -1,59 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quran/core/theme/figma_palette.dart';
-import 'package:quran/core/theme/figma_typography.dart';
+import 'package:quran_app/core/theme/figma_palette.dart';
+import 'package:quran_app/core/theme/figma_typography.dart';
 import '../../cubit/settings_cubit.dart';
 import '../../cubit/settings_state.dart';
+import 'package:quran_app/core/localization/app_localization_ext.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final t = context.tr;
     return Scaffold(
-      appBar: AppBar(title: const Text('الإعدادات')),
+      appBar: AppBar(title: Text(t.settings)),
       body: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, state) {
           return ListView(
             padding: const EdgeInsets.symmetric(vertical: 8),
             children: [
-              const _SectionTitle(title: 'المظهر')
+              _SectionTitle(title: t.appearance)
                   ,
               RadioListTile<ThemeMode>(
-                title: const Text('فاتح'),
+                title: Text(t.light),
                 value: ThemeMode.light,
                 groupValue: state.themeMode,
                 onChanged: (v) => context.read<SettingsCubit>().setTheme(v!),
               ),
               RadioListTile<ThemeMode>(
-                title: const Text('داكن'),
+                title: Text(t.dark),
                 value: ThemeMode.dark,
                 groupValue: state.themeMode,
                 onChanged: (v) => context.read<SettingsCubit>().setTheme(v!),
               ),
               RadioListTile<ThemeMode>(
-                title: const Text('حسب النظام'),
+                title: Text(t.system),
                 value: ThemeMode.system,
                 groupValue: state.themeMode,
                 onChanged: (v) => context.read<SettingsCubit>().setTheme(v!),
               ),
               const Divider(height: 24),
-              const _SectionTitle(title: 'اللغة')
+              _SectionTitle(title: t.language)
                   ,
               RadioListTile<String>(
-                title: const Text('العربية'),
+                title: Text(t.arabic),
                 value: 'ar',
                 groupValue: state.localeCode ?? 'ar',
                 onChanged: (v) => context.read<SettingsCubit>().setLocale(v!),
               ),
               RadioListTile<String>(
-                title: const Text('Deutsch'),
+                title: Text(t.german),
                 value: 'de',
                 groupValue: state.localeCode ?? 'ar',
                 onChanged: (v) => context.read<SettingsCubit>().setLocale(v!),
               ),
               const Divider(height: 24),
-              const _SectionTitle(title: 'حجم الخط')
+              _SectionTitle(title: t.fontSize)
                   ,
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -62,20 +64,20 @@ class SettingsPage extends StatelessWidget {
                     const Text('A-'),
                     Expanded(
                       child: Slider(
-                        value: state.fontScale,
-                        min: 0.8,
-                        max: 2.0,
-                        divisions: 12,
-                        onChanged: (v) => context.read<SettingsCubit>().setFontScale(v),
+                        value: 1.0, // frozen
+                        min: 1.0,
+                        max: 1.0,
+                        divisions: 1,
+                        onChanged: null, // disabled temporarily
                       ),
                     ),
-                    const Text('A+')
+                    Row(children: [const Text('A+'), const SizedBox(width: 8), Chip(label: Text(t.soon))])
                   ],
                 ),
               ),
               const Divider(height: 24),
               SwitchListTile(
-                title: const Text('إظهار علامة نهاية الآية'),
+                title: Text(t.showVerseEndSymbol),
                 value: state.verseEndSymbol,
                 onChanged: (v) => context.read<SettingsCubit>().toggleVerseEndSymbol(v),
               ),
