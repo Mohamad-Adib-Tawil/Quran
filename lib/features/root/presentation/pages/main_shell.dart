@@ -3,6 +3,8 @@ import 'package:quran_app/features/home/presentation/pages/home_screen.dart';
 import 'package:quran_app/features/audio/presentation/pages/audio_downloads_page.dart';
 import 'package:quran_app/features/favorites/presentation/pages/favorites_page.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:quran_app/core/assets/app_assets.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -29,9 +31,21 @@ class _MainShellState extends State<MainShell> {
         onDestinationSelected: (i) => setState(() => _index = i),
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         destinations: [
-          NavigationDestination(icon: const Icon(Icons.star_border), selectedIcon: const Icon(Icons.star), label: t.favoritesTitle),
-          NavigationDestination(icon: const Icon(Icons.download_outlined), selectedIcon: const Icon(Icons.download), label: t.manageAudio),
-          NavigationDestination(icon: const Icon(Icons.menu_book_outlined), selectedIcon: const Icon(Icons.menu_book), label: t.appTitle),
+          NavigationDestination(
+            icon: SvgPicture.asset(AppAssets.icStarGray, width: 24, height: 24),
+            selectedIcon: SvgPicture.asset(AppAssets.icStarGreen, width: 24, height: 24),
+            label: t.favoritesTitle,
+          ),
+          NavigationDestination(
+            icon: SvgPicture.asset(AppAssets.icDownloadGray, width: 24, height: 24),
+            selectedIcon: SvgPicture.asset(AppAssets.icDownloadGreen, width: 24, height: 24),
+            label: t.manageAudio,
+          ),
+          NavigationDestination(
+            icon: SvgPicture.asset(AppAssets.icQuranGray, width: 24, height: 24),
+            selectedIcon: SvgPicture.asset(AppAssets.icQuranGreen, width: 24, height: 24),
+            label: t.appTitle,
+          ),
         ],
       ),
     );
