@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../home/presentation/pages/home_screen.dart';
+import '../../../root/presentation/pages/main_shell.dart';
 import '../../cubit/settings_cubit.dart';
 
 class LanguageSelectPage extends StatelessWidget {
@@ -23,7 +23,7 @@ class LanguageSelectPage extends StatelessWidget {
               onTap: () {
                 context.read<SettingsCubit>().setLocale('ar');
                 Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                  MaterialPageRoute(builder: (_) => const MainShell()),
                 );
               },
             ),
@@ -33,7 +33,7 @@ class LanguageSelectPage extends StatelessWidget {
               onTap: () {
                 context.read<SettingsCubit>().setLocale('de');
                 Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                  MaterialPageRoute(builder: (_) => const MainShell()),
                 );
               },
             ),
