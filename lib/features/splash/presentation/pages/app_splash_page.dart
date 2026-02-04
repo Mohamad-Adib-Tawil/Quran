@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quran/features/home/presentation/pages/home_screen.dart';
-import 'package:quran/features/settings/cubit/settings_cubit.dart';
-import 'package:quran/features/settings/presentation/pages/language_select_page.dart';
-import 'package:quran/core/theme/figma_palette.dart';
+import 'package:quran_app/features/settings/cubit/settings_cubit.dart';
+import 'package:quran_app/features/settings/presentation/pages/language_select_page.dart';
+import 'package:quran_app/features/root/presentation/pages/main_shell.dart';
+import 'package:quran_app/core/theme/figma_palette.dart';
 
 class AppSplashPage extends StatefulWidget {
   const AppSplashPage({super.key});
@@ -25,7 +25,7 @@ class _AppSplashPageState extends State<AppSplashPage> {
       final locale = context.read<SettingsCubit>().state.localeCode;
       final next = (locale == null || locale.isEmpty)
           ? const LanguageSelectPage()
-          : const HomeScreen();
+          : const MainShell();
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => next),
       );
