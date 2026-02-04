@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:quran_library/quran_library.dart';
-import 'package:quran/features/audio/presentation/widgets/mini_player.dart';
-import 'package:quran/features/audio/presentation/pages/audio_downloads_page.dart';
-import 'package:quran/features/audio/presentation/widgets/surah_auto_sync.dart';
-import 'package:quran/features/quran/presentation/navigation/quran_open_target.dart';
+import 'package:quran_app/features/audio/presentation/widgets/mini_player.dart';
+import 'package:quran_app/features/audio/presentation/pages/audio_downloads_page.dart';
+import 'package:quran_app/features/audio/presentation/widgets/surah_auto_sync.dart';
+import 'package:quran_app/features/quran/presentation/navigation/quran_open_target.dart';
+import 'package:quran_app/core/localization/app_localization_ext.dart';
 
 class SurahListPage extends StatefulWidget {
   final QuranOpenTarget? openTarget;
@@ -44,6 +45,7 @@ class _SurahListPageState extends State<SurahListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.tr;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primary = Theme.of(context).colorScheme.primary;
     final textColor = Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black;
@@ -70,21 +72,21 @@ class _SurahListPageState extends State<SurahListPage> {
         topBarStyle: QuranTopBarStyle.defaults(isDark: isDark, context: context).copyWith(
           showAudioButton: false,
           showFontsButton: true,
-          tabIndexLabel: 'الفهرس',
-          tabBookmarksLabel: 'العلامات',
-          tabSearchLabel: 'بحث',
+          tabIndexLabel: t.indexTab,
+          tabBookmarksLabel: t.bookmarksTab,
+          tabSearchLabel: t.searchTab,
         ),
         indexTabStyle: IndexTabStyle.defaults(isDark: isDark, context: context).copyWith(
-          tabSurahsLabel: 'السور',
-          tabJozzLabel: 'الأجزاء',
+          tabSurahsLabel: t.tabSurahs,
+          tabJozzLabel: t.tabJuz,
         ),
         ayahMenuStyle: AyahMenuStyle.defaults(isDark: isDark, context: context)
-            .copyWith(copySuccessMessage: 'تم النسخ', showPlayAllButton: false),
+            .copyWith(copySuccessMessage: t.copied, showPlayAllButton: false),
         topBottomQuranStyle:
             TopBottomQuranStyle.defaults(isDark: isDark, context: context).copyWith(
-          hizbName: 'الحزب',
-          juzName: 'الجزء',
-          sajdaName: 'السجدة',
+          hizbName: t.hizbName,
+          juzName: t.juzName,
+          sajdaName: t.sajdaName,
         ),
       ),
       bottomNavigationBar: const SurahAutoSync(child: MiniAudioPlayer()),
@@ -95,7 +97,7 @@ class _SurahListPageState extends State<SurahListPage> {
           );
         },
         icon: const Icon(Icons.library_music),
-        label: const Text('إدارة الصوت'),
+        label: Text(t.manageAudio),
       ),
     );
   }
