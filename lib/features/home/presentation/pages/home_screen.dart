@@ -22,6 +22,8 @@ import '../cubit/home_state.dart';
 import 'package:quran_app/services/favorites_service.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:quran_app/core/assets/app_assets.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -83,6 +85,11 @@ class _HomeViewState extends State<_HomeView> {
               pinned: true,
               actions: [
                 IconButton(
+                  onPressed: () {},
+                  icon: SvgPicture.asset(AppAssets.icSearch, width: 22, height: 22),
+                  tooltip: t.searchSurahHint,
+                ),
+                IconButton(
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -90,7 +97,12 @@ class _HomeViewState extends State<_HomeView> {
                       ),
                     );
                   },
-                  icon: const Icon(Icons.settings),
+                  icon: SvgPicture.asset(AppAssets.icSettingsGreen, width: 22, height: 22),
+                  tooltip: t.settings,
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: SvgPicture.asset(AppAssets.icMenu, width: 22, height: 22),
                 ),
               ],
             ),
@@ -184,7 +196,11 @@ class _HomeViewState extends State<_HomeView> {
                             },
                             trailing: IconButton(
                               tooltip: _isFavorite(s) ? t.removeFromFavorites : t.addToFavorites,
-                              icon: Icon(_isFavorite(s) ? Icons.star : Icons.star_border, color: _isFavorite(s) ? Colors.amber : Colors.grey),
+                              icon: SvgPicture.asset(
+                                _isFavorite(s) ? AppAssets.icStarGreen : AppAssets.icStarGray,
+                                width: 24,
+                                height: 24,
+                              ),
                               onPressed: () => _toggleFavorite(s),
                             ),
                           );
