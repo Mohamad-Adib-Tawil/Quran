@@ -20,12 +20,12 @@ import 'services/audio_url_catalog_service.dart';
 import 'services/audio_session_manager.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  FlutterError.onError = (FlutterErrorDetails details) {
-    FlutterError.presentError(details);
-    // TODO: Forward to crash reporting service if integrated
-  };
   await runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.presentError(details);
+      // TODO: Forward to crash reporting service if integrated
+    };
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.music());
     await QuranLibrary.init();
