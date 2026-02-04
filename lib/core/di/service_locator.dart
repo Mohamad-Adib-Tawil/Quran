@@ -16,6 +16,7 @@ import '../../features/quran/domain/repositories/quran_repository.dart';
 import '../../services/audio_session_manager.dart';
 import '../../services/audio_url_catalog_service.dart';
 import '../../services/last_read_service.dart';
+import '../../services/favorites_service.dart';
 
 final sl = GetIt.instance;
 
@@ -29,6 +30,8 @@ Future<void> setupLocator() async {
   sl.registerLazySingleton<AudioSessionManager>(() => AudioSessionManager(sl<SharedPreferences>()));
   // Last read storage service
   sl.registerLazySingleton<LastReadService>(() => LastReadService(sl<SharedPreferences>()));
+  // Favorites storage service
+  sl.registerLazySingleton<FavoritesService>(() => FavoritesService(sl<SharedPreferences>()));
   // Audio catalog from local JSON
   final audioCatalog = AudioUrlCatalogService();
   await audioCatalog.load();
