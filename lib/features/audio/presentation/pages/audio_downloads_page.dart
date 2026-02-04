@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
+import 'package:quran_app/core/localization/app_localization_ext.dart';
 
 import '../../domain/repositories/audio_download_repository.dart';
 import '../cubit/audio_download_cubit.dart';
@@ -25,24 +26,20 @@ class _AudioDownloadsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.tr;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('إدارة الصوت'),
-          bottom: const TabBar(
+          title: Text(t.manageAudio),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'المحمّلة'),
-              Tab(text: 'غير المحمّلة'),
+              Tab(text: t.downloadedTab),
+              Tab(text: t.notDownloadedTab),
             ],
           ),
         ),
-        body: const TabBarView(
-          children: [
-            _DownloadedTab(),
-            _NotDownloadedTab(),
-          ],
-        ),
+        body: const TabBarView(children: [_DownloadedTab(), _NotDownloadedTab()]),
       ),
     );
   }
@@ -53,6 +50,7 @@ class _DownloadedTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.tr;
     return BlocBuilder<AudioDownloadCubit, AudioDownloadState>(
       builder: (context, state) {
         final list = state.downloaded;
@@ -60,7 +58,7 @@ class _DownloadedTab extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (list.isEmpty) {
-          return const Center(child: Text('لا توجد سور محمّلة'));
+          return Center(child: Text(t.noDownloaded));
         }
         return ListView.separated(
           itemCount: list.length,
@@ -75,7 +73,7 @@ class _DownloadedTab extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    tooltip: 'تشغيل',
+                    tooltip: t.play,
                     icon: const Icon(Icons.play_arrow),
                     onPressed: () async {
                       final audioCubit = context.read<AudioCubit>();
@@ -85,22 +83,20 @@ class _DownloadedTab extends StatelessWidget {
                       } catch (e) {
                         if (!context.mounted) return;
                         messenger.showSnackBar(
-                          SnackBar(content: Text('لا يمكن تشغيل السورة: $e')),
+                          SnackBar(content: Text(t.errorPlaySurah('$e'))),
                         );
                       }
                     },
                   ),
                   IconButton(
-                    tooltip: 'حذف',
+                    tooltip: t.delete,
                     icon: const Icon(Icons.delete_outline),
                     onPressed: () async {
                       final downloadCubit = context.read<AudioDownloadCubit>();
                       final messenger = ScaffoldMessenger.of(context);
                       await downloadCubit.delete(s);
                       if (!context.mounted) return;
-                      messenger.showSnackBar(
-                        const SnackBar(content: Text('تم حذف السورة')),
-                      );
+                      messenger.showSnackBar(SnackBar(content: Text(t.deleteSuccess)));
                     },
                   ),
                 ],
@@ -118,6 +114,7 @@ class _NotDownloadedTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.tr;
     return BlocBuilder<AudioDownloadCubit, AudioDownloadState>(
       builder: (context, state) {
         final list = state.notDownloaded;
@@ -125,7 +122,7 @@ class _NotDownloadedTab extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (list.isEmpty) {
-          return const Center(child: Text('لا توجد سور غير محمّلة'));
+          return Center(child: Text(t.noNotDownloaded));
         }
         return ListView.separated(
           itemCount: list.length,
@@ -144,7 +141,7 @@ class _NotDownloadedTab extends StatelessWidget {
                     ? null
                     : () => context.read<AudioDownloadCubit>().download(s),
                 icon: const Icon(Icons.download),
-                label: Text(downloading ? '${(progress * 100).toStringAsFixed(0)}%' : 'تحميل'),
+                label: Text(downloading ? '${(progress * 100).toStringAsFixed(0)}%' : t.download),
               ),
             );
           },
