@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
+import 'package:quran_app/core/assets/app_assets.dart';
 
 class LastReadCard extends StatelessWidget {
   final int surah;
@@ -56,7 +57,7 @@ class LastReadCard extends StatelessWidget {
               ),
             ),
             SvgPicture.asset(
-              'assets/figma/icons/play.svg',
+              AppAssets.icPlayMini,
               width: 36,
               height: 36,
               colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
