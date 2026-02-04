@@ -62,7 +62,6 @@ class MiniAudioPlayer extends StatelessWidget {
         final place = quran.getPlaceOfRevelation(sNum).toLowerCase();
         final isMadani = place.contains('mad');
 
-        // Main content with background and progress bar
         return Material(
           elevation: 4,
           color: Colors.transparent,
@@ -79,19 +78,20 @@ class MiniAudioPlayer extends StatelessWidget {
               ),
             ),
             child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [InkWell(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header row (tap to open full player)
+                InkWell(
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => FullPlayerPage()),
+                      MaterialPageRoute(builder: (_) => const FullPlayerPage()),
                     );
                   },
-                  child: 
-                  Padding(
+                  child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     child: Row(
                       children: [
-                        // Close
+                        // Close button
                         IconButton(
                           icon: SvgPicture.asset(AppAssets.icExitGreyCross, width: 20, height: 20),
                           onPressed: () => context.read<AudioCubit>().stop(),
@@ -110,49 +110,44 @@ class MiniAudioPlayer extends StatelessWidget {
                         const SizedBox(width: 8),
                         // Title and info (right-aligned Arabic)
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Container(
-                                    width: 36,
-                                    height: 36,
-                                    decoration: BoxDecoration(
-                                      color: scheme.primary,
-                                      borderRadius: BorderRadius.circular(8),
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: scheme.primary,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                alignment: Alignment.center,
+                                child: SvgPicture.asset(
+                                  AppAssets.icQuranGray,
+                                  width: 20,
+                                  height: 20,
+                                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      info.name,
+                                      style: Theme.of(context).textTheme.titleMedium,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.right,
                                     ),
-                                    alignment: Alignment.center,
-                                    child: SvgPicture.asset(
-                                      AppAssets.icQuranGray,
-                                      width: 20,
-                                      height: 20,
-                                      colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      '${isMadani ? t.madani : t.makki} • $verses آية',
+                                      style: Theme.of(context).textTheme.bodySmall,
+                                      textAlign: TextAlign.right,
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Flexible(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          info.name,
-                                          style: Theme.of(context).textTheme.titleMedium,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          textAlign: TextAlign.right,
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          '${isMadani ? t.madani : t.makki} • $verses آية',
-                                          style: Theme.of(context).textTheme.bodySmall,
-                                          textAlign: TextAlign.right,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -161,28 +156,30 @@ class MiniAudioPlayer extends StatelessWidget {
                     ),
                   ),
                 ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(_fmt(duration), style: Theme.of(context).textTheme.bodySmall),
-                        Text(_fmt(pos), style: Theme.of(context).textTheme.bodySmall),
-                      ],
-                    ),
+
+                // Times row
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(_fmt(duration), style: Theme.of(context).textTheme.bodySmall),
+                      Text(_fmt(pos), style: Theme.of(context).textTheme.bodySmall),
+                    ],
                   ),
-                  // Full-width progress bar at the very bottom
-                  SizedBox(
-                    height: 3,
-                    child: LinearProgressIndicator(
-                      value: pct,
-                      backgroundColor: scheme.surface.withValues(alpha: 0.4),
-                      valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
-                      minHeight: 3,
-                    ),
+                ),
+
+                // Full-width progress bar at bottom
+                SizedBox(
+                  height: 3,
+                  child: LinearProgressIndicator(
+                    value: pct,
+                    backgroundColor: scheme.surface.withValues(alpha: 0.4),
+                    valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
+                    minHeight: 3,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
@@ -190,7 +187,6 @@ class MiniAudioPlayer extends StatelessWidget {
     );
   }
 
-  
   String _fmt(Duration d) {
     final hh = d.inHours;
     final mm = d.inMinutes.remainder(60).toString().padLeft(2, '0');
