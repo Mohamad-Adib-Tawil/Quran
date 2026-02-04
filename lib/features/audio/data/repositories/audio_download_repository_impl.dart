@@ -65,20 +65,21 @@ class AudioDownloadRepositoryImpl implements AudioDownloadRepository {
         final List<String> candidates = [];
         if (withSlash.startsWith('https://') || withSlash.startsWith('http://')) {
           if (withSlash.startsWith('https://')) {
-            candidates.add('${withSlash}$padded.mp3');
-            candidates.add('${withSlash}$plain.mp3');
+            final httpBase = withSlash.replaceFirst('https://', 'http://');
+            candidates.add('$withSlash$padded.mp3');
+            candidates.add('$withSlash$plain.mp3');
             if (!kReleaseMode) {
-              candidates.add(withSlash.replaceFirst('https://', 'http://') + '$padded.mp3');
-              candidates.add(withSlash.replaceFirst('https://', 'http://') + '$plain.mp3');
+              candidates.add('$httpBase$padded.mp3');
+              candidates.add('$httpBase$plain.mp3');
             }
           } else if (withSlash.startsWith('http://')) {
             if (!kReleaseMode) {
-              candidates.add('${withSlash}$padded.mp3');
-              candidates.add('${withSlash}$plain.mp3');
+              candidates.add('$withSlash$padded.mp3');
+              candidates.add('$withSlash$plain.mp3');
             }
             final httpsBase = withSlash.replaceFirst('http://', 'https://');
-            candidates.add('${httpsBase}$padded.mp3');
-            candidates.add('${httpsBase}$plain.mp3');
+            candidates.add('$httpsBase$padded.mp3');
+            candidates.add('$httpsBase$plain.mp3');
           }
         } else {
           candidates.add('https://$withSlash$padded.mp3');
@@ -112,12 +113,12 @@ class AudioDownloadRepositoryImpl implements AudioDownloadRepository {
         final b = remote.baseUrl;
         if (b != null) {
           final bs = b.endsWith('/') ? b : '$b/';
-          candidates.add('${bs}$padded.mp3');
-          candidates.add('${bs}$plain.mp3');
+          candidates.add('$bs$padded.mp3');
+          candidates.add('$bs$plain.mp3');
           if (bs.startsWith('https://') && !kReleaseMode) {
             final hb = bs.replaceFirst('https://', 'http://');
-            candidates.add('${hb}$padded.mp3');
-            candidates.add('${hb}$plain.mp3');
+            candidates.add('$hb$padded.mp3');
+            candidates.add('$hb$plain.mp3');
           }
         }
         // fallbacks
@@ -125,21 +126,21 @@ class AudioDownloadRepositoryImpl implements AudioDownloadRepository {
           final withSlash = fb.endsWith('/') ? fb : '$fb/';
           if (withSlash.startsWith('http')) {
             if (withSlash.startsWith('https://')) {
-              candidates.add('${withSlash}$padded.mp3');
-              candidates.add('${withSlash}$plain.mp3');
+              candidates.add('$withSlash$padded.mp3');
+              candidates.add('$withSlash$plain.mp3');
               if (!kReleaseMode) {
                 final hb = withSlash.replaceFirst('https://', 'http://');
-                candidates.add('${hb}$padded.mp3');
-                candidates.add('${hb}$plain.mp3');
+                candidates.add('$hb$padded.mp3');
+                candidates.add('$hb$plain.mp3');
               }
             } else if (withSlash.startsWith('http://')) {
               if (!kReleaseMode) {
-                candidates.add('${withSlash}$padded.mp3');
-                candidates.add('${withSlash}$plain.mp3');
+                candidates.add('$withSlash$padded.mp3');
+                candidates.add('$withSlash$plain.mp3');
               }
               final sb = withSlash.replaceFirst('http://', 'https://');
-              candidates.add('${sb}$padded.mp3');
-              candidates.add('${sb}$plain.mp3');
+              candidates.add('$sb$padded.mp3');
+              candidates.add('$sb$plain.mp3');
             }
           } else {
             candidates.add('https://$withSlash$padded.mp3');
