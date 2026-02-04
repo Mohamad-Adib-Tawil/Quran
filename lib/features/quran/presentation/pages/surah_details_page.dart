@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:quran/core/theme/figma_palette.dart';
-import 'package:quran/core/theme/figma_typography.dart';
-import 'package:quran/core/theme/design_tokens.dart';
-import 'package:quran/features/quran/presentation/navigation/quran_open_target.dart';
-import 'package:quran/features/quran/presentation/pages/surah_list_page.dart';
+import 'package:quran_app/core/theme/figma_palette.dart';
+import 'package:quran_app/core/theme/figma_typography.dart';
+import 'package:quran_app/core/theme/design_tokens.dart';
+import 'package:quran_app/features/quran/presentation/navigation/quran_open_target.dart';
+import 'package:quran_app/features/quran/presentation/pages/surah_list_page.dart';
 import 'package:quran_library/quran_library.dart';
 
 class SurahDetailsPage extends StatelessWidget {
