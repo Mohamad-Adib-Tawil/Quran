@@ -10,7 +10,6 @@ import 'package:quran_app/services/last_read_service.dart';
 import 'package:quran_app/core/di/service_locator.dart';
 import 'package:quran_app/features/home/presentation/widgets/last_read_card.dart';
 import 'package:quran_app/features/home/presentation/widgets/home_tab_bar.dart';
-import 'package:quran_app/features/home/presentation/widgets/home_search_field.dart';
 import 'package:quran_app/features/quran/presentation/widgets/list/surah_list_item.dart';
 import 'package:quran_app/features/quran/presentation/widgets/list/list_divider.dart';
 import 'package:quran_app/features/quran/presentation/widgets/list/juz_list_item.dart';
@@ -49,6 +48,8 @@ class _HomeView extends StatefulWidget {
 class _HomeViewState extends State<_HomeView> {
   LastRead? _lastRead;
   Set<int> _favorites = <int>{};
+  bool _searching = false;
+  late final TextEditingController _searchCtrl;
 
   @override
   void initState() {
@@ -56,6 +57,11 @@ class _HomeViewState extends State<_HomeView> {
     _lastRead = sl<LastReadService>().getLastRead();
     // Load favorites once on start
     _favorites = sl<FavoritesService>().getFavorites().toSet();
+    _searchCtrl = TextEditingController()
+      ..addListener(() {
+        if (!mounted) return;
+        context.read<HomeCubit>().setQuery(_searchCtrl.text);
+      });
   }
 
   Future<void> _setLastRead(int surah, int ayah) async {
@@ -73,6 +79,12 @@ class _HomeViewState extends State<_HomeView> {
   bool _isFavorite(int surah) => _favorites.contains(surah);
 
   @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final t = context.tr;
     return DefaultTabController(
@@ -81,11 +93,28 @@ class _HomeViewState extends State<_HomeView> {
         body: NestedScrollView(
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
-              title: Text(t.appTitle),
+              title: _searching
+                  ? TextField(
+                      controller: _searchCtrl,
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        hintText: t.searchSurahHint,
+                        border: InputBorder.none,
+                      ),
+                    )
+                  : Text(t.appTitle),
               pinned: true,
               actions: [
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      _searching = !_searching;
+                      if (!_searching) {
+                        _searchCtrl.clear();
+                        context.read<HomeCubit>().setQuery('');
+                      }
+                    });
+                  },
                   icon: SvgPicture.asset(AppAssets.icSearch, width: 22, height: 22),
                   tooltip: t.searchSurahHint,
                 ),
@@ -122,15 +151,7 @@ class _HomeViewState extends State<_HomeView> {
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                child: HomeSearchField(
-                  onChanged: (v) => context.read<HomeCubit>().setQuery(v),
-                  hintText: t.searchSurahHint,
-                ),
-              ),
-            ),
+            // Removed always-visible search field; search is toggled in AppBar now
             SliverPersistentHeader(
               pinned: true,
               delegate: _TabBarDelegate(const HomeTabBar()),
@@ -151,23 +172,34 @@ class _HomeViewState extends State<_HomeView> {
                         separatorBuilder: (context, index) => const ListDivider(),
                         itemBuilder: (ctx, i) {
                           final s = numbers[i];
-                          String title;
-                          String? subtitle;
+                          final localeCode = Localizations.localeOf(context).languageCode;
+                          String titleAr;
+                          String titleLatin;
+                          String? subtitleAr;
+                          String? subtitleLatin;
                           if (meta.isNotEmpty && s - 1 < meta.length) {
                             final m = meta[s - 1];
-                            title = m.nameArabic;
+                            titleAr = m.nameArabic;
+                            titleLatin = m.nameEnglish;
                             final isMadani = m.revelation.toLowerCase().contains('mad');
-                            final revAr = isMadani ? t.madani : t.makki;
-                            subtitle = '$revAr • ${m.verseCount} آية';
+                            final revLocalized = isMadani ? t.madani : t.makki;
+                            final verseWord = localeCode == 'de' ? 'Verse' : localeCode == 'ar' ? 'آية' : 'Verses';
+                            subtitleAr = '$revLocalized • ${m.verseCount} آية';
+                            subtitleLatin = '${m.verseCount} $verseWord • $revLocalized';
                           } else {
                             final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
-                            title = info.name;
-                            subtitle = null;
+                            titleAr = info.name;
+                            titleLatin = 'Surah ${s.toString().padLeft(3, '0')}';
+                            subtitleAr = null;
+                            subtitleLatin = null;
                           }
+                          // In AR locale: show Arabic + English; in DE: Arabic + German (fallback to English until dataset is provided).
                           return SurahListItem(
                             surahNumber: s,
-                            title: title,
-                            subtitle: subtitle,
+                            titleAr: titleAr,
+                            titleLatin: titleLatin,
+                            subtitleAr: subtitleAr,
+                            subtitleLatin: subtitleLatin,
                             onTap: () {
                               if (!ctx.mounted) return;
                               _setLastRead(s, 1);
