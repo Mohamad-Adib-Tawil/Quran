@@ -190,6 +190,7 @@ class MiniAudioPlayer extends StatelessWidget {
     );
   }
 
+  
   String _fmt(Duration d) {
     final hh = d.inHours;
     final mm = d.inMinutes.remainder(60).toString().padLeft(2, '0');
