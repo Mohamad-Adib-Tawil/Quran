@@ -32,18 +32,26 @@ dependencies:
   flutter_screenutil: ^5.9.3
 
 dev_dependencies:
+  flutter_gen_runner: ^5.7.0
+  build_runner: ^2.4.8
+
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.4.0
+
+flutter_gen:
+  output: lib/gen/
+  line_length: 120
 
 flutter:
 
 
   uses-material-design: true
   assets:
+    - assets/icons/
+    - assets/images/
     - assets/audio/audio_urls.json
     - assets/splash/Splash Screen app.jpg
     - assets/figma/
