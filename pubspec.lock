@@ -653,6 +653,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.5+1"
+  quran:
+    dependency: "direct main"
+    description:
+      name: quran
+      sha256: afee7c882130da65ad3fe225e0f43b958029ebf8f2ddf9d99414e82d8598fcfc
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.4.1"
   quran_library:
     dependency: "direct main"
     description:
