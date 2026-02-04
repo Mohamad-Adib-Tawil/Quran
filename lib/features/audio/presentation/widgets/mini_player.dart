@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:quran_app/core/assets/app_assets.dart';
 
 import '../cubit/audio_cubit.dart';
 import '../cubit/audio_state.dart';
@@ -72,12 +74,14 @@ class MiniAudioPlayer extends StatelessWidget {
             return Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.skip_previous),
+                  icon: SvgPicture.asset(AppAssets.icPrev, width: 22, height: 22),
                   onPressed: () => context.read<AudioCubit>().playPrevFromCatalog(),
                   tooltip: t.previous,
                 ),
                 IconButton(
-                  icon: Icon(state.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill),
+                  icon: state.isPlaying
+                      ? const Icon(Icons.pause_circle_filled)
+                      : SvgPicture.asset(AppAssets.icPlay, width: 36, height: 36),
                   color: Theme.of(context).colorScheme.primary,
                   iconSize: 36,
                   onPressed: () => context.read<AudioCubit>().toggle(),
@@ -124,7 +128,7 @@ class MiniAudioPlayer extends StatelessWidget {
                   tooltip: t.stop,
                 ),
                 IconButton(
-                  icon: const Icon(Icons.skip_next),
+                  icon: SvgPicture.asset(AppAssets.icNext, width: 22, height: 22),
                   onPressed: () => context.read<AudioCubit>().playNextFromCatalog(),
                   tooltip: t.next,
                 ),
