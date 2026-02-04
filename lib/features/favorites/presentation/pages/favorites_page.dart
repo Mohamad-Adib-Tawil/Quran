@@ -7,12 +7,36 @@ import 'package:quran_app/core/di/service_locator.dart';
 import 'package:quran_app/services/favorites_service.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:quran_app/core/assets/app_assets.dart';
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});
 
   @override
   State<FavoritesPage> createState() => _FavoritesPageState();
+}
+
+class _SvgChipIcon extends StatelessWidget {
+  final String svgAsset;
+  final Color color;
+  final VoidCallback? onTap;
+  const _SvgChipIcon({required this.svgAsset, required this.color, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+        alignment: Alignment.center,
+        child: SvgPicture.asset(svgAsset, width: 18, height: 18),
+      ),
+    );
+  }
 }
 
 class _FavoritesPageState extends State<FavoritesPage> {
@@ -68,7 +92,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   onMute: () => context.read<AudioCubit>().pause(),
                   trailing: IconButton(
                     tooltip: t.removeFromFavorites,
-                    icon: const Icon(Icons.star, color: FigmaPalette.primary),
+                    icon: SvgPicture.asset(AppAssets.icStarGreen, width: 24, height: 24),
                     onPressed: () => _toggle(s),
                   ),
                 );
@@ -99,7 +123,7 @@ class _SurahCard extends StatelessWidget {
         children: [
           _ChipIcon(icon: Icons.volume_off, color: Colors.grey, onTap: onMute),
           const SizedBox(width: 8),
-          _ChipIcon(icon: Icons.play_arrow, color: FigmaPalette.primary, onTap: onPlay),
+          _SvgChipIcon(svgAsset: AppAssets.icPlay, color: FigmaPalette.primary, onTap: onPlay),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

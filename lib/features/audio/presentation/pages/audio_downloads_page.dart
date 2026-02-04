@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:quran_app/core/assets/app_assets.dart';
 
 import '../../domain/repositories/audio_download_repository.dart';
 import '../cubit/audio_download_cubit.dart';
@@ -62,7 +64,7 @@ class _DownloadedTab extends StatelessWidget {
         }
         return ListView.separated(
           itemCount: list.length,
-          separatorBuilder: (_context, _index) => const Divider(height: 1),
+          separatorBuilder: (context, index) => const Divider(height: 1),
           itemBuilder: (ctx, i) {
             final s = list[i];
             final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
@@ -74,7 +76,7 @@ class _DownloadedTab extends StatelessWidget {
                 children: [
                   IconButton(
                     tooltip: t.play,
-                    icon: const Icon(Icons.play_arrow),
+                    icon: SvgPicture.asset(AppAssets.icPlay, width: 20, height: 20),
                     onPressed: () async {
                       final audioCubit = context.read<AudioCubit>();
                       final messenger = ScaffoldMessenger.of(context);
@@ -90,7 +92,7 @@ class _DownloadedTab extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: t.delete,
-                    icon: const Icon(Icons.delete_outline),
+                    icon: SvgPicture.asset(AppAssets.icTrash, width: 20, height: 20),
                     onPressed: () async {
                       final downloadCubit = context.read<AudioDownloadCubit>();
                       final messenger = ScaffoldMessenger.of(context);
@@ -126,7 +128,7 @@ class _NotDownloadedTab extends StatelessWidget {
         }
         return ListView.separated(
           itemCount: list.length,
-          separatorBuilder: (_context, _index) => const Divider(height: 1),
+          separatorBuilder: (context, index) => const Divider(height: 1),
           itemBuilder: (ctx, i) {
             final s = list[i];
             final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
@@ -140,7 +142,7 @@ class _NotDownloadedTab extends StatelessWidget {
                 onPressed: downloading
                     ? null
                     : () => context.read<AudioDownloadCubit>().download(s),
-                icon: const Icon(Icons.download),
+                icon: SvgPicture.asset(AppAssets.icDownloadGreen, width: 18, height: 18),
                 label: Text(downloading ? '${(progress * 100).toStringAsFixed(0)}%' : t.download),
               ),
             );
