@@ -9,12 +9,12 @@ class SurahListItem extends StatelessWidget {
   final String titleAr;
   final String titleLatin;
   final String? subtitleAr;
-  final String? subtitleLatin;
+  final bool isFavorite;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final VoidCallback? onInfo;
-  final Widget? trailing;
-  const SurahListItem({super.key, required this.surahNumber, required this.titleAr, required this.titleLatin, this.subtitleAr, this.subtitleLatin, this.onTap, this.onLongPress, this.onInfo, this.trailing});
+  final VoidCallback? onFavoriteToggle;
+  const SurahListItem({super.key, required this.surahNumber, required this.titleAr, required this.titleLatin, this.subtitleAr, this.isFavorite = false, this.onTap, this.onLongPress, this.onInfo, this.onFavoriteToggle});
 
   @override
   Widget build(BuildContext context) {
@@ -54,43 +54,45 @@ class SurahListItem extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (subtitleAr != null || subtitleLatin != null) ...[
+                  if (subtitleAr != null) ...[
                     const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: subtitleLatin == null
-                              ? const SizedBox.shrink()
-                              : Text(
-                                  subtitleLatin!,
-                                  style: FigmaTypography.caption12(color: Theme.of(context).hintColor),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.left,
-                                ),
-                        ),
-                        const SizedBox(width: 12),
-                        Flexible(
-                          child: subtitleAr == null
-                              ? const SizedBox.shrink()
-                              : Text(
-                                  subtitleAr!,
-                                  style: GoogleFonts.notoNaskhArabic(fontSize: 12, fontWeight: FontWeight.w500, color: Theme.of(context).hintColor),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.right,
-                                ),
-                        ),
-                      ],
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        subtitleAr!,
+                        style: GoogleFonts.notoNaskhArabic(fontSize: 12, fontWeight: FontWeight.w500, color: Theme.of(context).hintColor),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.right,
+                      ),
                     ),
                   ],
+                  const SizedBox(height: 6),
+                  // Favorite button under the Latin title (left side)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            iconSize: 22,
+                            onPressed: onFavoriteToggle,
+                            icon: SvgPicture.asset(
+                              isFavorite ? AppAssets.icStarGreen : AppAssets.icStarGray,
+                              width: 22,
+                              height: 22,
+                            ),
+                            tooltip: isFavorite ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة',
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
-            if (trailing != null) ...[
-              trailing!,
-              const SizedBox(width: 6),
-            ],
             if (onInfo != null)
               IconButton(
                 icon: const Icon(Icons.info_outline, color: Colors.grey),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
 
-import '../../../audio/presentation/widgets/mini_player.dart';
 import '../../../quran/presentation/pages/surah_list_page.dart';
 import '../../../quran/presentation/navigation/quran_open_target.dart';
 import '../../../settings/presentation/pages/settings_page.dart';
@@ -91,6 +90,7 @@ class _HomeViewState extends State<_HomeView> {
       length: 3,
       child: Scaffold(
         body: NestedScrollView(
+          physics: const ClampingScrollPhysics(),
           headerSliverBuilder: (context, innerBoxIsScrolled) => [
             SliverAppBar(
               title: _searching
@@ -142,15 +142,7 @@ class _HomeViewState extends State<_HomeView> {
                   child: LastReadCard(surah: _lastRead!.surah, ayah: _lastRead!.ayah),
                 ),
               ),
-            const SliverToBoxAdapter(
-              child: Material(
-                elevation: 2,
-                child: Padding(
-                  padding: EdgeInsets.all(8),
-                  child: MiniAudioPlayer(),
-                ),
-              ),
-            ),
+            // Removed mini player from scroll; it is now persistent above the bottom navigation bar
             // Removed always-visible search field; search is toggled in AppBar now
             SliverPersistentHeader(
               pinned: true,
@@ -168,38 +160,36 @@ class _HomeViewState extends State<_HomeView> {
                       final meta = qState.surahs;
                       return ListView.separated(
                         padding: EdgeInsets.zero,
+                        physics: const NeverScrollableScrollPhysics(),
+                        primary: false,
+                        shrinkWrap: true,
                         itemCount: numbers.length,
                         separatorBuilder: (context, index) => const ListDivider(),
                         itemBuilder: (ctx, i) {
                           final s = numbers[i];
-                          final localeCode = Localizations.localeOf(context).languageCode;
                           String titleAr;
                           String titleLatin;
                           String? subtitleAr;
-                          String? subtitleLatin;
                           if (meta.isNotEmpty && s - 1 < meta.length) {
                             final m = meta[s - 1];
                             titleAr = m.nameArabic;
                             titleLatin = m.nameEnglish;
                             final isMadani = m.revelation.toLowerCase().contains('mad');
                             final revLocalized = isMadani ? t.madani : t.makki;
-                            final verseWord = localeCode == 'de' ? 'Verse' : localeCode == 'ar' ? 'آية' : 'Verses';
                             subtitleAr = '$revLocalized • ${m.verseCount} آية';
-                            subtitleLatin = '${m.verseCount} $verseWord • $revLocalized';
                           } else {
                             final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
                             titleAr = info.name;
                             titleLatin = 'Surah ${s.toString().padLeft(3, '0')}';
                             subtitleAr = null;
-                            subtitleLatin = null;
                           }
-                          // In AR locale: show Arabic + English; in DE: Arabic + German (fallback to English until dataset is provided).
                           return SurahListItem(
                             surahNumber: s,
                             titleAr: titleAr,
                             titleLatin: titleLatin,
                             subtitleAr: subtitleAr,
-                            subtitleLatin: subtitleLatin,
+                            isFavorite: _isFavorite(s),
+                            onFavoriteToggle: () => _toggleFavorite(s),
                             onTap: () {
                               if (!ctx.mounted) return;
                               _setLastRead(s, 1);
@@ -226,15 +216,6 @@ class _HomeViewState extends State<_HomeView> {
                                 ),
                               );
                             },
-                            trailing: IconButton(
-                              tooltip: _isFavorite(s) ? t.removeFromFavorites : t.addToFavorites,
-                              icon: SvgPicture.asset(
-                                _isFavorite(s) ? AppAssets.icStarGreen : AppAssets.icStarGray,
-                                width: 24,
-                                height: 24,
-                              ),
-                              onPressed: () => _toggleFavorite(s),
-                            ),
                           );
                         },
                       );
@@ -245,6 +226,9 @@ class _HomeViewState extends State<_HomeView> {
               // Juz tab
               ListView.separated(
                 padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
+                primary: false,
+                shrinkWrap: true,
                 itemCount: QuranLibrary.allJoz.length,
                 separatorBuilder: (context, index) => const ListDivider(),
                 itemBuilder: (ctx, i) {
@@ -266,6 +250,9 @@ class _HomeViewState extends State<_HomeView> {
               // Hizb tab (quarters)
               ListView.separated(
                 padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
+                primary: false,
+                shrinkWrap: true,
                 itemCount: QuranLibrary.allHizb.length,
                 separatorBuilder: (context, index) => const ListDivider(),
                 itemBuilder: (ctx, i) {
