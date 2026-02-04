@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/theme/design_tokens.dart';
-import 'package:quran_app/core/theme/app_colors.dart';
 import 'package:quran_app/features/quran/presentation/pages/surah_list_page.dart';
 import 'package:quran_app/features/quran/presentation/navigation/quran_open_target.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -35,42 +34,30 @@ class LastReadCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppRadius.xl),
-          gradient: const LinearGradient(
-            colors: [AppColors.primary, AppColors.primaryDark],
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
+          image: DecorationImage(
+            image: AssetImage(AppAssets.imgLastReadBg),
+            fit: BoxFit.cover,
           ),
-          boxShadow: AppShadows.soft(AppColors.primary),
         ),
-        child: Stack(
+        child: Row(
           children: [
-            Positioned.fill(
-              child: Opacity(
-                opacity: 0.15,
-                child: Image.asset(AppAssets.imgLastReadBg, fit: BoxFit.cover),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(t.lastRead, style: theme.textTheme.labelLarge?.copyWith(color: Colors.white70)),
+                  const SizedBox(height: 6),
+                  Text(info.name, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(t.ayahNumber('$ayah'), style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white)),
+                ],
               ),
             ),
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(t.lastRead, style: theme.textTheme.labelLarge?.copyWith(color: Colors.white70)),
-                      const SizedBox(height: 6),
-                      Text(info.name, style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 4),
-                      Text(t.ayahNumber('$ayah'), style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white)),
-                    ],
-                  ),
-                ),
-                SvgPicture.asset(
-                  AppAssets.icPlayMini,
-                  width: 36,
-                  height: 36,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                ),
-              ],
+            SvgPicture.asset(
+              AppAssets.icPlayMini,
+              width: 36,
+              height: 36,
+              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
             ),
           ],
         ),
