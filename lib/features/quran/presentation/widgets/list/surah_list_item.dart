@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:quran/core/theme/figma_palette.dart';
-import 'package:quran/core/theme/figma_typography.dart';
+import 'package:quran_app/core/theme/figma_palette.dart';
+import 'package:quran_app/core/theme/figma_typography.dart';
 
 class SurahListItem extends StatelessWidget {
   final int surahNumber;
@@ -9,7 +9,8 @@ class SurahListItem extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final VoidCallback? onInfo;
-  const SurahListItem({super.key, required this.surahNumber, required this.title, this.subtitle, this.onTap, this.onLongPress, this.onInfo});
+  final Widget? trailing;
+  const SurahListItem({super.key, required this.surahNumber, required this.title, this.subtitle, this.onTap, this.onLongPress, this.onInfo, this.trailing});
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +35,10 @@ class SurahListItem extends StatelessWidget {
                 ],
               ),
             ),
+            if (trailing != null) ...[
+              trailing!,
+              const SizedBox(width: 6),
+            ],
             if (onInfo != null)
               IconButton(
                 icon: const Icon(Icons.info_outline, color: Colors.grey),
