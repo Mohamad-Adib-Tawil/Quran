@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
+import 'package:quran_app/core/localization/app_localization_ext.dart';
 
 import '../cubit/audio_cubit.dart';
 import '../cubit/audio_state.dart';
@@ -10,6 +11,7 @@ class MiniAudioPlayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.tr;
     return Material(
       elevation: 6,
       color: Theme.of(context).colorScheme.surface,
@@ -32,7 +34,7 @@ class MiniAudioPlayer extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('جاري تحميل السورة...', style: Theme.of(context).textTheme.bodyMedium),
+                        Text(t.downloadingSurah, style: Theme.of(context).textTheme.bodyMedium),
                         const SizedBox(height: 6),
                         LinearProgressIndicator(value: state.downloadProgress.clamp(0.0, 1.0)),
                       ],
@@ -49,7 +51,7 @@ class MiniAudioPlayer extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      state.errorMessage ?? 'حدث خطأ غير متوقع',
+                      state.errorMessage ?? t.unexpectedError,
                       style: Theme.of(context).textTheme.bodyMedium,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -58,7 +60,7 @@ class MiniAudioPlayer extends StatelessWidget {
                   const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: () => context.read<AudioCubit>().retry(),
-                    child: const Text('إعادة المحاولة'),
+                    child: Text(t.retry),
                   ),
                 ],
               );
@@ -72,14 +74,14 @@ class MiniAudioPlayer extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.skip_previous),
                   onPressed: () => context.read<AudioCubit>().playPrevFromCatalog(),
-                  tooltip: 'السابق',
+                  tooltip: t.previous,
                 ),
                 IconButton(
                   icon: Icon(state.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill),
                   color: Theme.of(context).colorScheme.primary,
                   iconSize: 36,
                   onPressed: () => context.read<AudioCubit>().toggle(),
-                  tooltip: state.isPlaying ? 'إيقاف مؤقت' : 'تشغيل',
+                  tooltip: state.isPlaying ? t.pause : t.play,
                 ),
                 Expanded(
                   child: Column(
@@ -119,12 +121,12 @@ class MiniAudioPlayer extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.stop_circle_outlined),
                   onPressed: () => context.read<AudioCubit>().stop(),
-                  tooltip: 'إيقاف',
+                  tooltip: t.stop,
                 ),
                 IconButton(
                   icon: const Icon(Icons.skip_next),
                   onPressed: () => context.read<AudioCubit>().playNextFromCatalog(),
-                  tooltip: 'التالي',
+                  tooltip: t.next,
                 ),
               ],
             );
