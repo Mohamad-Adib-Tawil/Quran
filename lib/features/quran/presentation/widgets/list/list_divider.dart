@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:quran/core/theme/figma_palette.dart';
+import 'package:quran_app/core/theme/figma_palette.dart';
 
 class ListDivider extends StatelessWidget {
   const ListDivider({super.key});
