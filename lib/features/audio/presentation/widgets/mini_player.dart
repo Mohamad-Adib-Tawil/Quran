@@ -91,12 +91,54 @@ class MiniAudioPlayer extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                     child: Row(
                       children: [
-                        // Close button
-                        IconButton(
-                          icon: SvgPicture.asset(AppAssets.icExitGreyCross, width: 20, height: 20),
-                          onPressed: () => context.read<AudioCubit>().stop(),
-                          tooltip: t.stop,
+                        // Title and info – ثابتة على اليمين دائماً
+                        Expanded(
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        info.name,
+                                        style: Theme.of(context).textTheme.titleMedium,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.right,
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${isMadani ? t.madani : t.makki} • $verses ${t.aya}',
+                                        style: Theme.of(context).textTheme.bodySmall,
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: scheme.primary,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: SvgPicture.asset(
+                                    AppAssets.icQuranGray,
+                                    width: 20,
+                                    height: 20,
+                                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         // Play/Pause
                         IconButton(
                           iconSize: 36,
@@ -107,50 +149,11 @@ class MiniAudioPlayer extends StatelessWidget {
                           onPressed: () => context.read<AudioCubit>().toggle(),
                           tooltip: state.isPlaying ? t.pause : t.play,
                         ),
-                        const SizedBox(width: 8),
-                        // Title and info (right-aligned Arabic)
-                        Expanded(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Container(
-                                width: 36,
-                                height: 36,
-                                decoration: BoxDecoration(
-                                  color: scheme.primary,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                alignment: Alignment.center,
-                                child: SvgPicture.asset(
-                                  AppAssets.icQuranGray,
-                                  width: 20,
-                                  height: 20,
-                                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Flexible(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      info.name,
-                                      style: Theme.of(context).textTheme.titleMedium,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.right,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      '${isMadani ? t.madani : t.makki} • $verses ${t.aya}',
-                                      style: Theme.of(context).textTheme.bodySmall,
-                                      textAlign: TextAlign.right,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                        // Close button
+                        IconButton(
+                          icon: SvgPicture.asset(AppAssets.icExitGreyCross, width: 20, height: 20),
+                          onPressed: () => context.read<AudioCubit>().stop(),
+                          tooltip: t.stop,
                         ),
                       ],
                     ),
@@ -163,8 +166,8 @@ class MiniAudioPlayer extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(_fmt(duration), style: Theme.of(context).textTheme.bodySmall),
                       Text(_fmt(pos), style: Theme.of(context).textTheme.bodySmall),
+                      Text(_fmt(duration), style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),
                 ),
