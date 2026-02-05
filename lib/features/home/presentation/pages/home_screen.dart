@@ -160,9 +160,7 @@ class _HomeViewState extends State<_HomeView> {
                       final meta = qState.surahs;
                       return ListView.separated(
                         padding: EdgeInsets.zero,
-                        physics: const NeverScrollableScrollPhysics(),
-                        primary: false,
-                        shrinkWrap: true,
+                        primary: true,
                         itemCount: numbers.length,
                         separatorBuilder: (context, index) => const ListDivider(),
                         itemBuilder: (ctx, i) {
@@ -226,9 +224,7 @@ class _HomeViewState extends State<_HomeView> {
               // Juz tab
               ListView.separated(
                 padding: EdgeInsets.zero,
-                physics: const NeverScrollableScrollPhysics(),
-                primary: false,
-                shrinkWrap: true,
+                primary: true,
                 itemCount: QuranLibrary.allJoz.length,
                 separatorBuilder: (context, index) => const ListDivider(),
                 itemBuilder: (ctx, i) {
@@ -250,9 +246,7 @@ class _HomeViewState extends State<_HomeView> {
               // Hizb tab (quarters)
               ListView.separated(
                 padding: EdgeInsets.zero,
-                physics: const NeverScrollableScrollPhysics(),
-                primary: false,
-                shrinkWrap: true,
+                primary: true,
                 itemCount: QuranLibrary.allHizb.length,
                 separatorBuilder: (context, index) => const ListDivider(),
                 itemBuilder: (ctx, i) {

@@ -9,12 +9,25 @@ class SurahListItem extends StatelessWidget {
   final String titleAr;
   final String titleLatin;
   final String? subtitleAr;
+  final String? subtitleLatin;
   final bool isFavorite;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
   final VoidCallback? onInfo;
   final VoidCallback? onFavoriteToggle;
-  const SurahListItem({super.key, required this.surahNumber, required this.titleAr, required this.titleLatin, this.subtitleAr, this.isFavorite = false, this.onTap, this.onLongPress, this.onInfo, this.onFavoriteToggle});
+  const SurahListItem({
+    super.key,
+    required this.surahNumber,
+    required this.titleAr,
+    required this.titleLatin,
+    this.subtitleAr,
+    this.subtitleLatin,
+    this.isFavorite = false,
+    this.onTap,
+    this.onLongPress,
+    this.onInfo,
+    this.onFavoriteToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,88 +36,95 @@ class SurahListItem extends StatelessWidget {
       onLongPress: onLongPress,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
+        child: Stack(
+          // Use loose fit so the item can size itself based on its content.
+          // This avoids forcing an infinite height when placed in shrink-wrapped lists.
+          fit: StackFit.loose,
+          alignment: Alignment.center,
           children: [
-            _NumberPill(number: surahNumber),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+            // Base content row with directional start padding so number pill doesn't overlap
+            Padding(
+              padding: const EdgeInsetsDirectional.only(start: 40),
+              child: Row(
+                textDirection: TextDirection.ltr,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
+                  // Latin column (left)
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Column(
+                      textDirection: TextDirection.ltr,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
                           titleLatin,
                           style: FigmaTypography.latinBody15(color: Theme.of(context).colorScheme.onSurface),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.left,
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Flexible(
-                        child: Text(
+                        // No Latin subtitle; info will always be shown under Arabic title
+                        const SizedBox(height: 4),
+                        SizedBox(
+                          height: 22,
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: SvgPicture.asset(
+                              isFavorite ? AppAssets.icStarGreen : AppAssets.icStarGray,
+                              width: 20,
+                              height: 20,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Arabic column (right) expands and stays flush to the right
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Column(
+                        textDirection: TextDirection.ltr,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                        Text(
                           titleAr,
                           style: GoogleFonts.notoNaskhArabic(fontSize: 15, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.right,
                         ),
-                      ),
-                    ],
-                  ),
-                  if (subtitleAr != null) ...[
-                    const SizedBox(height: 4),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Text(
-                        subtitleAr!,
-                        style: GoogleFonts.notoNaskhArabic(fontSize: 12, fontWeight: FontWeight.w500, color: Theme.of(context).hintColor),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.right,
+                        if (subtitleAr != null) ...[
+                          const SizedBox(height: 3),
+                          Text(
+                            subtitleAr!,
+                            style: GoogleFonts.notoNaskhArabic(fontSize: 12, fontWeight: FontWeight.w500, color: Theme.of(context).hintColor),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.right,
+                          ),
+                        ],
+                      ],
                       ),
                     ),
-                  ],
-                  const SizedBox(height: 6),
-                  // Favorite button under the Latin title (left side)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            iconSize: 22,
-                            onPressed: onFavoriteToggle,
-                            icon: SvgPicture.asset(
-                              isFavorite ? AppAssets.icStarGreen : AppAssets.icStarGray,
-                              width: 22,
-                              height: 22,
-                            ),
-                            tooltip: isFavorite ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة',
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
             ),
-            if (onInfo != null)
-              IconButton(
-                icon: const Icon(Icons.info_outline, color: Colors.grey),
-                onPressed: onInfo,
-                tooltip: 'تفاصيل',
-              ),
-            const Icon(Icons.chevron_right, color: Colors.grey),
+            // Directional number pill at the start edge (left in LTR, right in RTL)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: _NumberPill(number: surahNumber),
+            ),
           ],
         ),
       ),
     );
   }
+  
 }
 
 class _NumberPill extends StatelessWidget {

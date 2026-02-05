@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:quran_library/quran_library.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:quran_app/core/theme/design_tokens.dart';
@@ -20,6 +21,8 @@ class LastReadCard extends StatelessWidget {
     final theme = Theme.of(context);
     final t = context.tr;
     final info = QuranLibrary().getSurahInfo(surahNumber: surah - 1);
+    final isGerman = Localizations.localeOf(context).languageCode.startsWith('de');
+    final surahTitle = isGerman ? quran.getSurahName(surah) : info.name;
     return InkWell(
       onTap: () {
         // keep audio context in sync with last read
@@ -31,47 +34,62 @@ class LastReadCard extends StatelessWidget {
         );
       },
       borderRadius: BorderRadius.circular(AppRadius.xl),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          image: DecorationImage(
-            image: AssetImage(AppAssets.imgLastReadBg),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        child: Stack(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                SvgPicture.asset(AppAssets.icBookmark, width: 18, height: 18, colorFilter: const ColorFilter.mode(Colors.white70, BlendMode.srcIn)),
-                const SizedBox(width: 8),
-                Text(t.lastRead, style: theme.textTheme.labelLarge?.copyWith(color: Colors.white70)),
-              ],
+            Positioned.fill(
+              child: isGerman
+                  ? Transform(
+                      alignment: Alignment.center,
+                      transform: Matrix4.identity()..rotateY(math.pi),
+                      child: Image.asset(
+                        AppAssets.imgLastReadBg,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Image.asset(
+                      AppAssets.imgLastReadBg,
+                      fit: BoxFit.cover,
+                    ),
             ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                info.name,
-                style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.right,
+            Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SvgPicture.asset(AppAssets.icBookmarkSaved, width: 18, height: 18, colorFilter: const ColorFilter.mode(Colors.white70, BlendMode.srcIn)),
+                      const SizedBox(width: 8),
+                      Text(t.lastRead, style: theme.textTheme.labelLarge?.copyWith(color: Colors.white70)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      surahTitle,
+                      style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.start,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      // Surah info (e.g., مدنية • 200 آية)
+                      Text(
+                        '${_revelationText(context, surah)} • ${_verseCountText(context, surah)}',
+                        style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
+                      ),
+                      const SizedBox(width: 12),
+                      _AyahChip(ayah: ayah),
+                    ],
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // Surah info (e.g., مدنية • 200 آية)
-                Text(
-                  '${_revelationText(context, surah)} • ${_verseCountText(context, surah)}',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
-                ),
-                const SizedBox(width: 12),
-                _AyahChip(ayah: ayah),
-              ],
             ),
           ],
         ),
@@ -107,9 +125,11 @@ class _AyahChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text('الآية $ayah', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
+          SvgPicture.asset(AppAssets.icLastAya, width: 16, height: 16),
+          const SizedBox(width: 6),
+          Text(context.tr.ayahNumber(ayah), style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
           const SizedBox(width: 8),
-          SvgPicture.asset(AppAssets.icPlayMini, width: 18, height: 18, colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn)),
+          // SvgPicture.asset(AppAssets.icPlayMini, width: 18, height: 18, colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn)),
         ],
       ),
     );
