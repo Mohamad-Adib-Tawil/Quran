@@ -107,7 +107,7 @@ String _revelationText(BuildContext context, int surah) {
 
 String _verseCountText(BuildContext context, int surah) {
   final count = quran.getVerseCount(surah);
-  return '$count آية';
+  return '$count ${context.tr.aya}';
 }
 
 class _AyahChip extends StatelessWidget {

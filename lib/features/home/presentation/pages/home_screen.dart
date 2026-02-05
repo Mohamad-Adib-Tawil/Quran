@@ -170,7 +170,7 @@ class _HomeViewState extends State<_HomeView> {
                             titleLatin = m.nameEnglish;
                             final isMadani = m.revelation.toLowerCase().contains('mad');
                             final revLocalized = isMadani ? t.madani : t.makki;
-                            subtitleAr = '$revLocalized • ${m.verseCount} آية';
+                            subtitleAr = '$revLocalized • ${m.verseCount} ${t.aya}';
                           } else {
                             final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
                             titleAr = info.name;

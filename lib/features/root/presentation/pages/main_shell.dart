@@ -35,6 +35,7 @@ class _MainShellState extends State<MainShell> {
             selectedIndex: _index,
             onDestinationSelected: (i) => setState(() => _index = i),
             labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            indicatorColor: Colors.transparent,
             destinations: [
               NavigationDestination(
                 icon: SvgPicture.asset(AppAssets.icStarGray, width: 24, height: 24),

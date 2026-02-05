@@ -111,6 +111,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get aya => 'Vers';
+
+  @override
   String get madani => 'Medinensisch';
 
   @override
