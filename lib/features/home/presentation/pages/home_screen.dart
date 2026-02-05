@@ -4,7 +4,6 @@ import 'package:quran_library/quran_library.dart';
 
 import '../../../quran/presentation/pages/surah_list_page.dart';
 import '../../../quran/presentation/navigation/quran_open_target.dart';
-import '../../../settings/presentation/pages/settings_page.dart';
 import 'package:quran_app/services/last_read_service.dart';
 import 'package:quran_app/core/di/service_locator.dart';
 import 'package:quran_app/features/home/presentation/widgets/last_read_card.dart';
@@ -20,8 +19,7 @@ import '../cubit/home_state.dart';
 import 'package:quran_app/services/favorites_service.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:quran_app/core/assets/app_assets.dart';
+ 
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -104,32 +102,7 @@ class _HomeViewState extends State<_HomeView> {
                     )
                   : Text(t.appTitle),
               pinned: true,
-              actions: [
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _searching = !_searching;
-                      if (!_searching) {
-                        _searchCtrl.clear();
-                        context.read<HomeCubit>().setQuery('');
-                      }
-                    });
-                  },
-                  icon: SvgPicture.asset(AppAssets.icSearch, width: 22, height: 22),
-                  tooltip: t.searchSurahHint,
-                ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const SettingsPage(),
-                      ),
-                    );
-                  },
-                  icon: SvgPicture.asset(AppAssets.icSettingsGreen, width: 22, height: 22),
-                  tooltip: t.settings,
-                ),
-              ],
+              actions: const [],
             ),
             if (_lastRead != null)
               SliverToBoxAdapter(
