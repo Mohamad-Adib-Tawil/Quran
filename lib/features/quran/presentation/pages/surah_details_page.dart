@@ -7,20 +7,76 @@ import 'package:quran_app/features/quran/presentation/navigation/quran_open_targ
 import 'package:quran_app/features/quran/presentation/pages/surah_list_page.dart';
 import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
+import 'package:quran_app/core/di/service_locator.dart';
+import 'package:quran_app/services/favorites_service.dart';
 
-class SurahDetailsPage extends StatelessWidget {
+class SurahDetailsPage extends StatefulWidget {
   final int surahNumber; // 1-based
   const SurahDetailsPage({super.key, required this.surahNumber});
 
   @override
+  State<SurahDetailsPage> createState() => _SurahDetailsPageState();
+}
+
+class _SurahDetailsPageState extends State<SurahDetailsPage> {
+  bool _isFav = false;
+  int? _firstAyahUQ;
+  int? _firstPageIndex; // 0-based
+  bool _loadingTafsir = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _isFav = sl<FavoritesService>().isFavorite(widget.surahNumber);
+    // حضّر معرّف الآية الأولى ورقم صفحتها للتفسير
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final qc = QuranCtrl.instance;
+      if (qc.surahs.isEmpty || qc.ayahs.isEmpty) {
+        // تهيئة بيانات القرآن إن لم تكن جاهزة
+        await qc.loadQuranDataV1();
+      }
+      final uq = qc.getAyahUQBySurahAndAyah(widget.surahNumber, 1);
+      int? pageIndex;
+      if (uq != null) {
+        try {
+          final ayah = qc.ayahs.firstWhere((a) => a.ayahUQNumber == uq);
+          pageIndex = (ayah.page - 1).clamp(0, 603);
+        } catch (_) {}
+      }
+      if (!mounted) return;
+      setState(() {
+        _firstAyahUQ = uq;
+        _firstPageIndex = pageIndex;
+        _loadingTafsir = false;
+      });
+    });
+  }
+
+  Future<void> _toggleFav() async {
+    final favs = await sl<FavoritesService>().toggle(widget.surahNumber);
+    if (!mounted) return;
+    setState(() => _isFav = favs.contains(widget.surahNumber));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final info = QuranLibrary().getSurahInfo(surahNumber: surahNumber - 1);
+    final info = QuranLibrary().getSurahInfo(surahNumber: widget.surahNumber - 1);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(title: Text(info.name)),
+      appBar: AppBar(
+        title: Text(info.name),
+        actions: [
+          IconButton(
+            onPressed: _toggleFav,
+            icon: SvgPicture.asset(_isFav ? AppAssets.icStarGreen : AppAssets.icStarGray, width: 22, height: 22),
+            tooltip: _isFav ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة',
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _HeaderCard(surahNumber: surahNumber, title: info.name),
+          _HeaderCard(surahNumber: widget.surahNumber, title: info.name),
           const SizedBox(height: 16),
           _PrimaryAction(
             label: 'القراءة',
@@ -28,17 +84,32 @@ class SurahDetailsPage extends StatelessWidget {
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(surahNumber)),
+                  builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(widget.surahNumber)),
                 ),
               );
             },
           ),
           const SizedBox(height: 16),
-          _InfoTile(title: 'رقم السورة', value: '$surahNumber'),
+          _InfoTile(title: 'رقم السورة', value: '${widget.surahNumber}'),
           const Divider(height: 1, color: FigmaPalette.divider),
           _InfoTile(title: 'الاسم', value: info.name),
           const Divider(height: 1, color: FigmaPalette.divider),
-          // ملاحظات: يمكن توسيع التفاصيل (عدد الآيات/مكية-مدنية) عند توفر API دقيق من quran_library
+          const SizedBox(height: 16),
+          Text('التفسير', style: FigmaTypography.title18(color: Theme.of(context).colorScheme.onSurface)),
+          const SizedBox(height: 12),
+          if (_loadingTafsir)
+            const Center(child: CircularProgressIndicator())
+          else if (_firstAyahUQ != null && _firstPageIndex != null)
+            SizedBox(
+              height: 360,
+              child: TafsirPagesBuild(
+                pageIndex: _firstPageIndex!,
+                ayahUQNumber: _firstAyahUQ!,
+                isDark: isDark,
+              ),
+            )
+          else
+            Text('تعذّر تحميل التفسير حاليًا', style: FigmaTypography.body13(color: Theme.of(context).hintColor)),
         ],
       ),
     );

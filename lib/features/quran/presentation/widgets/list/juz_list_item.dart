@@ -33,7 +33,7 @@ class JuzListItem extends StatelessWidget {
               ),
             ),
             Icon(
-              Directionality.of(context) == TextDirection.rtl ? Icons.chevron_left : Icons.chevron_right,
+              Directionality.of(context) == TextDirection.rtl ? Icons.chevron_right : Icons.chevron_left,
               color: Colors.grey,
             ),
           ],
@@ -73,7 +73,7 @@ class HizbListItem extends StatelessWidget {
               ),
             ),
             Icon(
-              Directionality.of(context) == TextDirection.rtl ? Icons.chevron_left : Icons.chevron_right,
+              Directionality.of(context) == TextDirection.rtl ? Icons.chevron_right : Icons.chevron_left,
               color: Colors.grey,
             ),
           ],
