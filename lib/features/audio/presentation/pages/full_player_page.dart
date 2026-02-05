@@ -37,8 +37,7 @@ class FullPlayerPage extends StatelessWidget {
             final max = duration.inMilliseconds == 0 ? 1.0 : duration.inMilliseconds.toDouble();
             final val = duration.inMilliseconds == 0 ? 0.0 : pos.inMilliseconds.clamp(0, duration.inMilliseconds).toDouble();
 
-            final lang = Localizations.localeOf(context).languageCode;
-            final verseWord = lang == 'ar' ? 'آية' : 'Verse';
+            final verseWord = context.tr.aya;
             return Column(
               children: [
                 // Green header with background

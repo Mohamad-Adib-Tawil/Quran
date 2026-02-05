@@ -6,7 +6,7 @@ class HomeTabBar extends StatelessWidget implements PreferredSizeWidget {
   const HomeTabBar({super.key});
 
   @override
-  Size get preferredSize => const Size.fromHeight(kTextTabBarHeight);
+  Size get preferredSize => const Size.fromHeight(kTextTabBarHeight + 14);
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +26,7 @@ class HomeTabBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         indicatorPadding: EdgeInsets.zero,
+        labelPadding: const EdgeInsets.symmetric(vertical: 7),
         labelStyle: FigmaTypography.body15(color: Colors.white),
         unselectedLabelStyle: FigmaTypography.body15(color: scheme.primary),
         labelColor: Colors.white,

@@ -111,6 +111,9 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get aya => 'آية';
+
+  @override
   String get madani => 'مدنية';
 
   @override

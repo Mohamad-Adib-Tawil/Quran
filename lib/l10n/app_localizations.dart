@@ -290,6 +290,12 @@ abstract class AppLocalizations {
   /// **'الآية {ayah}'**
   String ayahNumber(Object ayah);
 
+  /// No description provided for @aya.
+  ///
+  /// In ar, this message translates to:
+  /// **'آية'**
+  String get aya;
+
   /// No description provided for @madani.
   ///
   /// In ar, this message translates to:

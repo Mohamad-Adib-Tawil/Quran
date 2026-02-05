@@ -142,7 +142,7 @@ class MiniAudioPlayer extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
-                                      '${isMadani ? t.madani : t.makki} • $verses آية',
+                                      '${isMadani ? t.madani : t.makki} • $verses ${t.aya}',
                                       style: Theme.of(context).textTheme.bodySmall,
                                       textAlign: TextAlign.right,
                                     ),
