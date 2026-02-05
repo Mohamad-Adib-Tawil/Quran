@@ -18,21 +18,24 @@ class JuzListItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
           children: [
-            _Pill(label: '${t.juzName} $index'),
+            _Pill(label: '$index'),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${t.juzName} $index', style: FigmaTypography.body15(color: Theme.of(context).colorScheme.onSurface)),
-                  if (subtitle != null) ...[
+                  Text(t.juzName, style: FigmaTypography.body15(color: Theme.of(context).colorScheme.onSurface)),
+                  if (subtitle != null && !subtitle!.contains(t.juzName)) ...[
                     const SizedBox(height: 4),
                     Text(subtitle!, style: FigmaTypography.caption12(color: Theme.of(context).hintColor), maxLines: 1, overflow: TextOverflow.ellipsis),
                   ],
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.grey),
+            Icon(
+              Directionality.of(context) == TextDirection.rtl ? Icons.chevron_left : Icons.chevron_right,
+              color: Colors.grey,
+            ),
           ],
         ),
       ),
@@ -55,21 +58,24 @@ class HizbListItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
           children: [
-            _Pill(label: '${t.hizbName} $index'),
+            _Pill(label: '$index'),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${t.hizbName} $index', style: FigmaTypography.body15(color: Theme.of(context).colorScheme.onSurface)),
-                  if (subtitle != null) ...[
+                  Text(t.hizbName, style: FigmaTypography.body15(color: Theme.of(context).colorScheme.onSurface)),
+                  if (subtitle != null && !subtitle!.contains(t.hizbName)) ...[
                     const SizedBox(height: 4),
                     Text(subtitle!, style: FigmaTypography.caption12(color: Theme.of(context).hintColor), maxLines: 1, overflow: TextOverflow.ellipsis),
                   ],
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: Colors.grey),
+            Icon(
+              Directionality.of(context) == TextDirection.rtl ? Icons.chevron_left : Icons.chevron_right,
+              color: Colors.grey,
+            ),
           ],
         ),
       ),

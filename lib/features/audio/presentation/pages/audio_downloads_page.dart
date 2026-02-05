@@ -159,12 +159,11 @@ class _NotDownloadedTab extends StatelessWidget {
             return ListTile(
               title: Text('${info.name} (${s.toString().padLeft(3, '0')})'),
               subtitle: downloading ? LinearProgressIndicator(value: progress) : null,
-              trailing: ElevatedButton.icon(
-                onPressed: downloading
-                    ? null
-                    : () => context.read<AudioDownloadCubit>().download(s),
-                icon: SvgPicture.asset(AppAssets.icDownloadGreen, width: 18, height: 18),
-                label: Text(downloading ? '${(progress * 100).toStringAsFixed(0)}%' : t.download),
+              trailing: IconButton(
+                onPressed:
+                    downloading ? null : () => context.read<AudioDownloadCubit>().download(s),
+                icon: SvgPicture.asset(AppAssets.icDownloadGreen, width: 20, height: 20),
+                tooltip: t.download,
               ),
             );
           },

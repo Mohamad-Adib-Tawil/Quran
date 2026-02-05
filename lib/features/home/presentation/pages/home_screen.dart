@@ -129,10 +129,6 @@ class _HomeViewState extends State<_HomeView> {
                   icon: SvgPicture.asset(AppAssets.icSettingsGreen, width: 22, height: 22),
                   tooltip: t.settings,
                 ),
-                IconButton(
-                  onPressed: () {},
-                  icon: SvgPicture.asset(AppAssets.icMenu, width: 22, height: 22),
-                ),
               ],
             ),
             if (_lastRead != null)
