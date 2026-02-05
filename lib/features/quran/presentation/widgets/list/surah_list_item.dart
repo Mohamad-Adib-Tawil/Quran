@@ -71,11 +71,24 @@ class SurahListItem extends StatelessWidget {
                           height: 22,
                           child: Align(
                             alignment: Alignment.centerLeft,
-                            child: SvgPicture.asset(
-                              isFavorite ? AppAssets.icStarGreen : AppAssets.icStarGray,
-                              width: 20,
-                              height: 20,
-                            ),
+                            child: onFavoriteToggle == null
+                                ? SvgPicture.asset(
+                                    isFavorite ? AppAssets.icStarGreen : AppAssets.icStarGray,
+                                    width: 20,
+                                    height: 20,
+                                  )
+                                : InkWell(
+                                    onTap: onFavoriteToggle,
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(2),
+                                      child: SvgPicture.asset(
+                                        isFavorite ? AppAssets.icStarGreen : AppAssets.icStarGray,
+                                        width: 20,
+                                        height: 20,
+                                      ),
+                                    ),
+                                  ),
                           ),
                         ),
                       ],
