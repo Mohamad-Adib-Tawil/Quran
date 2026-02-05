@@ -31,28 +31,34 @@ class _MainShellState extends State<MainShell> {
         mainAxisSize: MainAxisSize.min,
         children: [
           const MiniAudioPlayer(),
-          NavigationBar(
-            selectedIndex: _index,
-            onDestinationSelected: (i) => setState(() => _index = i),
-            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-            indicatorColor: Colors.transparent,
-            destinations: [
-              NavigationDestination(
-                icon: SvgPicture.asset(AppAssets.icStarGray, width: 24, height: 24),
-                selectedIcon: SvgPicture.asset(AppAssets.icStarGreen, width: 24, height: 24),
-                label: t.favoritesTitle,
-              ),
-              NavigationDestination(
-                icon: SvgPicture.asset(AppAssets.icDownloadGray, width: 24, height: 24),
-                selectedIcon: SvgPicture.asset(AppAssets.icDownloadGreen, width: 24, height: 24),
-                label: t.manageAudio,
-              ),
-              NavigationDestination(
-                icon: SvgPicture.asset(AppAssets.icQuranGray, width: 24, height: 24),
-                selectedIcon: SvgPicture.asset(AppAssets.icQuranGreen, width: 24, height: 24),
-                label: t.appTitle,
-              ),
-            ],
+          NavigationBarTheme(
+            data: NavigationBarThemeData(
+              indicatorColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              overlayColor: MaterialStatePropertyAll(Colors.transparent),
+            ),
+            child: NavigationBar(
+              selectedIndex: _index,
+              onDestinationSelected: (i) => setState(() => _index = i),
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              destinations: [
+                NavigationDestination(
+                  icon: SvgPicture.asset(AppAssets.icStarGray, width: 24, height: 24),
+                  selectedIcon: SvgPicture.asset(AppAssets.icStarGreen, width: 24, height: 24),
+                  label: t.favoritesTitle,
+                ),
+                NavigationDestination(
+                  icon: SvgPicture.asset(AppAssets.icDownloadGray, width: 24, height: 24),
+                  selectedIcon: SvgPicture.asset(AppAssets.icDownloadGreen, width: 24, height: 24),
+                  label: t.manageAudio,
+                ),
+                NavigationDestination(
+                  icon: SvgPicture.asset(AppAssets.icQuranGray, width: 24, height: 24),
+                  selectedIcon: SvgPicture.asset(AppAssets.icQuranGreen, width: 24, height: 24),
+                  label: t.appTitle,
+                ),
+              ],
+            ),
           ),
         ],
       ),
