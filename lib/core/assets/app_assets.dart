@@ -29,6 +29,8 @@ class AppAssets {
   static const String icLanguage = 'assets/icons/language-exchange 1.svg';
   static const String icVectorGreen = 'assets/icons/Vector_green.svg';
   static const String icBookmark = 'assets/figma/icons/bookmark.svg';
+  static const String icBookmarkSaved = 'assets/icons/bookmarkـsaved.svg';
+  static const String icLastAya = 'assets/icons/last_aya_icon.svg';
 
   // Images (PNG/JPG)
   static const String imgPlayerBgMini = 'assets/images/background_player_mini.png';
