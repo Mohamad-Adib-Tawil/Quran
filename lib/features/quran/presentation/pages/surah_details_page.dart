@@ -87,7 +87,7 @@ class _SurahDetailsPageState extends State<SurahDetailsPage> {
             iconPath: AppAssets.icQuranGreen,
             onTap: () {
               // ✅ Sync mini player with opened surah
-              unawaited(context.read<AudioCubit>().selectSurah(widget.surahNumber));
+              context.read<AudioCubit>().selectSurah(widget.surahNumber);
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(widget.surahNumber)),

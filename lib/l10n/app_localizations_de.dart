@@ -196,4 +196,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get noSurahSelected => 'Keine Sure ausgewählt';
+
+  @override
+  String get ready => 'Bereit';
 }

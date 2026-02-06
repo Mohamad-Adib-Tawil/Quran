@@ -59,5 +59,6 @@
   "errorOccurred": "Ein Fehler ist aufgetreten",
   "back": "Zurück",
   "preparing": "Vorbereitung...",
-  "noSurahSelected": "Keine Sure ausgewählt"
+  "noSurahSelected": "Keine Sure ausgewählt",
+  "ready": "Bereit"
 }

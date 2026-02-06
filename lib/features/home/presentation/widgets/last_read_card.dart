@@ -28,8 +28,7 @@ class LastReadCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         // keep audio context in sync with last read
-        // Fire-and-forget: ensures previous playback is stopped and state reset
-        unawaited(context.read<AudioCubit>().selectSurah(surah));
+        context.read<AudioCubit>().selectSurah(surah);
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(surah)),
