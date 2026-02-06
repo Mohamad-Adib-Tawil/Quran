@@ -34,7 +34,7 @@ class AudioSessionManager {
   Future<void> restoreIfNeeded(AudioCubit cubit) async {
     final lastSurah = _prefs.getInt(_keyLastSurah) ?? 1; // الفاتحة افتراضيًا
     // عيّن السورة الحالية فقط (بدون تشغيل)
-    cubit.selectSurah(lastSurah);
+    unawaited(cubit.selectSurah(lastSurah));
     // يمكن لاحقًا استرجاع الموضع أو التشغيل إن احتجنا
   }
 

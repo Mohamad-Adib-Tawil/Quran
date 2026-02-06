@@ -49,7 +49,7 @@ class _SurahAutoSyncState extends State<SurahAutoSync> {
       _ignoreSurah1Until = DateTime.now().add(const Duration(seconds: 4));
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        context.read<AudioCubit>().selectSurah(initSurah);
+        unawaited(context.read<AudioCubit>().selectSurah(initSurah));
       });
     }
 
@@ -104,7 +104,7 @@ class _SurahAutoSyncState extends State<SurahAutoSync> {
         if (kDebugMode) {
           debugPrint('[SurahAutoSync] apply: selectSurah($surah)');
         }
-        context.read<AudioCubit>().selectSurah(surah);
+        unawaited(context.read<AudioCubit>().selectSurah(surah));
       }
     } catch (_) {
       // ignore

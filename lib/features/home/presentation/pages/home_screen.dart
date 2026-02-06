@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -197,7 +199,7 @@ class _HomeViewState extends State<_HomeView> {
                             onTap: () {
                               if (!ctx.mounted) return;
                               _setLastRead(s, 1);
-                              context.read<AudioCubit>().selectSurah(s);
+                              unawaited(context.read<AudioCubit>().selectSurah(s));
                               Navigator.of(ctx).push(
                                 MaterialPageRoute(
                                   builder: (_) => SurahListPage(
