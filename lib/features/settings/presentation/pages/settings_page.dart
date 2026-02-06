@@ -21,8 +21,10 @@ class SettingsPage extends StatelessWidget {
           return ListView(
             padding: const EdgeInsets.symmetric(vertical: 8),
             children: [
-              _SectionTitle(title: t.appearance, iconSvg: AppAssets.icSettingsGreen)
-                  ,
+              _SectionTitle(
+                title: t.appearance,
+                iconSvg: AppAssets.icSettingsGreen,
+              ),
               RadioListTile<ThemeMode>(
                 title: Text(t.light),
                 value: ThemeMode.light,
@@ -42,8 +44,7 @@ class SettingsPage extends StatelessWidget {
                 onChanged: (v) => context.read<SettingsCubit>().setTheme(v!),
               ),
               const Divider(height: 24),
-              _SectionTitle(title: t.language, iconSvg: AppAssets.icLanguage)
-                  ,
+              _SectionTitle(title: t.language, iconSvg: AppAssets.icLanguage),
               RadioListTile<String>(
                 title: Text(t.arabic),
                 value: 'ar',
@@ -57,8 +58,7 @@ class SettingsPage extends StatelessWidget {
                 onChanged: (v) => context.read<SettingsCubit>().setLocale(v!),
               ),
               const Divider(height: 24),
-              _SectionTitle(title: t.fontSize)
-                  ,
+              _SectionTitle(title: t.fontSize),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -73,15 +73,45 @@ class SettingsPage extends StatelessWidget {
                         onChanged: null, // disabled temporarily
                       ),
                     ),
-                    Row(children: [const Text('A+'), const SizedBox(width: 8), Chip(label: Text(t.soon))])
+                    Row(
+                      children: [
+                        const Text('A+'),
+                        const SizedBox(width: 8),
+                        Chip(label: Text(t.soon)),
+                      ],
+                    ),
                   ],
                 ),
               ),
               const Divider(height: 24),
-              SwitchListTile(
-                title: Text(t.showVerseEndSymbol),
-                value: state.verseEndSymbol,
-                onChanged: (v) => context.read<SettingsCubit>().toggleVerseEndSymbol(v),
+              // SwitchListTile(
+              //   title: Text(t.showVerseEndSymbol),
+              //   value: state.verseEndSymbol,
+              //   onChanged: (v) => context.read<SettingsCubit>().toggleVerseEndSymbol(v),
+              // ),
+              const SizedBox(height: 24),
+              Container(
+                height: 150,
+                width: 150,
+                decoration: BoxDecoration(
+                  image: const DecorationImage(
+                    image: AssetImage(
+                      "assets/home/صورة الشيخ احمد كراسي الشخصية.png",
+                    ),
+                    fit: BoxFit.contain,
+                  ),
+                  shape: BoxShape.circle,
+                  // color: FigmaPalette.primary.withOpacity(0.1),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                "الشيخ أحمد كراسي رحمه الله",
+                textAlign: TextAlign.center,
+                style: FigmaTypography.body15(
+                  color: FigmaPalette.textDark,
+                  // fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 24),
             ],
@@ -107,7 +137,10 @@ class _SectionTitle extends StatelessWidget {
             SvgPicture.asset(iconSvg!, width: 20, height: 20),
             const SizedBox(width: 8),
           ],
-          Text(title, style: FigmaTypography.body15(color: FigmaPalette.textDark)),
+          Text(
+            title,
+            style: FigmaTypography.body15(color: FigmaPalette.textDark),
+          ),
         ],
       ),
     );

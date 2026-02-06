@@ -49,6 +49,8 @@
 		<array>
 			<string>audio</string>
 		</array>
+		<key>NSAppleMusicUsageDescription</key>
+		<string>يستخدم هذا التطبيق الصوت لتشغيل تلاوة القرآن الكريم في الخلفية</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>

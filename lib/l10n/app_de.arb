@@ -55,5 +55,9 @@
   "previous": "Zurück",
   "pause": "Pause",
   "stop": "Stopp",
-  "next": "Weiter"
+  "next": "Weiter",
+  "errorOccurred": "Ein Fehler ist aufgetreten",
+  "back": "Zurück",
+  "preparing": "Vorbereitung...",
+  "noSurahSelected": "Keine Sure ausgewählt"
 }

@@ -55,5 +55,9 @@
   "previous": "السابق",
   "pause": "إيقاف مؤقت",
   "stop": "إيقاف",
-  "next": "التالي"
+  "next": "التالي",
+  "errorOccurred": "حدث خطأ",
+  "back": "رجوع",
+  "preparing": "جاري التحضير...",
+  "noSurahSelected": "لم يتم اختيار سورة"
 }

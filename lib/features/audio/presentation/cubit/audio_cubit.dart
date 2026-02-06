@@ -25,6 +25,13 @@ class AudioCubit extends Cubit<AudioState> {
   }
 
   void _bind() {
+    // ✅ Cancel any existing subscriptions before creating new ones
+    // Note: Not awaiting here to avoid making _bind async (called from constructor)
+    _posSub?.cancel();
+    _durSub?.cancel();
+    _stateSub?.cancel();
+    _dlSub?.cancel();
+    
     _posSub = _repo.positionStream.listen((pos) {
       emit(state.copyWith(position: pos));
     });
@@ -41,7 +48,23 @@ class AudioCubit extends Cubit<AudioState> {
     });
   }
 
+  /// ✅ Cancel all active subscriptions to prevent memory leaks
+  Future<void> _cancelSubscriptions() async {
+    await _posSub?.cancel();
+    await _durSub?.cancel();
+    await _stateSub?.cancel();
+    await _dlSub?.cancel();
+    _posSub = null;
+    _durSub = null;
+    _stateSub = null;
+    _dlSub = null;
+  }
+
   Future<String> prepareSurah(int surah, {Duration? initialPosition, bool cache = true}) async {
+    // ✅ Cancel download subscription when preparing a new surah
+    await _dlSub?.cancel();
+    _dlSub = null;
+    
     final url = await _repo.prepareSurah(surah: surah, initialPosition: initialPosition, cache: cache);
     emit(state.copyWith(url: url, currentSurah: surah, position: initialPosition ?? Duration.zero));
     return url;
@@ -61,32 +84,58 @@ class AudioCubit extends Cubit<AudioState> {
     emit(state.copyWith(url: url));
   }
 
-  Future<void> play() => _repo.play();
+  Future<void> play() async {
+    try {
+      await _repo.play();
+    } catch (e) {
+      emit(state.copyWith(
+        phase: AudioPhase.error,
+        isPlaying: false,
+        errorMessage: 'فشل تشغيل الصوت: ${e.toString()}',
+      ));
+      rethrow;
+    }
+  }
   Future<void> pause() => _repo.pause();
   Future<void> stop() => _repo.stop();
   Future<void> seek(Duration position) => _repo.seek(position);
 
   Future<void> toggle() async {
-    if (state.isPlaying) {
-      await pause();
-      emit(state.copyWith(phase: AudioPhase.paused));
-      return;
+    try {
+      if (state.isPlaying) {
+        await pause();
+        emit(state.copyWith(phase: AudioPhase.paused));
+        return;
+      }
+      if (state.url == null && state.currentSurah != null) {
+        // لا يوجد مصدر مُحمّل: شغّل مباشرة من كتالوج JSON (بث)
+        await playFromCatalog(state.currentSurah!);
+        return;
+      }
+      await play();
+      emit(state.copyWith(phase: AudioPhase.playing));
+    } catch (e) {
+      emit(state.copyWith(
+        phase: AudioPhase.error,
+        isPlaying: false,
+        errorMessage: 'خطأ في التبديل: ${e.toString()}',
+      ));
     }
-    if (state.url == null && state.currentSurah != null) {
-      // لا يوجد مصدر مُحمّل: شغّل مباشرة من كتالوج JSON (بث)
-      await playFromCatalog(state.currentSurah!);
-      return;
-    }
-    await play();
-    emit(state.copyWith(phase: AudioPhase.playing));
   }
 
   // New API: unified play that auto-downloads if needed
   Future<void> playSurah(int surah, {Duration? from}) async {
     _lastRequestedSurah = surah;
     emit(state.copyWith(currentSurah: surah, errorMessage: null));
+    
     try {
+      // ✅ Validate input
+      if (surah < 1 || surah > 114) {
+        throw ArgumentError('رقم السورة غير صحيح: $surah');
+      }
+      
       final hasFile = await _downloadRepo.isDownloaded(surah);
+      
       // Honor autoDownload preference
       if (!hasFile) {
         if (state.autoDownload) {
@@ -98,12 +147,22 @@ class AudioCubit extends Cubit<AudioState> {
           return;
         }
       }
+      
       emit(state.copyWith(phase: AudioPhase.preparing));
       await prepareSurah(surah, initialPosition: from, cache: true);
       await play();
       emit(state.copyWith(phase: AudioPhase.playing));
+      
+    } on ArgumentError catch (e) {
+      emit(state.copyWith(
+        phase: AudioPhase.error,
+        errorMessage: e.message,
+      ));
     } catch (e) {
-      emit(state.copyWith(phase: AudioPhase.error, errorMessage: e.toString()));
+      emit(state.copyWith(
+        phase: AudioPhase.error,
+        errorMessage: 'فشل تشغيل السورة: ${e.toString()}',
+      ));
     }
   }
 
@@ -153,22 +212,48 @@ class AudioCubit extends Cubit<AudioState> {
   // Play directly from catalog JSON URL (no download). Used by Home screen.
   Future<void> playFromCatalog(int surah) async {
     try {
+      // ✅ Validate input
+      if (surah < 1 || surah > 114) {
+        throw ArgumentError('رقم السورة غير صحيح: $surah');
+      }
+      
       final url = _catalog.urlForSurah(surah);
       if (url == null) {
         throw StateError('لا يوجد رابط صوت لهذه السورة في الكتالوج');
       }
+      
+      // ✅ Validate HTTPS
+      if (!url.startsWith('https://')) {
+        throw StateError('مصدر الصوت يجب أن يكون HTTPS');
+      }
+      
       // منع أي مصدر آخر غير المسموح به
       const allowedPrefix = 'https://quran.devmmnd.com/quran-audio/';
       if (!url.startsWith(allowedPrefix)) {
         throw StateError('مصدر الصوت غير مسموح. يجب أن يبدأ بـ $allowedPrefix');
       }
+      
       emit(state.copyWith(phase: AudioPhase.preparing, errorMessage: null));
       await _repo.setUrl(url);
       emit(state.copyWith(url: url, currentSurah: surah));
       await _repo.play();
       emit(state.copyWith(phase: AudioPhase.playing));
+      
+    } on ArgumentError catch (e) {
+      emit(state.copyWith(
+        phase: AudioPhase.error,
+        errorMessage: e.message,
+      ));
+    } on StateError catch (e) {
+      emit(state.copyWith(
+        phase: AudioPhase.error,
+        errorMessage: e.message,
+      ));
     } catch (e) {
-      emit(state.copyWith(phase: AudioPhase.error, errorMessage: e.toString()));
+      emit(state.copyWith(
+        phase: AudioPhase.error,
+        errorMessage: 'فشل تشغيل الصوت من الكتالوج: ${e.toString()}',
+      ));
     }
   }
 
@@ -236,12 +321,12 @@ class AudioCubit extends Cubit<AudioState> {
   }
 
   @override
-  Future<void> close() {
-    _posSub?.cancel();
-    _durSub?.cancel();
-    _stateSub?.cancel();
-    _dlSub?.cancel();
+  Future<void> close() async {
+    // ✅ Properly dispose all resources
+    await _cancelSubscriptions();
     _sleepTimerHandle?.cancel();
+    _sleepTimerHandle = null;
+    // Note: AudioRepository doesn't have dispose method, player is managed by just_audio
     return super.close();
   }
 }

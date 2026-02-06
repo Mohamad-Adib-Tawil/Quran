@@ -141,21 +141,29 @@ class MiniAudioPlayer extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // Play/Pause
-                        IconButton(
-                          iconSize: 36,
-                          color: scheme.primary,
-                          icon: state.isPlaying
-                              ? const Icon(Icons.pause_circle_filled)
-                              : SvgPicture.asset(AppAssets.icPlay, width: 36, height: 36),
-                          onPressed: () => context.read<AudioCubit>().toggle(),
-                          tooltip: state.isPlaying ? t.pause : t.play,
+                        // Play/Pause - ✅ Added Semantics
+                        Semantics(
+                          label: state.isPlaying ? t.pause : t.play,
+                          button: true,
+                          child: IconButton(
+                            iconSize: 36,
+                            color: scheme.primary,
+                            icon: state.isPlaying
+                                ? const Icon(Icons.pause_circle_filled)
+                                : SvgPicture.asset(AppAssets.icPlay, width: 36, height: 36),
+                            onPressed: () => context.read<AudioCubit>().toggle(),
+                            tooltip: state.isPlaying ? t.pause : t.play,
+                          ),
                         ),
-                        // Close button
-                        IconButton(
-                          icon: SvgPicture.asset(AppAssets.icExitGreyCross, width: 14, height: 14),
-                          onPressed: () => context.read<AudioCubit>().stop(),
-                          tooltip: t.stop,
+                        // Close button - ✅ Added Semantics
+                        Semantics(
+                          label: t.stop,
+                          button: true,
+                          child: IconButton(
+                            icon: SvgPicture.asset(AppAssets.icExitGreyCross, width: 14, height: 14),
+                            onPressed: () => context.read<AudioCubit>().stop(),
+                            tooltip: t.stop,
+                          ),
                         ),
                       ],
                     ),
