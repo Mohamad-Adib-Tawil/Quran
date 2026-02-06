@@ -43,7 +43,7 @@ class _HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<_HomeView> {
-  LastRead? _lastRead;
+  late LastRead _lastRead;
   Set<int> _favorites = <int>{};
   bool _searching = false;
   late final TextEditingController _searchCtrl;
@@ -51,6 +51,7 @@ class _HomeViewState extends State<_HomeView> {
   @override
   void initState() {
     super.initState();
+    // ✅ getLastRead() now always returns a value (defaults to Al-Fatiha)
     _lastRead = sl<LastReadService>().getLastRead();
     // Load favorites once on start
     _favorites = sl<FavoritesService>().getFavorites().toSet();
@@ -130,16 +131,16 @@ class _HomeViewState extends State<_HomeView> {
               ],
 
             ),
-            if (_lastRead != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
-                  child: LastReadCard(
-                    surah: _lastRead!.surah,
-                    ayah: _lastRead!.ayah,
-                  ),
+            // ✅ Always show last read card (defaults to Al-Fatiha)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
+                child: LastReadCard(
+                  surah: _lastRead.surah,
+                  ayah: _lastRead.ayah,
                 ),
               ),
+            ),
             // Removed mini player from scroll; it is now persistent above the bottom navigation bar
             // Removed always-visible search field; search is toggled in AppBar now
             SliverPersistentHeader(

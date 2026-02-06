@@ -9,6 +9,8 @@ import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
 import 'package:quran_app/core/di/service_locator.dart';
 import 'package:quran_app/services/favorites_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
 
 class SurahDetailsPage extends StatefulWidget {
   final int surahNumber; // 1-based
@@ -82,6 +84,8 @@ class _SurahDetailsPageState extends State<SurahDetailsPage> {
             label: 'القراءة',
             iconPath: AppAssets.icQuranGreen,
             onTap: () {
+              // ✅ Sync mini player with opened surah
+              context.read<AudioCubit>().selectSurah(widget.surahNumber);
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(widget.surahNumber)),

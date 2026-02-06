@@ -18,10 +18,13 @@ class LastReadService {
     await _prefs.setInt(_kAyah, ayah);
   }
 
-  LastRead? getLastRead() {
+  LastRead getLastRead() {
     final s = _prefs.getInt(_kSurah);
     final a = _prefs.getInt(_kAyah);
-    if (s == null || a == null) return null;
+    // ✅ Default to Al-Fatiha (Surah 1, Ayah 1) if no last read exists
+    if (s == null || a == null) {
+      return const LastRead(surah: 1, ayah: 1);
+    }
     return LastRead(surah: s, ayah: a);
   }
 
