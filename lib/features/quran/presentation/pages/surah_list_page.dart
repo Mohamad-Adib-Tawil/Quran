@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/features/audio/presentation/widgets/mini_player.dart';
-import 'package:quran_app/features/audio/presentation/widgets/surah_auto_sync.dart';
 import 'package:quran_app/features/quran/presentation/navigation/quran_open_target.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 
@@ -143,16 +142,13 @@ class _SurahListPageState extends State<SurahListPage> {
               sajdaNameColor: primary,
             ),
       ),
-      bottomNavigationBar: SurahAutoSync(
-        // ✅ Prevent transient resets (often to Al-Fatiha) from overriding
-        // the surah we navigated to.
-        initialSurah: widget.openTarget?.type == QuranOpenTargetType.surah
-            ? widget.openTarget?.number
-            : null,
-        child: const Padding(
-          padding: EdgeInsets.only(bottom: 40, left: 20, right: 20),
-          child: MiniAudioPlayer(debugTag: 'SurahListPage'),
-        ),
+      // ✅ IMPORTANT: Do NOT use SurahAutoSync here.
+      // QuranLibrary().currentAndLastSurahNumber is tied to quran_library's internal AudioCtrl
+      // (not the currently displayed surah), and can transiently reset to Al-Fatiha (1),
+      // which would override the user's selected surah in our AudioCubit.
+      bottomNavigationBar: const Padding(
+        padding: EdgeInsets.only(bottom: 40, left: 20, right: 20),
+        child: MiniAudioPlayer(debugTag: 'SurahListPage'),
       ),
       // floatingActionButton: FloatingActionButton.extended(
       //   onPressed: () {
