@@ -140,8 +140,8 @@ class AudioCubit extends Cubit<AudioState> {
         return;
       }
       if (state.url == null && state.currentSurah != null) {
-        // لا يوجد مصدر مُحمّل: شغّل مباشرة من كتالوج JSON (بث)
-        await playFromCatalog(state.currentSurah!);
+        // ✅ No prepared source yet. Use unified flow so auto-download works.
+        await playSurah(state.currentSurah!);
         return;
       }
       await play();
