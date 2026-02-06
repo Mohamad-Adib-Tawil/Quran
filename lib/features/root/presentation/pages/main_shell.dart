@@ -30,7 +30,8 @@ class _MainShellState extends State<MainShell> {
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const MiniAudioPlayer(),
+          // ✅ Hide mini player when idle (only show when actively playing)
+          const MiniAudioPlayer(hideWhenIdle: true),
           NavigationBarTheme(
             data: NavigationBarThemeData(
               indicatorColor: Colors.transparent,

@@ -11,17 +11,28 @@ import '../cubit/audio_cubit.dart';
 import '../cubit/audio_state.dart';
 
 class MiniAudioPlayer extends StatelessWidget {
-  const MiniAudioPlayer({super.key});
+  /// If true, shows the player only when actively playing/paused (not idle).
+  /// If false, shows whenever a surah is selected.
+  final bool hideWhenIdle;
+
+  const MiniAudioPlayer({super.key, this.hideWhenIdle = false});
 
   @override
   Widget build(BuildContext context) {
     final t = context.tr;
     return BlocBuilder<AudioCubit, AudioState>(
       builder: (context, state) {
-        // ✅ Show mini player if a surah is selected (even if not playing)
-        // Hide only if no surah selected at all
-        if (state.currentSurah == null && state.url == null) {
-          return const SizedBox.shrink();
+        // ✅ Different behavior based on hideWhenIdle flag
+        if (hideWhenIdle) {
+          // For MainShell: hide if no surah OR if idle (not playing)
+          if ((state.currentSurah == null && state.url == null) || state.phase == AudioPhase.idle) {
+            return const SizedBox.shrink();
+          }
+        } else {
+          // For SurahListPage: show whenever a surah is selected
+          if (state.currentSurah == null && state.url == null) {
+            return const SizedBox.shrink();
+          }
         }
 
         // Downloading phase
