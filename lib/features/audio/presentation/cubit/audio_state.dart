@@ -5,6 +5,7 @@ enum AudioPhase { idle, downloading, preparing, playing, paused, error }
 enum RepeatMode { one, off, next }
 
 class AudioState extends Equatable {
+  static const Object _noChange = Object();
   final String? url;
   final bool isPlaying;
   final Duration position;
@@ -57,35 +58,38 @@ class AudioState extends Equatable {
         sleepTimer: null,
       );
 
+  /// copyWith supports clearing nullable fields by passing explicit `null`.
+  /// For nullable fields we use a sentinel value to differentiate between
+  /// "no change" and "set to null".
   AudioState copyWith({
-    String? url,
+    Object? url = _noChange,
     bool? isPlaying,
     Duration? position,
-    Duration? duration,
-    int? currentSurah,
+    Object? duration = _noChange,
+    Object? currentSurah = _noChange,
     bool? isBuffering,
     AudioPhase? phase,
     double? downloadProgress,
-    String? errorMessage,
+    Object? errorMessage = _noChange,
     RepeatMode? repeatMode,
     double? speed,
     bool? autoDownload,
-    Duration? sleepTimer,
+    Object? sleepTimer = _noChange,
   }) =>
       AudioState(
-        url: url ?? this.url,
+        url: url == _noChange ? this.url : url as String?,
         isPlaying: isPlaying ?? this.isPlaying,
         position: position ?? this.position,
-        duration: duration ?? this.duration,
-        currentSurah: currentSurah ?? this.currentSurah,
+        duration: duration == _noChange ? this.duration : duration as Duration?,
+        currentSurah: currentSurah == _noChange ? this.currentSurah : currentSurah as int?,
         isBuffering: isBuffering ?? this.isBuffering,
         phase: phase ?? this.phase,
         downloadProgress: downloadProgress ?? this.downloadProgress,
-        errorMessage: errorMessage ?? this.errorMessage,
+        errorMessage: errorMessage == _noChange ? this.errorMessage : errorMessage as String?,
         repeatMode: repeatMode ?? this.repeatMode,
         speed: speed ?? this.speed,
         autoDownload: autoDownload ?? this.autoDownload,
-        sleepTimer: sleepTimer ?? this.sleepTimer,
+        sleepTimer: sleepTimer == _noChange ? this.sleepTimer : sleepTimer as Duration?,
       );
 
   @override
