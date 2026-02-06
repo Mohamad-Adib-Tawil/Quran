@@ -143,8 +143,13 @@ class _SurahListPageState extends State<SurahListPage> {
               sajdaNameColor: primary,
             ),
       ),
-      bottomNavigationBar: const SurahAutoSync(
-        child: Padding(
+      bottomNavigationBar: SurahAutoSync(
+        // ✅ Prevent transient resets (often to Al-Fatiha) from overriding
+        // the surah we navigated to.
+        initialSurah: widget.openTarget?.type == QuranOpenTargetType.surah
+            ? widget.openTarget?.number
+            : null,
+        child: const Padding(
           padding: EdgeInsets.only(bottom: 40, left: 20, right: 20),
           child: MiniAudioPlayer(),
         ),
