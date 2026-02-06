@@ -32,7 +32,10 @@ class _SvgChipIcon extends StatelessWidget {
       child: Container(
         width: 36,
         height: 36,
-        decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
         alignment: Alignment.center,
         child: SvgPicture.asset(svgAsset, width: 18, height: 18),
       ),
@@ -68,24 +71,28 @@ class _FavoritesPageState extends State<FavoritesPage> {
       appBar: AppBar(
         title: Text(t.favoritesTitle),
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: SvgPicture.asset(AppAssets.icSearch, width: 22, height: 22),
-            tooltip: t.searchSurahHint,
-          ),
+          // IconButton(
+          //   onPressed: () {},
+          //   icon: SvgPicture.asset(AppAssets.icSearch, width: 22, height: 22),
+          //   tooltip: t.searchSurahHint,
+          // ),
           IconButton(
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SettingsPage()),
-              );
+              Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const SettingsPage()));
             },
-            icon: SvgPicture.asset(AppAssets.icSettingsGreen, width: 22, height: 22),
+            icon: SvgPicture.asset(
+              AppAssets.icSettingsGreen,
+              width: 22,
+              height: 22,
+            ),
             tooltip: t.settings,
           ),
-          IconButton(
-            onPressed: () {},
-            icon: SvgPicture.asset(AppAssets.icMenu, width: 22, height: 22),
-          ),
+          // IconButton(
+          //   onPressed: () {},
+          //   icon: SvgPicture.asset(AppAssets.icMenu, width: 22, height: 22),
+          // ),
         ],
       ),
       body: _favorites.isEmpty
@@ -113,7 +120,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   onMute: () => context.read<AudioCubit>().pause(),
                   trailing: IconButton(
                     tooltip: t.removeFromFavorites,
-                    icon: SvgPicture.asset(AppAssets.icStarGreen, width: 24, height: 24),
+                    icon: SvgPicture.asset(
+                      AppAssets.icStarGreen,
+                      width: 24,
+                      height: 24,
+                    ),
                     onPressed: () => _toggle(s),
                   ),
                 );
@@ -129,7 +140,13 @@ class _SurahCard extends StatelessWidget {
   final VoidCallback onPlay;
   final VoidCallback onMute;
   final Widget trailing;
-  const _SurahCard({required this.title, required this.subtitle, required this.onPlay, required this.onMute, required this.trailing});
+  const _SurahCard({
+    required this.title,
+    required this.subtitle,
+    required this.onPlay,
+    required this.onMute,
+    required this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -137,22 +154,38 @@ class _SurahCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Row(
         children: [
           _ChipIcon(icon: Icons.volume_off, color: Colors.grey, onTap: onMute),
           const SizedBox(width: 8),
-          _SvgChipIcon(svgAsset: AppAssets.icPlay, color: FigmaPalette.primary, onTap: onPlay),
+          _SvgChipIcon(
+            svgAsset: AppAssets.icPlay,
+            color: FigmaPalette.primary,
+            onTap: onPlay,
+          ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(title, style: FigmaTypography.body15(color: FigmaPalette.textDark)),
+                Text(
+                  title,
+                  style: FigmaTypography.body15(color: FigmaPalette.textDark),
+                ),
                 const SizedBox(height: 4),
-                Text(subtitle, style: FigmaTypography.caption12(color: Colors.black54)),
+                Text(
+                  subtitle,
+                  style: FigmaTypography.caption12(color: Colors.black54),
+                ),
               ],
             ),
           ),
@@ -178,7 +211,10 @@ class _ChipIcon extends StatelessWidget {
       child: Container(
         width: 36,
         height: 36,
-        decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
         child: Icon(icon, color: color),
       ),
     );

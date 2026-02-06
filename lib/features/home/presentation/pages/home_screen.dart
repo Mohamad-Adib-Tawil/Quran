@@ -19,7 +19,6 @@ import '../cubit/home_state.dart';
 import 'package:quran_app/services/favorites_service.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
- 
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -32,8 +31,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
- 
 
 class _HomeView extends StatefulWidget {
   const _HomeView();
@@ -108,7 +105,10 @@ class _HomeViewState extends State<_HomeView> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(12, 8, 12, 6),
-                  child: LastReadCard(surah: _lastRead!.surah, ayah: _lastRead!.ayah),
+                  child: LastReadCard(
+                    surah: _lastRead!.surah,
+                    ayah: _lastRead!.ayah,
+                  ),
                 ),
               ),
             // Removed mini player from scroll; it is now persistent above the bottom navigation bar
@@ -131,7 +131,8 @@ class _HomeViewState extends State<_HomeView> {
                         padding: EdgeInsets.zero,
                         primary: true,
                         itemCount: numbers.length,
-                        separatorBuilder: (context, index) => const ListDivider(),
+                        separatorBuilder: (context, index) =>
+                            const ListDivider(),
                         itemBuilder: (ctx, i) {
                           final s = numbers[i];
                           String titleAr;
@@ -141,13 +142,19 @@ class _HomeViewState extends State<_HomeView> {
                             final m = meta[s - 1];
                             titleAr = m.nameArabic;
                             titleLatin = m.nameEnglish;
-                            final isMadani = m.revelation.toLowerCase().contains('mad');
+                            final isMadani = m.revelation
+                                .toLowerCase()
+                                .contains('mad');
                             final revLocalized = isMadani ? t.madani : t.makki;
-                            subtitleAr = '$revLocalized • ${m.verseCount} ${t.aya}';
+                            subtitleAr =
+                                '$revLocalized • ${m.verseCount} ${t.aya}';
                           } else {
-                            final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
+                            final info = QuranLibrary().getSurahInfo(
+                              surahNumber: s - 1,
+                            );
                             titleAr = info.name;
-                            titleLatin = 'Surah ${s.toString().padLeft(3, '0')}';
+                            titleLatin =
+                                'Surah ${s.toString().padLeft(3, '0')}';
                             subtitleAr = null;
                           }
                           return SurahListItem(
@@ -163,7 +170,9 @@ class _HomeViewState extends State<_HomeView> {
                               context.read<AudioCubit>().selectSurah(s);
                               Navigator.of(ctx).push(
                                 MaterialPageRoute(
-                                  builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(s)),
+                                  builder: (_) => SurahListPage(
+                                    openTarget: QuranOpenTarget.surah(s),
+                                  ),
                                 ),
                               );
                             },
@@ -171,7 +180,8 @@ class _HomeViewState extends State<_HomeView> {
                               if (!ctx.mounted) return;
                               Navigator.of(ctx).push(
                                 MaterialPageRoute(
-                                  builder: (_) => SurahDetailsPage(surahNumber: s),
+                                  builder: (_) =>
+                                      SurahDetailsPage(surahNumber: s),
                                 ),
                               );
                             },
@@ -179,7 +189,8 @@ class _HomeViewState extends State<_HomeView> {
                               if (!ctx.mounted) return;
                               Navigator.of(ctx).push(
                                 MaterialPageRoute(
-                                  builder: (_) => SurahDetailsPage(surahNumber: s),
+                                  builder: (_) =>
+                                      SurahDetailsPage(surahNumber: s),
                                 ),
                               );
                             },
@@ -205,7 +216,9 @@ class _HomeViewState extends State<_HomeView> {
                       if (!ctx.mounted) return;
                       Navigator.of(ctx).push(
                         MaterialPageRoute(
-                          builder: (_) => SurahListPage(openTarget: QuranOpenTarget.juz(i + 1)),
+                          builder: (_) => SurahListPage(
+                            openTarget: QuranOpenTarget.juz(i + 1),
+                          ),
                         ),
                       );
                     },
@@ -227,7 +240,9 @@ class _HomeViewState extends State<_HomeView> {
                       if (!ctx.mounted) return;
                       Navigator.of(ctx).push(
                         MaterialPageRoute(
-                          builder: (_) => SurahListPage(openTarget: QuranOpenTarget.hizb(i + 1)),
+                          builder: (_) => SurahListPage(
+                            openTarget: QuranOpenTarget.hizb(i + 1),
+                          ),
                         ),
                       );
                     },
@@ -253,7 +268,11 @@ class _TabBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Container(
       color: Theme.of(context).colorScheme.surface,
       child: tabBar,
