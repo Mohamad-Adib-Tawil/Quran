@@ -40,9 +40,33 @@ class AudioCubit extends Cubit<AudioState> {
     });
     _stateSub = _repo.playerStateStream.listen((playerState) async {
       final playing = playerState.playing;
-      emit(state.copyWith(isPlaying: playing));
+      final processing = playerState.processingState;
+
+      // ✅ Single source of truth for playback state
+      AudioPhase nextPhase;
+      switch (processing) {
+        case ProcessingState.loading:
+        case ProcessingState.buffering:
+          nextPhase = AudioPhase.preparing;
+          break;
+        case ProcessingState.ready:
+          nextPhase = playing ? AudioPhase.playing : AudioPhase.paused;
+          break;
+        case ProcessingState.completed:
+          nextPhase = AudioPhase.idle;
+          break;
+        case ProcessingState.idle:
+        default:
+          nextPhase = AudioPhase.idle;
+      }
+
+      // ✅ Emit only if changed to avoid UI jitter
+      if (state.isPlaying != playing || state.phase != nextPhase) {
+        emit(state.copyWith(isPlaying: playing, phase: nextPhase));
+      }
+
       // Handle completion
-      if (playerState.processingState == ProcessingState.completed) {
+      if (processing == ProcessingState.completed) {
         await _onCompleted();
       }
     });
@@ -74,7 +98,7 @@ class AudioCubit extends Cubit<AudioState> {
     // Keep legacy behavior for already-downloaded use cases
     await prepareSurah(surah, initialPosition: from, cache: cache);
     await play();
-    emit(state.copyWith(phase: AudioPhase.playing));
+    // phase/isPlaying are driven by playerStateStream
   }
 
   Future<void> prefetchSurah(int surah) => _repo.prefetchSurah(surah: surah);
@@ -104,7 +128,7 @@ class AudioCubit extends Cubit<AudioState> {
     try {
       if (state.isPlaying) {
         await pause();
-        emit(state.copyWith(phase: AudioPhase.paused));
+        // phase/isPlaying are driven by playerStateStream
         return;
       }
       if (state.url == null && state.currentSurah != null) {
@@ -113,7 +137,7 @@ class AudioCubit extends Cubit<AudioState> {
         return;
       }
       await play();
-      emit(state.copyWith(phase: AudioPhase.playing));
+      // phase/isPlaying are driven by playerStateStream
     } catch (e) {
       emit(state.copyWith(
         phase: AudioPhase.error,
@@ -148,10 +172,9 @@ class AudioCubit extends Cubit<AudioState> {
         }
       }
       
-      emit(state.copyWith(phase: AudioPhase.preparing));
+      // phase/isPlaying are driven by playerStateStream
       await prepareSurah(surah, initialPosition: from, cache: true);
       await play();
-      emit(state.copyWith(phase: AudioPhase.playing));
       
     } on ArgumentError catch (e) {
       emit(state.copyWith(
@@ -233,11 +256,11 @@ class AudioCubit extends Cubit<AudioState> {
         throw StateError('مصدر الصوت غير مسموح. يجب أن يبدأ بـ $allowedPrefix');
       }
       
-      emit(state.copyWith(phase: AudioPhase.preparing, errorMessage: null));
+      // phase/isPlaying are driven by playerStateStream
+      emit(state.copyWith(errorMessage: null));
       await _repo.setUrl(url);
       emit(state.copyWith(url: url, currentSurah: surah));
       await _repo.play();
-      emit(state.copyWith(phase: AudioPhase.playing));
       
     } on ArgumentError catch (e) {
       emit(state.copyWith(
@@ -279,10 +302,10 @@ class AudioCubit extends Cubit<AudioState> {
       emit(state.copyWith(downloadProgress: evt.progress, phase: AudioPhase.downloading));
       if (evt.status == DownloadStatus.completed) {
         await _dlSub?.cancel();
-        emit(state.copyWith(phase: AudioPhase.preparing, downloadProgress: 1.0));
+        // phase/isPlaying are driven by playerStateStream
+        emit(state.copyWith(downloadProgress: 1.0));
         await prepareSurah(surah, initialPosition: Duration.zero, cache: true);
         await play();
-        emit(state.copyWith(phase: AudioPhase.playing));
       } else if (evt.status == DownloadStatus.failed || evt.status == DownloadStatus.canceled) {
         await _dlSub?.cancel();
         emit(state.copyWith(phase: AudioPhase.error, errorMessage: 'تعذر تحميل السورة. حاول مرة أخرى.'));
