@@ -36,24 +36,28 @@ class _AudioDownloadsView extends StatelessWidget {
         appBar: AppBar(
           title: Text(t.manageAudio),
           actions: [
-            IconButton(
-              onPressed: () {},
-              icon: SvgPicture.asset(AppAssets.icSearch, width: 22, height: 22),
-              tooltip: t.searchSurahHint,
-            ),
+            // IconButton(
+            //   onPressed: () {},
+            //   icon: SvgPicture.asset(AppAssets.icSearch, width: 22, height: 22),
+            //   tooltip: t.searchSurahHint,
+            // ),
             IconButton(
               onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const SettingsPage()),
-                );
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => const SettingsPage()));
               },
-              icon: SvgPicture.asset(AppAssets.icSettingsGreen, width: 22, height: 22),
+              icon: SvgPicture.asset(
+                AppAssets.icSettingsGreen,
+                width: 22,
+                height: 22,
+              ),
               tooltip: t.settings,
             ),
-            IconButton(
-              onPressed: () {},
-              icon: SvgPicture.asset(AppAssets.icMenu, width: 22, height: 22),
-            ),
+            // IconButton(
+            //   onPressed: () {},
+            //   icon: SvgPicture.asset(AppAssets.icMenu, width: 22, height: 22),
+            // ),
           ],
           bottom: TabBar(
             tabs: [
@@ -62,7 +66,9 @@ class _AudioDownloadsView extends StatelessWidget {
             ],
           ),
         ),
-        body: const TabBarView(children: [_DownloadedTab(), _NotDownloadedTab()]),
+        body: const TabBarView(
+          children: [_DownloadedTab(), _NotDownloadedTab()],
+        ),
       ),
     );
   }
@@ -97,7 +103,11 @@ class _DownloadedTab extends StatelessWidget {
                 children: [
                   IconButton(
                     tooltip: t.play,
-                    icon: SvgPicture.asset(AppAssets.icPlay, width: 20, height: 20),
+                    icon: SvgPicture.asset(
+                      AppAssets.icPlay,
+                      width: 20,
+                      height: 20,
+                    ),
                     onPressed: () async {
                       final audioCubit = context.read<AudioCubit>();
                       final messenger = ScaffoldMessenger.of(context);
@@ -113,13 +123,19 @@ class _DownloadedTab extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: t.delete,
-                    icon: SvgPicture.asset(AppAssets.icTrash, width: 20, height: 20),
+                    icon: SvgPicture.asset(
+                      AppAssets.icTrash,
+                      width: 20,
+                      height: 20,
+                    ),
                     onPressed: () async {
                       final downloadCubit = context.read<AudioDownloadCubit>();
                       final messenger = ScaffoldMessenger.of(context);
                       await downloadCubit.delete(s);
                       if (!context.mounted) return;
-                      messenger.showSnackBar(SnackBar(content: Text(t.deleteSuccess)));
+                      messenger.showSnackBar(
+                        SnackBar(content: Text(t.deleteSuccess)),
+                      );
                     },
                   ),
                 ],
@@ -158,11 +174,18 @@ class _NotDownloadedTab extends StatelessWidget {
             final downloading = status == DownloadStatus.downloading;
             return ListTile(
               title: Text('${info.name} (${s.toString().padLeft(3, '0')})'),
-              subtitle: downloading ? LinearProgressIndicator(value: progress) : null,
+              subtitle: downloading
+                  ? LinearProgressIndicator(value: progress)
+                  : null,
               trailing: IconButton(
-                onPressed:
-                    downloading ? null : () => context.read<AudioDownloadCubit>().download(s),
-                icon: SvgPicture.asset(AppAssets.icDownloadGreen, width: 20, height: 20),
+                onPressed: downloading
+                    ? null
+                    : () => context.read<AudioDownloadCubit>().download(s),
+                icon: SvgPicture.asset(
+                  AppAssets.icDownloadGreen,
+                  width: 20,
+                  height: 20,
+                ),
                 tooltip: t.download,
               ),
             );
