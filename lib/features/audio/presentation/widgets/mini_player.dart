@@ -18,8 +18,9 @@ class MiniAudioPlayer extends StatelessWidget {
     final t = context.tr;
     return BlocBuilder<AudioCubit, AudioState>(
       builder: (context, state) {
-        // Hide if no session
-        if ((state.currentSurah == null && state.url == null) || state.phase == AudioPhase.idle) {
+        // ✅ Show mini player if a surah is selected (even if not playing)
+        // Hide only if no surah selected at all
+        if (state.currentSurah == null && state.url == null) {
           return const SizedBox.shrink();
         }
 
