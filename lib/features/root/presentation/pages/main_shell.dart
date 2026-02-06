@@ -31,7 +31,7 @@ class _MainShellState extends State<MainShell> {
         mainAxisSize: MainAxisSize.min,
         children: [
           // ✅ Hide mini player when idle (only show when actively playing)
-          const MiniAudioPlayer(hideWhenIdle: true),
+          const MiniAudioPlayer(hideWhenIdle: true, debugTag: 'MainShell'),
           NavigationBarTheme(
             data: NavigationBarThemeData(
               indicatorColor: Colors.transparent,

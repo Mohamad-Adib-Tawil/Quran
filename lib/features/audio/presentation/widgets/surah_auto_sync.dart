@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
@@ -59,6 +60,9 @@ class _SurahAutoSyncState extends State<SurahAutoSync> {
   void _tick() {
     try {
       final surah = QuranLibrary().currentAndLastSurahNumber;
+      if (kDebugMode) {
+        debugPrint('[SurahAutoSync] tick: surah=$surah lastApplied=$_lastAppliedSurah candidate=$_candidateSurah hits=$_candidateHits');
+      }
       if (surah < 1 || surah > 114) return;
 
       // ✅ Guard against transient reset to Al-Fatiha (surah=1)
@@ -66,6 +70,9 @@ class _SurahAutoSyncState extends State<SurahAutoSync> {
       if (surah == 1 && _lastAppliedSurah != null && _lastAppliedSurah != 1) {
         final until = _ignoreSurah1Until;
         if (until != null && DateTime.now().isBefore(until)) {
+          if (kDebugMode) {
+            debugPrint('[SurahAutoSync] ignored transient surah=1 until=$until');
+          }
           return;
         }
       }
@@ -75,6 +82,9 @@ class _SurahAutoSyncState extends State<SurahAutoSync> {
       if (_candidateSurah != surah) {
         _candidateSurah = surah;
         _candidateHits = 1;
+        if (kDebugMode) {
+          debugPrint('[SurahAutoSync] candidate set: surah=$surah hits=$_candidateHits');
+        }
         return;
       }
 
@@ -82,10 +92,18 @@ class _SurahAutoSyncState extends State<SurahAutoSync> {
 
       // Require extra confirmation for surah=1 to reduce false resets.
       final requiredHits = (surah == 1) ? 3 : 2;
-      if (_candidateHits < requiredHits) return;
+      if (_candidateHits < requiredHits) {
+        if (kDebugMode) {
+          debugPrint('[SurahAutoSync] waiting stability: surah=$surah hits=$_candidateHits required=$requiredHits');
+        }
+        return;
+      }
 
       if (surah != _lastAppliedSurah) {
         _lastAppliedSurah = surah;
+        if (kDebugMode) {
+          debugPrint('[SurahAutoSync] apply: selectSurah($surah)');
+        }
         context.read<AudioCubit>().selectSurah(surah);
       }
     } catch (_) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
@@ -15,13 +16,38 @@ class MiniAudioPlayer extends StatelessWidget {
   /// If false, shows whenever a surah is selected.
   final bool hideWhenIdle;
 
-  const MiniAudioPlayer({super.key, this.hideWhenIdle = false});
+  /// Debug tag to identify the location of this mini player instance.
+  /// Example: 'MainShell' or 'SurahListPage'.
+  final String debugTag;
+
+  const MiniAudioPlayer({
+    super.key,
+    this.hideWhenIdle = false,
+    this.debugTag = 'MiniAudioPlayer',
+  });
 
   @override
   Widget build(BuildContext context) {
     final t = context.tr;
     return BlocBuilder<AudioCubit, AudioState>(
+      buildWhen: (prev, curr) {
+        // ✅ Reduce rebuilds: only rebuild when relevant values change
+        return prev.currentSurah != curr.currentSurah ||
+            prev.url != curr.url ||
+            prev.isPlaying != curr.isPlaying ||
+            prev.phase != curr.phase ||
+            prev.position != curr.position ||
+            prev.duration != curr.duration ||
+            prev.downloadProgress != curr.downloadProgress ||
+            prev.errorMessage != curr.errorMessage;
+      },
       builder: (context, state) {
+        if (kDebugMode) {
+          debugPrint(
+            '[MiniPlayer][$debugTag] build: phase=${state.phase} surah=${state.currentSurah} '
+            'isPlaying=${state.isPlaying} urlSet=${state.url != null}',
+          );
+        }
         // ✅ Different behavior based on hideWhenIdle flag
         if (hideWhenIdle) {
           // For MainShell: hide if no surah OR if idle (not playing)
