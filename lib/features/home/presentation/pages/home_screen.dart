@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:quran_app/core/assets/app_assets.dart';
+import 'package:quran_app/features/settings/presentation/pages/settings_page.dart';
 import 'package:quran_library/quran_library.dart';
 
 import '../../../quran/presentation/pages/surah_list_page.dart';
@@ -99,7 +102,33 @@ class _HomeViewState extends State<_HomeView> {
                     )
                   : Text(t.appTitle),
               pinned: true,
-              actions: const [],
+                           actions: [
+                IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _searching = !_searching;
+                      if (!_searching) {
+                        _searchCtrl.clear();
+                        context.read<HomeCubit>().setQuery('');
+                      }
+                    });
+                  },
+                  icon: SvgPicture.asset(AppAssets.icSearch, width: 22, height: 22),
+                  tooltip: t.searchSurahHint,
+                ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const SettingsPage(),
+                      ),
+                    );
+                  },
+                  icon: SvgPicture.asset(AppAssets.icSettingsGreen, width: 22, height: 22),
+                  tooltip: t.settings,
+                ),
+              ],
+
             ),
             if (_lastRead != null)
               SliverToBoxAdapter(
