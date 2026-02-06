@@ -143,17 +143,6 @@ class FullPlayerPage extends StatelessWidget {
             final isMadani = place.contains('mad');
             final titleLatin = quran.getSurahName(sNum);
 
-            final duration = state.duration ?? Duration.zero;
-            final pos = state.position;
-            final max = duration.inMilliseconds == 0
-                ? 1.0
-                : duration.inMilliseconds.toDouble();
-            final val = duration.inMilliseconds == 0
-                ? 0.0
-                : pos.inMilliseconds
-                      .clamp(0, duration.inMilliseconds)
-                      .toDouble();
-
             final verseWord = context.tr.aya;
             return Stack(
               children: [
@@ -236,51 +225,13 @@ class FullPlayerPage extends StatelessWidget {
                 // Spacer to push controls to bottom
                 const Spacer(),
 
-                // Progress slider
-                Padding(
-                  padding: const EdgeInsets.symmetric(
+                // Progress slider (updates independently of main BlocBuilder)
+                const Padding(
+                  padding: EdgeInsets.symmetric(
                     horizontal: 24,
                     vertical: 12,
                   ),
-                  child: Column(
-                    children: [
-                      SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          activeTrackColor: scheme.primary,
-                          inactiveTrackColor: scheme.primary.withOpacity(0.2),
-                          thumbColor: scheme.primary,
-                          trackHeight: 4,
-                          thumbShape: const RoundSliderThumbShape(
-                            enabledThumbRadius: 8,
-                          ),
-                        ),
-                        child: Slider(
-                          value: val,
-                          min: 0,
-                          max: max,
-                          onChanged: (v) => context.read<AudioCubit>().seek(
-                            Duration(milliseconds: v.round()),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              _fmt(pos),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            Text(
-                              _fmt(duration),
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: _FullPlayerProgressSection(),
                 ),
 
                 // Controls at bottom with padding
@@ -443,6 +394,74 @@ class FullPlayerPage extends StatelessWidget {
     final mm = d.inMinutes.remainder(60).toString().padLeft(2, '0');
     final ss = d.inSeconds.remainder(60).toString().padLeft(2, '0');
     return hh > 0 ? '$hh:$mm:$ss' : '$mm:$ss';
+  }
+}
+
+class _FullPlayerProgressSection extends StatelessWidget {
+  const _FullPlayerProgressSection();
+
+  String _fmt(Duration d) {
+    final hh = d.inHours;
+    final mm = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final ss = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return hh > 0 ? '$hh:$mm:$ss' : '$mm:$ss';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    final duration = context.select(
+      (AudioCubit c) => c.state.duration ?? Duration.zero,
+    );
+    final pos = context.select((AudioCubit c) => c.state.position);
+
+    final max = duration.inMilliseconds == 0
+        ? 1.0
+        : duration.inMilliseconds.toDouble();
+    final val = duration.inMilliseconds == 0
+        ? 0.0
+        : pos.inMilliseconds.clamp(0, duration.inMilliseconds).toDouble();
+
+    return Column(
+      children: [
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            activeTrackColor: scheme.primary,
+            inactiveTrackColor: scheme.primary.withOpacity(0.2),
+            thumbColor: scheme.primary,
+            trackHeight: 4,
+            thumbShape: const RoundSliderThumbShape(
+              enabledThumbRadius: 8,
+            ),
+          ),
+          child: Slider(
+            value: val,
+            min: 0,
+            max: max,
+            onChanged: (v) => context.read<AudioCubit>().seek(
+              Duration(milliseconds: v.round()),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _fmt(pos),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              Text(
+                _fmt(duration),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
 
