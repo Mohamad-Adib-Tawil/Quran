@@ -151,7 +151,7 @@ class _SurahListPageState extends State<SurahListPage> {
             : null,
         child: const Padding(
           padding: EdgeInsets.only(bottom: 40, left: 20, right: 20),
-          child: MiniAudioPlayer(),
+          child: MiniAudioPlayer(debugTag: 'SurahListPage'),
         ),
       ),
       // floatingActionButton: FloatingActionButton.extended(
