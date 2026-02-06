@@ -18,6 +18,7 @@ class AudioCubit extends Cubit<AudioState> {
   StreamSubscription? _stateSub;
   StreamSubscription? _dlSub;
   int? _lastRequestedSurah;
+  Timer? _sleepTimerHandle;
 
   AudioCubit(this._repo, this._downloadRepo, this._catalog) : super(AudioState.initial()) {
     _bind();
@@ -86,10 +87,16 @@ class AudioCubit extends Cubit<AudioState> {
     emit(state.copyWith(currentSurah: surah, errorMessage: null));
     try {
       final hasFile = await _downloadRepo.isDownloaded(surah);
+      // Honor autoDownload preference
       if (!hasFile) {
-        // Start download with progress updates
-        await _startDownloadFlow(surah);
-        return; // progression continues via progress listener
+        if (state.autoDownload) {
+          await _startDownloadFlow(surah);
+          return; // flow continues via progress listener
+        } else {
+          // Stream directly if available
+          await playFromCatalog(surah);
+          return;
+        }
       }
       emit(state.copyWith(phase: AudioPhase.preparing));
       await prepareSurah(surah, initialPosition: from, cache: true);
@@ -107,8 +114,34 @@ class AudioCubit extends Cubit<AudioState> {
     }
   }
 
-  void setOnCompleteBehavior(OnCompleteBehavior behavior) {
-    emit(state.copyWith(onComplete: behavior));
+  // Repeat mode control
+  void setRepeatMode(RepeatMode mode) {
+    emit(state.copyWith(repeatMode: mode));
+  }
+
+  // Playback speed
+  Future<void> setPlaybackSpeed(double speed) async {
+    await _repo.setSpeed(speed);
+    emit(state.copyWith(speed: speed));
+  }
+
+  // Auto download preference (affects playSurah flow)
+  void setAutoDownload(bool value) {
+    emit(state.copyWith(autoDownload: value));
+  }
+
+  // Sleep timer: stop after [duration] from now; null to cancel
+  void setSleepTimer(Duration? duration) {
+    _sleepTimerHandle?.cancel();
+    if (duration == null) {
+      emit(state.copyWith(sleepTimer: null));
+      return;
+    }
+    _sleepTimerHandle = Timer(duration, () async {
+      await stop();
+      emit(state.copyWith(phase: AudioPhase.idle, isPlaying: false, sleepTimer: null));
+    });
+    emit(state.copyWith(sleepTimer: duration));
   }
 
   // Set current surah context without preparing or downloading
@@ -180,17 +213,17 @@ class AudioCubit extends Cubit<AudioState> {
   }
 
   Future<void> _onCompleted() async {
-    switch (state.onComplete) {
-      case OnCompleteBehavior.repeatOne:
+    switch (state.repeatMode) {
+      case RepeatMode.one:
         await _repo.seek(Duration.zero);
         await _repo.play();
         emit(state.copyWith(phase: AudioPhase.playing, position: Duration.zero));
         break;
-      case OnCompleteBehavior.stop:
+      case RepeatMode.off:
         await _repo.stop();
         emit(state.copyWith(phase: AudioPhase.idle));
         break;
-      case OnCompleteBehavior.next:
+      case RepeatMode.next:
         final s = state.currentSurah;
         if (s != null && s < 114) {
           await playSurah(s + 1, from: Duration.zero);
@@ -208,6 +241,7 @@ class AudioCubit extends Cubit<AudioState> {
     _durSub?.cancel();
     _stateSub?.cancel();
     _dlSub?.cancel();
+    _sleepTimerHandle?.cancel();
     return super.close();
   }
 }

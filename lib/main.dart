@@ -18,21 +18,30 @@ import 'features/audio/domain/repositories/audio_repository.dart' as audio_domai
 import 'features/splash/presentation/pages/app_splash_page.dart';
 import 'services/audio_url_catalog_service.dart';
 import 'services/audio_session_manager.dart';
+import 'features/audio/settings/audio_settings_cubit.dart';
+import 'features/audio/settings/audio_settings_service.dart';
+import 'core/logging/logging.dart';
 
 Future<void> main() async {
   await runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
-    FlutterError.onError = (FlutterErrorDetails details) {
-      FlutterError.presentError(details);
-      // TODO: Forward to crash reporting service if integrated
-    };
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.music());
     await QuranLibrary.init();
     await setupLocator();
+    // Hook crash reporting after DI ready
+    final crash = sl<CrashReporter>();
+    FlutterError.onError = (FlutterErrorDetails details) async {
+      FlutterError.presentError(details);
+      await crash.recordFlutterError(details);
+    };
     runApp(const QuranApp());
-  }, (Object error, StackTrace stack) {
-    // TODO: Forward to crash reporting service if integrated
+  }, (Object error, StackTrace stack) async {
+    // Forward to crash reporting service
+    try {
+      final crash = sl<CrashReporter>();
+      await crash.recordError(error, stack);
+    } catch (_) {}
   });
 }
 
@@ -57,6 +66,7 @@ class QuranApp extends StatelessWidget {
           session.restoreIfNeeded(cubit);
           return cubit;
         }),
+        BlocProvider(create: (ctx) => AudioSettingsCubit(sl<AudioSettingsService>(), ctx.read<AudioCubit>())),
       ],
       child: BlocBuilder<SettingsCubit, SettingsState>(
         builder: (context, settings) {

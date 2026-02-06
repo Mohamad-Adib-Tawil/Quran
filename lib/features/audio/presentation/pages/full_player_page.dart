@@ -7,7 +7,8 @@ import 'package:quran_app/core/assets/app_assets.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_state.dart';
-import 'package:quran_app/features/settings/presentation/pages/settings_page.dart';
+import 'package:quran_app/features/audio/settings/audio_settings_cubit.dart';
+import 'package:quran_app/features/audio/presentation/widgets/audio_settings_sheet.dart';
 
 class FullPlayerPage extends StatelessWidget {
   const FullPlayerPage({super.key});
@@ -40,99 +41,192 @@ class FullPlayerPage extends StatelessWidget {
             final verseWord = context.tr.aya;
             return Column(
               children: [
-                // Green header with background
-                Container(
-                  height: 320,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(AppAssets.imgPlayerBgBig),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        titleLatin,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Colors.white),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        info.name,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        '$verses $verseWord • ${isMadani ? t.madani : t.makki}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white70),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Progress slider
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Column(
-                    children: [
-                      Slider(
-                        value: val,
-                        min: 0,
-                        max: max,
-                        onChanged: (v) => context.read<AudioCubit>().seek(Duration(milliseconds: v.round())),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Surah image taking half of screen height
+                SizedBox(
+                                  height: MediaQuery.of(context).size.height * 0.55,
+                                
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Stack(
+                        alignment: Alignment.center,
                         children: [
-                          Text(_fmt(pos), style: Theme.of(context).textTheme.bodySmall),
-                          Text(_fmt(duration), style: Theme.of(context).textTheme.bodySmall),
+                          Image.asset(
+                            AppAssets.imgPlayerBgBig,
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                          Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            color: Colors.black.withOpacity(0.12),
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                titleLatin,
+                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 28,
+                                    ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                info.name,
+                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                      color: Colors.white,
+                                      fontSize: 24,
+                                    ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                '$verses $verseWord • ${isMadani ? t.madani : t.makki}',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      color: Colors.white70,
+                                      fontSize: 16,
+                                    ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ],
                       ),
+                    ),
+                  ),
+                ),
+
+                // Spacer to push controls to bottom
+                const Spacer(),
+                
+                // Progress slider
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: Column(
+                    children: [
+                      SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          activeTrackColor: scheme.primary,
+                          inactiveTrackColor: scheme.primary.withOpacity(0.2),
+                          thumbColor: scheme.primary,
+                          trackHeight: 4,
+                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                        ),
+                        child: Slider(
+                          value: val,
+                          min: 0,
+                          max: max,
+                          onChanged: (v) => context.read<AudioCubit>().seek(Duration(milliseconds: v.round())),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(_fmt(pos), style: Theme.of(context).textTheme.bodySmall),
+                            Text(_fmt(duration), style: Theme.of(context).textTheme.bodySmall),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
 
-                // Controls
+                // Controls at bottom with padding
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.only(left: 16, right: 16, bottom: 30, top: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
+                      // Repeat button on the left
+                      _RepeatButton(),
+                      
+                      // Previous button
                       IconButton(
-                        icon: const Icon(Icons.settings_outlined),
-                        onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute(builder: (_) => const SettingsPage()));
-                        },
-                        tooltip: t.settings,
-                      ),
-                      IconButton(
-                        icon: SvgPicture.asset(AppAssets.icPrev, width: 28, height: 28, colorFilter: ColorFilter.mode(scheme.onSurface, BlendMode.srcIn)),
+                        icon: SvgPicture.asset(
+                          AppAssets.icPrev, 
+                          width: 32, 
+                          height: 32, 
+                          colorFilter: ColorFilter.mode(scheme.onSurface, BlendMode.srcIn)
+                        ),
                         onPressed: () => context.read<AudioCubit>().playPrevFromCatalog(),
                         tooltip: t.previous,
                       ),
-                      IconButton(
-                        iconSize: 56,
-                        icon: state.isPlaying
-                            ? const Icon(Icons.pause_circle_filled, size: 56)
-                            : SvgPicture.asset(AppAssets.icPlay, width: 56, height: 56),
-                        color: scheme.primary,
+                      
+                      // Play/Pause button
+                      RawMaterialButton(
                         onPressed: () => context.read<AudioCubit>().toggle(),
-                        tooltip: state.isPlaying ? t.pause : t.play,
+                        fillColor: scheme.primary,
+                        elevation: 2,
+                        shape: const CircleBorder(),
+                        constraints: const BoxConstraints.tightFor(width: 72, height: 72),
+                        child: Icon(
+                          state.isPlaying ? Icons.pause : Icons.play_arrow, 
+                          color: Colors.white, 
+                          size: 36
+                        ),
                       ),
+                      
+                      // Next button
                       IconButton(
-                        icon: SvgPicture.asset(AppAssets.icNext, width: 28, height: 28, colorFilter: ColorFilter.mode(scheme.onSurface, BlendMode.srcIn)),
+                        icon: SvgPicture.asset(
+                          AppAssets.icNext, 
+                          width: 32, 
+                          height: 32, 
+                          colorFilter: ColorFilter.mode(scheme.onSurface, BlendMode.srcIn)
+                        ),
                         onPressed: () => context.read<AudioCubit>().playNextFromCatalog(),
                         tooltip: t.next,
                       ),
-                      _RepeatButton(),
+                      
+                      // Settings button
+                      IconButton(
+                        icon: const Icon(Icons.settings_outlined, size: 28),
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            useSafeArea: true,
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.vertical(top: Radius.circular(16))
+                            ),
+                            builder: (_) => const AudioSettingsSheet(),
+                          );
+                        },
+                        tooltip: t.settings,
+                      ),
                     ],
                   ),
                 ),
+                if (state.phase == AudioPhase.error)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.red.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(state.errorMessage ?? 'Error', style: Theme.of(context).textTheme.bodyMedium)),
+                          const SizedBox(width: 8),
+                          TextButton(onPressed: () => context.read<AudioCubit>().retry(), child: Text(t.retry)),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             );
           },
@@ -155,39 +249,58 @@ class _RepeatButton extends StatelessWidget {
     return BlocBuilder<AudioCubit, AudioState>(
       builder: (context, state) {
         final scheme = Theme.of(context).colorScheme;
-        final behavior = state.onComplete;
-        String label;
-        switch (behavior) {
-          case OnCompleteBehavior.repeatOne:
-            label = 'Repeat';
-            break;
-          case OnCompleteBehavior.stop:
-            label = 'No repeat';
-            break;
-          case OnCompleteBehavior.next:
-            label = 'Next Surah';
-            break;
-        }
+        final mode = state.repeatMode;
+        String label = mode == RepeatMode.one
+            ? 'Repeat One'
+            : mode == RepeatMode.off
+                ? 'No Repeat'
+                : 'Next Surah';
+        final baseColor = mode == RepeatMode.off ? scheme.onSurface.withOpacity(0.4) : scheme.primary;
         return IconButton(
-          icon: SvgPicture.asset(AppAssets.icRepeat, width: 24, height: 24, colorFilter: ColorFilter.mode(scheme.primary, BlendMode.srcIn)),
           tooltip: label,
           onPressed: () {
-            final next = _cycle(behavior);
-            context.read<AudioCubit>().setOnCompleteBehavior(next);
+            final next = _cycle(mode);
+            context.read<AudioSettingsCubit>().setRepeat(next);
           },
+          icon: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              SvgPicture.asset(
+                AppAssets.icRepeat,
+                width: 24,
+                height: 24,
+                colorFilter: ColorFilter.mode(baseColor, BlendMode.srcIn),
+              ),
+              if (mode == RepeatMode.one)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    width: 14,
+                    height: 14,
+                    decoration: BoxDecoration(
+                      color: baseColor,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text('1', style: TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+            ],
+          ),
         );
       },
     );
   }
 
-  OnCompleteBehavior _cycle(OnCompleteBehavior b) {
+  RepeatMode _cycle(RepeatMode b) {
     switch (b) {
-      case OnCompleteBehavior.repeatOne:
-        return OnCompleteBehavior.stop;
-      case OnCompleteBehavior.stop:
-        return OnCompleteBehavior.next;
-      case OnCompleteBehavior.next:
-        return OnCompleteBehavior.repeatOne;
+      case RepeatMode.one:
+        return RepeatMode.off;
+      case RepeatMode.off:
+        return RepeatMode.next;
+      case RepeatMode.next:
+        return RepeatMode.one;
     }
   }
 }

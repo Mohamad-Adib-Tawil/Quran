@@ -17,6 +17,9 @@ import '../../services/audio_session_manager.dart';
 import '../../services/audio_url_catalog_service.dart';
 import '../../services/last_read_service.dart';
 import '../../services/favorites_service.dart';
+import '../../features/audio/settings/audio_settings_service.dart';
+import '../config/feature_flags.dart';
+import '../logging/logging.dart';
 
 final sl = GetIt.instance;
 
@@ -27,7 +30,14 @@ Future<void> setupLocator() async {
   // Async singletons
   final prefs = await SharedPreferences.getInstance();
   sl.registerSingleton<SharedPreferences>(prefs);
+  // Feature flags
+  sl.registerLazySingleton<FeatureFlagsService>(() => FeatureFlagsService(sl<SharedPreferences>()));
+  // Logging & crash
+  sl.registerLazySingleton<AppLogger>(() => AppLogger());
+  sl.registerLazySingleton<CrashReporter>(() => CrashReporter(sl<AppLogger>()));
   sl.registerLazySingleton<AudioSessionManager>(() => AudioSessionManager(sl<SharedPreferences>()));
+  // Audio settings service
+  sl.registerLazySingleton<AudioSettingsService>(() => AudioSettingsService(sl<SharedPreferences>()));
   // Last read storage service
   sl.registerLazySingleton<LastReadService>(() => LastReadService(sl<SharedPreferences>()));
   // Favorites storage service

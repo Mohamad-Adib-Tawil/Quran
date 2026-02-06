@@ -52,6 +52,9 @@ class AudioRepositoryImpl implements AudioRepository {
   Future<void> seek(Duration position) => player.seek(position);
 
   @override
+  Future<void> setSpeed(double speed) => player.setSpeed(speed);
+
+  @override
   bool get isPlaying => player.playing;
 
   @override
