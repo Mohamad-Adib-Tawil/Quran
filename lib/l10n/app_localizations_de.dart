@@ -184,4 +184,16 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get next => 'Weiter';
+
+  @override
+  String get errorOccurred => 'Ein Fehler ist aufgetreten';
+
+  @override
+  String get back => 'Zurück';
+
+  @override
+  String get preparing => 'Vorbereitung...';
+
+  @override
+  String get noSurahSelected => 'Keine Sure ausgewählt';
 }

@@ -31,10 +31,18 @@ class SurahListItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    // ✅ Build semantic label for screen readers
+    final semanticLabel = 'سورة $titleAr، $titleLatin${subtitleAr != null ? '، $subtitleAr' : ''}';
+    
+    return Semantics(
+      label: semanticLabel,
+      button: true,
       onTap: onTap,
       onLongPress: onLongPress,
-      child: Padding(
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Stack(
           // Use loose fit so the item can size itself based on its content.
@@ -77,15 +85,19 @@ class SurahListItem extends StatelessWidget {
                                     width: 20,
                                     height: 20,
                                   )
-                                : InkWell(
-                                    onTap: onFavoriteToggle,
-                                    borderRadius: BorderRadius.circular(6),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(2),
-                                      child: SvgPicture.asset(
-                                        isFavorite ? AppAssets.icStarGreen : AppAssets.icStarGray,
-                                        width: 20,
-                                        height: 20,
+                                : Semantics(
+                                    label: isFavorite ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة',
+                                    button: true,
+                                    child: InkWell(
+                                      onTap: onFavoriteToggle,
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(2),
+                                        child: SvgPicture.asset(
+                                          isFavorite ? AppAssets.icStarGreen : AppAssets.icStarGray,
+                                          width: 20,
+                                          height: 20,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -133,6 +145,7 @@ class SurahListItem extends StatelessWidget {
               child: _NumberPill(number: surahNumber),
             ),
           ],
+        ),
         ),
       ),
     );

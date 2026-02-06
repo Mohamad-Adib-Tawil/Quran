@@ -23,25 +23,50 @@ class AudioDownloadCubit extends Cubit<AudioDownloadState> {
   }
 
   Future<void> download(int surah) async {
-    if (_subs.containsKey(surah)) return; // already tracking
-    // subscribe to progress
-    final sub = repo.progressStream(surah).listen((event) {
-      final map = Map<int, double>.from(state.progressBySurah);
-      map[event.surah] = event.progress;
+    // ✅ Validate input
+    if (surah < 1 || surah > 114) {
       final status = Map<int, DownloadStatus>.from(state.statusBySurah);
-      status[event.surah] = _mapStatus(event.status);
-      emit(state.copyWith(progressBySurah: map, statusBySurah: status));
-      if (event.status == DownloadStatus.completed) {
-        // refresh lists
-        loadIndexes();
+      status[surah] = DownloadStatus.failed;
+      emit(state.copyWith(statusBySurah: status));
+      return;
+    }
+    
+    // ✅ Prevent duplicate downloads
+    if (_subs.containsKey(surah)) return; // already tracking
+    
+    // subscribe to progress
+    final sub = repo.progressStream(surah).listen(
+      (event) {
+        final map = Map<int, double>.from(state.progressBySurah);
+        map[event.surah] = event.progress;
+        final status = Map<int, DownloadStatus>.from(state.statusBySurah);
+        status[event.surah] = _mapStatus(event.status);
+        emit(state.copyWith(progressBySurah: map, statusBySurah: status));
+        if (event.status == DownloadStatus.completed) {
+          // refresh lists
+          loadIndexes();
+          _disposeSub(surah);
+        } else if (event.status == DownloadStatus.failed || event.status == DownloadStatus.canceled) {
+          // ✅ Clean up on failure/cancel
+          _disposeSub(surah);
+        }
+      },
+      onError: (error) {
+        // ✅ Handle stream errors
+        final map = Map<int, double>.from(state.progressBySurah);
+        map[surah] = 0.0;
+        final status = Map<int, DownloadStatus>.from(state.statusBySurah);
+        status[surah] = DownloadStatus.failed;
+        emit(state.copyWith(progressBySurah: map, statusBySurah: status));
         _disposeSub(surah);
-      }
-    });
+      },
+    );
     _subs[surah] = sub;
+    
     try {
       await repo.downloadSurah(surah);
-    } catch (_) {
-      // mark as failed on immediate error (e.g., URL resolution)
+    } catch (e) {
+      // ✅ mark as failed on immediate error (e.g., URL resolution)
       final map = Map<int, double>.from(state.progressBySurah);
       map[surah] = 0.0;
       final status = Map<int, DownloadStatus>.from(state.statusBySurah);

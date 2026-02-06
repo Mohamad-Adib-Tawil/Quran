@@ -39,23 +39,53 @@ class AudioRemoteDataSource {
 
   /// Returns a candidate audio URL (no preflight).
   /// Preference: baseUrl -> assets mapping -> first fallback.
+  /// ✅ Added validation and error handling
   Future<String> getSurahUrl({required int surah}) async {
+    // ✅ Validate surah number
+    if (surah < 1 || surah > 114) {
+      throw ArgumentError('رقم السورة غير صحيح: $surah. يجب أن يكون بين 1 و 114');
+    }
+
     final padded = surah.toString().padLeft(3, '0');
-    // Prefer baseUrl if configured (allows overriding broken asset links)
-    if (baseUrl != null) {
-      return '${baseUrl!}$padded.mp3';
+    
+    try {
+      // Prefer baseUrl if configured (allows overriding broken asset links)
+      if (baseUrl != null) {
+        final url = '${baseUrl!}$padded.mp3';
+        // ✅ Validate HTTPS
+        if (!url.startsWith('https://')) {
+          throw StateError('رابط الصوت يجب أن يكون HTTPS: $url');
+        }
+        return url;
+      }
+      
+      // Then assets mapping
+      final cached = _surahUrls;
+      if (cached != null && cached.containsKey(surah)) {
+        final url = cached[surah]!;
+        // ✅ Validate HTTPS
+        if (!url.startsWith('https://')) {
+          throw StateError('رابط الصوت من الأصول يجب أن يكون HTTPS: $url');
+        }
+        return url;
+      }
+      
+      // Use first configured fallback host if any
+      if (fallbackBaseUrls.isNotEmpty) {
+        final fb = fallbackBaseUrls.first;
+        final url = fb.endsWith('/') ? '$fb$padded.mp3' : '$fb/$padded.mp3';
+        // ✅ Validate HTTPS
+        if (!url.startsWith('https://')) {
+          throw StateError('رابط الاحتياطي يجب أن يكون HTTPS: $url');
+        }
+        return url;
+      }
+      
+      throw StateError('رابط الصوت للسورة $surah غير متوفر. قم بتحميل الأصول أو تعيين baseUrl.');
+    } catch (e) {
+      // ✅ Wrap exceptions with context
+      throw Exception('فشل الحصول على رابط السورة $surah: $e');
     }
-    // Then assets mapping
-    final cached = _surahUrls;
-    if (cached != null && cached.containsKey(surah)) {
-      return cached[surah]!;
-    }
-    // Use first configured fallback host if any
-    if (fallbackBaseUrls.isNotEmpty) {
-      final fb = fallbackBaseUrls.first;
-      return fb.endsWith('/') ? '$fb$padded.mp3' : '$fb/$padded.mp3';
-    }
-    throw StateError('Audio URL for surah $surah is not available. Load assets or set baseUrl.');
   }
 
   /// Legacy API compatibility: returns surah-level URL ignoring ayah parameter.

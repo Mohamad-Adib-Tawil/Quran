@@ -55,6 +55,7 @@ flutter:
     - assets/audio/audio_urls.json
     - assets/splash/Splash Screen app.jpg
     - assets/figma/
+    - assets/home/صورة الشيخ احمد كراسي الشخصية.png
   generate: true
 
   

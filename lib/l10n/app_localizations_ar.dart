@@ -184,4 +184,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get next => 'التالي';
+
+  @override
+  String get errorOccurred => 'حدث خطأ';
+
+  @override
+  String get back => 'رجوع';
+
+  @override
+  String get preparing => 'جاري التحضير...';
+
+  @override
+  String get noSurahSelected => 'لم يتم اختيار سورة';
 }

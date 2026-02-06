@@ -439,6 +439,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'التالي'**
   String get next;
+
+  /// No description provided for @errorOccurred.
+  ///
+  /// In ar, this message translates to:
+  /// **'حدث خطأ'**
+  String get errorOccurred;
+
+  /// No description provided for @back.
+  ///
+  /// In ar, this message translates to:
+  /// **'رجوع'**
+  String get back;
+
+  /// No description provided for @preparing.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاري التحضير...'**
+  String get preparing;
+
+  /// No description provided for @noSurahSelected.
+  ///
+  /// In ar, this message translates to:
+  /// **'لم يتم اختيار سورة'**
+  String get noSurahSelected;
 }
 
 class _AppLocalizationsDelegate

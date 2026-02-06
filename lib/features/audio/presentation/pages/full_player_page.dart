@@ -26,7 +26,102 @@ class FullPlayerPage extends StatelessWidget {
         child: BlocBuilder<AudioCubit, AudioState>(
           builder: (context, state) {
             final t = context.tr;
-            final sNum = state.currentSurah ?? 1;
+            
+            // ✅ Error boundary - Show error state
+            if (state.phase == AudioPhase.error) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        state.errorMessage ?? t.errorOccurred,
+                        style: Theme.of(context).textTheme.titleMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () => context.read<AudioCubit>().retry(),
+                        icon: const Icon(Icons.refresh),
+                        label: Text(t.retry),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text(t.back),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+            
+            // ✅ Loading boundary - Show loading state
+            if (state.phase == AudioPhase.downloading || state.phase == AudioPhase.preparing) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(
+                      state.phase == AudioPhase.downloading
+                          ? t.downloadingSurah
+                          : t.preparing,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    if (state.phase == AudioPhase.downloading) ...[
+                      const SizedBox(height: 12),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 48),
+                        child: LinearProgressIndicator(
+                          value: state.downloadProgress.clamp(0.0, 1.0),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              );
+            }
+            
+            // ✅ Validate state before rendering
+            if (state.currentSurah == null) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.music_note,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        t.noSurahSelected,
+                        style: Theme.of(context).textTheme.titleMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text(t.back),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+            
+            final sNum = state.currentSurah!;
             final info = QuranLibrary().getSurahInfo(surahNumber: sNum - 1);
             final verses = quran.getVerseCount(sNum);
             final place = quran.getPlaceOfRevelation(sNum).toLowerCase();
