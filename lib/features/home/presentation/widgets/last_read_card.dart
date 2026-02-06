@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:quran_library/quran_library.dart';
@@ -26,7 +28,8 @@ class LastReadCard extends StatelessWidget {
     return InkWell(
       onTap: () {
         // keep audio context in sync with last read
-        context.read<AudioCubit>().selectSurah(surah);
+        // Fire-and-forget: ensures previous playback is stopped and state reset
+        unawaited(context.read<AudioCubit>().selectSurah(surah));
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(surah)),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_app/core/theme/figma_palette.dart';
@@ -85,7 +87,7 @@ class _SurahDetailsPageState extends State<SurahDetailsPage> {
             iconPath: AppAssets.icQuranGreen,
             onTap: () {
               // ✅ Sync mini player with opened surah
-              context.read<AudioCubit>().selectSurah(widget.surahNumber);
+              unawaited(context.read<AudioCubit>().selectSurah(widget.surahNumber));
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(widget.surahNumber)),

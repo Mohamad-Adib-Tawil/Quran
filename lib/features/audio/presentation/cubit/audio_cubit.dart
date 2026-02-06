@@ -234,10 +234,32 @@ class AudioCubit extends Cubit<AudioState> {
     emit(state.copyWith(sleepTimer: duration));
   }
 
-  // Set current surah context without preparing or downloading
-  void selectSurah(int surah) {
+  // Set current surah context without preparing or downloading.
+  // ✅ Also resets previous playback state to avoid playing the wrong track.
+  Future<void> selectSurah(int surah) async {
     if (surah < 1 || surah > 114) return;
-    emit(state.copyWith(currentSurah: surah));
+
+    // No-op if same surah
+    if (state.currentSurah == surah) return;
+
+    try {
+      // Stop any current playback to avoid progress continuing on the old track.
+      await _repo.stop();
+    } catch (_) {
+      // ignore
+    }
+
+    emit(state.copyWith(
+      currentSurah: surah,
+      url: null,
+      position: Duration.zero,
+      duration: null,
+      downloadProgress: 0,
+      isBuffering: false,
+      isPlaying: false,
+      phase: AudioPhase.idle,
+      errorMessage: null,
+    ));
   }
 
   // Play directly from catalog JSON URL (no download). Used by Home screen.
