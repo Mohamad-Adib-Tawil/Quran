@@ -17,11 +17,11 @@ class FullPlayerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      appBar: AppBar(
-        title: const SizedBox.shrink(),
-        centerTitle: false,
-        backgroundColor: Colors.transparent,
-      ),
+      // appBar: AppBar(
+      //   title: const SizedBox.shrink(),
+      //   centerTitle: false,
+      //   backgroundColor: Colors.transparent,
+      // ),
       body: SafeArea(
         child: BlocBuilder<AudioCubit, AudioState>(
           builder: (context, state) {
@@ -35,18 +35,32 @@ class FullPlayerPage extends StatelessWidget {
 
             final duration = state.duration ?? Duration.zero;
             final pos = state.position;
-            final max = duration.inMilliseconds == 0 ? 1.0 : duration.inMilliseconds.toDouble();
-            final val = duration.inMilliseconds == 0 ? 0.0 : pos.inMilliseconds.clamp(0, duration.inMilliseconds).toDouble();
+            final max = duration.inMilliseconds == 0
+                ? 1.0
+                : duration.inMilliseconds.toDouble();
+            final val = duration.inMilliseconds == 0
+                ? 0.0
+                : pos.inMilliseconds
+                      .clamp(0, duration.inMilliseconds)
+                      .toDouble();
 
             final verseWord = context.tr.aya;
             return Column(
               children: [
+                AppBar(
+                  title: Text("${info.name} • $titleLatin"),
+                  centerTitle: true,
+                  backgroundColor: Colors.transparent,
+                ),
                 // Surah image taking half of screen height
                 SizedBox(
-                                  height: MediaQuery.of(context).size.height * 0.55,
-                                
+                  height: MediaQuery.of(context).size.height * 0.55,
+
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: Stack(
@@ -69,7 +83,10 @@ class FullPlayerPage extends StatelessWidget {
                             children: [
                               Text(
                                 titleLatin,
-                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(
                                       color: Colors.white,
                                       fontWeight: FontWeight.w600,
                                       fontSize: 28,
@@ -79,7 +96,8 @@ class FullPlayerPage extends StatelessWidget {
                               const SizedBox(height: 8),
                               Text(
                                 info.name,
-                                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(
                                       color: Colors.white,
                                       fontSize: 24,
                                     ),
@@ -88,7 +106,8 @@ class FullPlayerPage extends StatelessWidget {
                               const SizedBox(height: 12),
                               Text(
                                 '$verses $verseWord • ${isMadani ? t.madani : t.makki}',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
                                       color: Colors.white70,
                                       fontSize: 16,
                                     ),
@@ -104,10 +123,13 @@ class FullPlayerPage extends StatelessWidget {
 
                 // Spacer to push controls to bottom
                 const Spacer(),
-                
+
                 // Progress slider
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   child: Column(
                     children: [
                       SliderTheme(
@@ -116,13 +138,17 @@ class FullPlayerPage extends StatelessWidget {
                           inactiveTrackColor: scheme.primary.withOpacity(0.2),
                           thumbColor: scheme.primary,
                           trackHeight: 4,
-                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                          thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 8,
+                          ),
                         ),
                         child: Slider(
                           value: val,
                           min: 0,
                           max: max,
-                          onChanged: (v) => context.read<AudioCubit>().seek(Duration(milliseconds: v.round())),
+                          onChanged: (v) => context.read<AudioCubit>().seek(
+                            Duration(milliseconds: v.round()),
+                          ),
                         ),
                       ),
                       Padding(
@@ -130,8 +156,14 @@ class FullPlayerPage extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(_fmt(pos), style: Theme.of(context).textTheme.bodySmall),
-                            Text(_fmt(duration), style: Theme.of(context).textTheme.bodySmall),
+                            Text(
+                              _fmt(pos),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            Text(
+                              _fmt(duration),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
                           ],
                         ),
                       ),
@@ -141,51 +173,66 @@ class FullPlayerPage extends StatelessWidget {
 
                 // Controls at bottom with padding
                 Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 16, bottom: 30, top: 8),
+                  padding: const EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    bottom: 30,
+                    top: 8,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       // Repeat button on the left
                       _RepeatButton(),
-                      
+
                       // Previous button
                       IconButton(
                         icon: SvgPicture.asset(
-                          AppAssets.icPrev, 
-                          width: 32, 
-                          height: 32, 
-                          colorFilter: ColorFilter.mode(scheme.onSurface, BlendMode.srcIn)
+                          AppAssets.icNext,
+                          width: 32,
+                          height: 32,
+                          colorFilter: ColorFilter.mode(
+                            scheme.onSurface,
+                            BlendMode.srcIn,
+                          ),
                         ),
-                        onPressed: () => context.read<AudioCubit>().playPrevFromCatalog(),
-                        tooltip: t.previous,
+                        onPressed: () =>
+                            context.read<AudioCubit>().playNextFromCatalog(),
+                        tooltip: t.next,
                       ),
-                      
+
                       // Play/Pause button
                       RawMaterialButton(
                         onPressed: () => context.read<AudioCubit>().toggle(),
                         fillColor: scheme.primary,
                         elevation: 2,
                         shape: const CircleBorder(),
-                        constraints: const BoxConstraints.tightFor(width: 72, height: 72),
+                        constraints: const BoxConstraints.tightFor(
+                          width: 72,
+                          height: 72,
+                        ),
                         child: Icon(
-                          state.isPlaying ? Icons.pause : Icons.play_arrow, 
-                          color: Colors.white, 
-                          size: 36
+                          state.isPlaying ? Icons.pause : Icons.play_arrow,
+                          color: Colors.white,
+                          size: 36,
                         ),
                       ),
-                      
+
                       // Next button
                       IconButton(
                         icon: SvgPicture.asset(
-                          AppAssets.icNext, 
-                          width: 32, 
-                          height: 32, 
-                          colorFilter: ColorFilter.mode(scheme.onSurface, BlendMode.srcIn)
+                          AppAssets.icPrev,
+                          width: 32,
+                          height: 32,
+                          colorFilter: ColorFilter.mode(
+                            scheme.onSurface,
+                            BlendMode.srcIn,
+                          ),
                         ),
-                        onPressed: () => context.read<AudioCubit>().playNextFromCatalog(),
-                        tooltip: t.next,
+                        onPressed: () =>
+                            context.read<AudioCubit>().playPrevFromCatalog(),
+                        tooltip: t.previous,
                       ),
-                      
                       // Settings button
                       IconButton(
                         icon: const Icon(Icons.settings_outlined, size: 28),
@@ -195,7 +242,9 @@ class FullPlayerPage extends StatelessWidget {
                             isScrollControlled: true,
                             useSafeArea: true,
                             shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(16))
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(16),
+                              ),
                             ),
                             builder: (_) => const AudioSettingsSheet(),
                           );
@@ -220,9 +269,17 @@ class FullPlayerPage extends StatelessWidget {
                         children: [
                           const Icon(Icons.error_outline, color: Colors.red),
                           const SizedBox(width: 8),
-                          Expanded(child: Text(state.errorMessage ?? 'Error', style: Theme.of(context).textTheme.bodyMedium)),
+                          Expanded(
+                            child: Text(
+                              state.errorMessage ?? 'Error',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
                           const SizedBox(width: 8),
-                          TextButton(onPressed: () => context.read<AudioCubit>().retry(), child: Text(t.retry)),
+                          TextButton(
+                            onPressed: () => context.read<AudioCubit>().retry(),
+                            child: Text(t.retry),
+                          ),
                         ],
                       ),
                     ),
@@ -253,9 +310,11 @@ class _RepeatButton extends StatelessWidget {
         String label = mode == RepeatMode.one
             ? 'Repeat One'
             : mode == RepeatMode.off
-                ? 'No Repeat'
-                : 'Next Surah';
-        final baseColor = mode == RepeatMode.off ? scheme.onSurface.withOpacity(0.4) : scheme.primary;
+            ? 'No Repeat'
+            : 'Next Surah';
+        final baseColor = mode == RepeatMode.off
+            ? scheme.onSurface.withOpacity(0.4)
+            : scheme.primary;
         return IconButton(
           tooltip: label,
           onPressed: () {
@@ -283,7 +342,14 @@ class _RepeatButton extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
-                    child: const Text('1', style: TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.bold)),
+                    child: const Text(
+                      '1',
+                      style: TextStyle(
+                        fontSize: 9,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
             ],
