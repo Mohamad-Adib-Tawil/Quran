@@ -177,6 +177,17 @@ class MiniAudioPlayer extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 8),
+                        // ✅ Buffering indicator (fixed size to avoid layout shift)
+                        SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: AnimatedOpacity(
+                            opacity: state.isBuffering ? 1 : 0,
+                            duration: const Duration(milliseconds: 150),
+                            child: const CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
                         // Play/Pause - ✅ Added Semantics
                         Semantics(
                           label: state.isPlaying ? t.pause : t.play,

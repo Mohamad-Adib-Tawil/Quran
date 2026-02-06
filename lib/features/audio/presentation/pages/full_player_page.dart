@@ -24,6 +24,21 @@ class FullPlayerPage extends StatelessWidget {
       // ),
       body: SafeArea(
         child: BlocBuilder<AudioCubit, AudioState>(
+          // ✅ Prevent full-page rebuilds on position updates.
+          // Position/duration/progress are handled by dedicated selectors.
+          buildWhen: (prev, curr) {
+            return prev.currentSurah != curr.currentSurah ||
+                prev.url != curr.url ||
+                prev.isPlaying != curr.isPlaying ||
+                prev.phase != curr.phase ||
+                prev.isBuffering != curr.isBuffering ||
+                prev.downloadProgress != curr.downloadProgress ||
+                prev.errorMessage != curr.errorMessage ||
+                prev.repeatMode != curr.repeatMode ||
+                prev.speed != curr.speed ||
+                prev.autoDownload != curr.autoDownload ||
+                prev.sleepTimer != curr.sleepTimer;
+          },
           builder: (context, state) {
             final t = context.tr;
             
@@ -140,8 +155,10 @@ class FullPlayerPage extends StatelessWidget {
                       .toDouble();
 
             final verseWord = context.tr.aya;
-            return Column(
+            return Stack(
               children: [
+                Column(
+                  children: [
                 AppBar(
                   title: Text("${info.name} • $titleLatin"),
                   centerTitle: true,
@@ -379,6 +396,40 @@ class FullPlayerPage extends StatelessWidget {
                       ),
                     ),
                   ),
+                  ],
+                ),
+
+                // ✅ Buffering overlay (does not affect layout)
+                Positioned(
+                  top: 12,
+                  right: 12,
+                  child: AnimatedOpacity(
+                    opacity: state.isBuffering ? 1 : 0,
+                    duration: const Duration(milliseconds: 150),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.35),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Buffering',
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ],
             );
           },

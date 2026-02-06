@@ -43,26 +43,34 @@ class AudioCubit extends Cubit<AudioState> {
       final processing = playerState.processingState;
 
       // ✅ Single source of truth for playback state
+      // We keep [phase] stable (playing/paused) during buffering and expose buffering separately.
+      final bool buffering =
+          processing == ProcessingState.loading || processing == ProcessingState.buffering;
+
       AudioPhase nextPhase;
-      switch (processing) {
-        case ProcessingState.loading:
-        case ProcessingState.buffering:
-          nextPhase = AudioPhase.preparing;
-          break;
-        case ProcessingState.ready:
+      if (processing == ProcessingState.completed || processing == ProcessingState.idle) {
+        nextPhase = AudioPhase.idle;
+      } else if (processing == ProcessingState.ready) {
+        nextPhase = playing ? AudioPhase.playing : AudioPhase.paused;
+      } else {
+        // loading/buffering
+        // If we already have a selected track (url/surah), keep stable phase.
+        if (state.url != null || state.currentSurah != null) {
           nextPhase = playing ? AudioPhase.playing : AudioPhase.paused;
-          break;
-        case ProcessingState.completed:
-          nextPhase = AudioPhase.idle;
-          break;
-        case ProcessingState.idle:
-        default:
-          nextPhase = AudioPhase.idle;
+        } else {
+          nextPhase = AudioPhase.preparing;
+        }
       }
 
       // ✅ Emit only if changed to avoid UI jitter
-      if (state.isPlaying != playing || state.phase != nextPhase) {
-        emit(state.copyWith(isPlaying: playing, phase: nextPhase));
+      if (state.isPlaying != playing ||
+          state.phase != nextPhase ||
+          state.isBuffering != buffering) {
+        emit(state.copyWith(
+          isPlaying: playing,
+          phase: nextPhase,
+          isBuffering: buffering,
+        ));
       }
 
       // Handle completion
