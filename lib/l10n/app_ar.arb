@@ -59,5 +59,6 @@
   "errorOccurred": "حدث خطأ",
   "back": "رجوع",
   "preparing": "جاري التحضير...",
-  "noSurahSelected": "لم يتم اختيار سورة"
+  "noSurahSelected": "لم يتم اختيار سورة",
+  "ready": "جاهزة"
 }

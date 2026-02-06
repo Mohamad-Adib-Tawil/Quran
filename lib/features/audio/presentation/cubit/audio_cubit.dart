@@ -96,9 +96,22 @@ class AudioCubit extends Cubit<AudioState> {
     // ✅ Cancel download subscription when preparing a new surah
     await _dlSub?.cancel();
     _dlSub = null;
-    
-    final url = await _repo.prepareSurah(surah: surah, initialPosition: initialPosition, cache: cache);
-    emit(state.copyWith(url: url, currentSurah: surah, position: initialPosition ?? Duration.zero));
+
+    final url = await _repo.prepareSurah(
+      surah: surah,
+      initialPosition: initialPosition,
+      cache: cache,
+    );
+
+    // ✅ Mark which surah is actually loaded in the engine
+    emit(state.copyWith(
+      url: url,
+      currentSurah: surah,
+      loadedSurah: surah,
+      position: initialPosition ?? Duration.zero,
+      // duration will arrive via durationStream
+    ));
+
     return url;
   }
 
@@ -111,9 +124,9 @@ class AudioCubit extends Cubit<AudioState> {
 
   Future<void> prefetchSurah(int surah) => _repo.prefetchSurah(surah: surah);
 
-  Future<void> setUrl(String url) async {
+  Future<void> setUrl(String url, {int? surah}) async {
     await _repo.setUrl(url);
-    emit(state.copyWith(url: url));
+    emit(state.copyWith(url: url, loadedSurah: surah ?? state.loadedSurah));
   }
 
   Future<void> play() async {
@@ -158,6 +171,7 @@ class AudioCubit extends Cubit<AudioState> {
   // New API: unified play that auto-downloads if needed
   Future<void> playSurah(int surah, {Duration? from}) async {
     _lastRequestedSurah = surah;
+    // currentSurah is the queued/selected surah
     emit(state.copyWith(currentSurah: surah, errorMessage: null));
     
     try {
@@ -166,8 +180,20 @@ class AudioCubit extends Cubit<AudioState> {
         throw ArgumentError('رقم السورة غير صحيح: $surah');
       }
       
+      // If switching to a new surah, stop the previous engine source first.
+      if (state.loadedSurah != null && state.loadedSurah != surah) {
+        await _repo.stop();
+        emit(state.copyWith(
+          url: null,
+          duration: null,
+          position: Duration.zero,
+          isBuffering: false,
+          loadedSurah: null,
+        ));
+      }
+
       final hasFile = await _downloadRepo.isDownloaded(surah);
-      
+
       // Honor autoDownload preference
       if (!hasFile) {
         if (state.autoDownload) {
@@ -234,32 +260,12 @@ class AudioCubit extends Cubit<AudioState> {
     emit(state.copyWith(sleepTimer: duration));
   }
 
-  // Set current surah context without preparing or downloading.
-  // ✅ Also resets previous playback state to avoid playing the wrong track.
-  Future<void> selectSurah(int surah) async {
+  // Set current surah context (queued/selected) without touching playback.
+  // ✅ Do not stop/reset the engine here; switching is handled inside playSurah.
+  void selectSurah(int surah) {
     if (surah < 1 || surah > 114) return;
-
-    // No-op if same surah
     if (state.currentSurah == surah) return;
-
-    try {
-      // Stop any current playback to avoid progress continuing on the old track.
-      await _repo.stop();
-    } catch (_) {
-      // ignore
-    }
-
-    emit(state.copyWith(
-      currentSurah: surah,
-      url: null,
-      position: Duration.zero,
-      duration: null,
-      downloadProgress: 0,
-      isBuffering: false,
-      isPlaying: false,
-      phase: AudioPhase.idle,
-      errorMessage: null,
-    ));
+    emit(state.copyWith(currentSurah: surah));
   }
 
   // Play directly from catalog JSON URL (no download). Used by Home screen.
@@ -289,7 +295,7 @@ class AudioCubit extends Cubit<AudioState> {
       // phase/isPlaying are driven by playerStateStream
       emit(state.copyWith(errorMessage: null));
       await _repo.setUrl(url);
-      emit(state.copyWith(url: url, currentSurah: surah));
+      emit(state.copyWith(url: url, currentSurah: surah, loadedSurah: surah));
       await _repo.play();
       
     } on ArgumentError catch (e) {

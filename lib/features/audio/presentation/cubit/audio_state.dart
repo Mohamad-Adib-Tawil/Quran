@@ -10,7 +10,11 @@ class AudioState extends Equatable {
   final bool isPlaying;
   final Duration position;
   final Duration? duration;
+  /// The surah currently selected/queued in the UI.
   final int? currentSurah;
+
+  /// The surah currently loaded in the audio engine (source of truth for playback).
+  final int? loadedSurah;
 
   // ✅ Playback details
   /// True when the underlying player is buffering/loading while having a selected track.
@@ -32,6 +36,7 @@ class AudioState extends Equatable {
     required this.position,
     required this.duration,
     required this.currentSurah,
+    required this.loadedSurah,
     required this.isBuffering,
     required this.phase,
     required this.downloadProgress,
@@ -48,6 +53,7 @@ class AudioState extends Equatable {
         position: Duration.zero,
         duration: null,
         currentSurah: null,
+        loadedSurah: null,
         isBuffering: false,
         phase: AudioPhase.idle,
         downloadProgress: 0.0,
@@ -67,6 +73,7 @@ class AudioState extends Equatable {
     Duration? position,
     Object? duration = _noChange,
     Object? currentSurah = _noChange,
+    Object? loadedSurah = _noChange,
     bool? isBuffering,
     AudioPhase? phase,
     double? downloadProgress,
@@ -82,6 +89,7 @@ class AudioState extends Equatable {
         position: position ?? this.position,
         duration: duration == _noChange ? this.duration : duration as Duration?,
         currentSurah: currentSurah == _noChange ? this.currentSurah : currentSurah as int?,
+        loadedSurah: loadedSurah == _noChange ? this.loadedSurah : loadedSurah as int?,
         isBuffering: isBuffering ?? this.isBuffering,
         phase: phase ?? this.phase,
         downloadProgress: downloadProgress ?? this.downloadProgress,
@@ -99,6 +107,7 @@ class AudioState extends Equatable {
         position,
         duration,
         currentSurah,
+        loadedSurah,
         isBuffering,
         phase,
         downloadProgress,

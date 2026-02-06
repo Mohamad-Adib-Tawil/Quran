@@ -93,6 +93,8 @@ class MiniAudioPlayer extends StatelessWidget {
 
         final scheme = Theme.of(context).colorScheme;
         final sNum = state.currentSurah ?? 1;
+        final loaded = state.loadedSurah;
+        final isQueuedNotLoaded = loaded != null && loaded != sNum;
         final info = QuranLibrary().getSurahInfo(surahNumber: sNum - 1);
         final verses = quran.getVerseCount(sNum);
         final place = quran.getPlaceOfRevelation(sNum).toLowerCase();
@@ -155,12 +157,34 @@ class MiniAudioPlayer extends StatelessWidget {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      Text(
-                                        info.name,
-                                        style: Theme.of(context).textTheme.titleMedium,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.right,
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          if (isQueuedNotLoaded)
+                                            Container(
+                                              margin: const EdgeInsets.only(left: 8),
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: scheme.primary.withValues(alpha: 0.12),
+                                                borderRadius: BorderRadius.circular(999),
+                                              ),
+                                              child: Text(
+                                                t.ready,
+                                                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                                      color: scheme.primary,
+                                                    ),
+                                              ),
+                                            ),
+                                          Flexible(
+                                            child: Text(
+                                              info.name,
+                                              style: Theme.of(context).textTheme.titleMedium,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              textAlign: TextAlign.right,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                       const SizedBox(height: 2),
                                       Text(

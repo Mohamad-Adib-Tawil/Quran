@@ -463,6 +463,12 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'لم يتم اختيار سورة'**
   String get noSurahSelected;
+
+  /// No description provided for @ready.
+  ///
+  /// In ar, this message translates to:
+  /// **'جاهزة'**
+  String get ready;
 }
 
 class _AppLocalizationsDelegate

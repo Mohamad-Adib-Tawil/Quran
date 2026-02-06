@@ -196,4 +196,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noSurahSelected => 'لم يتم اختيار سورة';
+
+  @override
+  String get ready => 'جاهزة';
 }

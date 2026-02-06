@@ -199,7 +199,7 @@ class _HomeViewState extends State<_HomeView> {
                             onTap: () {
                               if (!ctx.mounted) return;
                               _setLastRead(s, 1);
-                              unawaited(context.read<AudioCubit>().selectSurah(s));
+                              context.read<AudioCubit>().selectSurah(s);
                               Navigator.of(ctx).push(
                                 MaterialPageRoute(
                                   builder: (_) => SurahListPage(
