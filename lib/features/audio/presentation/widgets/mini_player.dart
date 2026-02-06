@@ -30,22 +30,25 @@ class MiniAudioPlayer extends StatelessWidget {
   Widget build(BuildContext context) {
     final t = context.tr;
     return BlocBuilder<AudioCubit, AudioState>(
+      // ✅ Main rebuild scope: avoid rebuilding the whole widget tree on position updates.
+      // Position/duration will be handled by dedicated selectors below.
       buildWhen: (prev, curr) {
-        // ✅ Reduce rebuilds: only rebuild when relevant values change
         return prev.currentSurah != curr.currentSurah ||
             prev.url != curr.url ||
             prev.isPlaying != curr.isPlaying ||
             prev.phase != curr.phase ||
-            prev.position != curr.position ||
-            prev.duration != curr.duration ||
             prev.downloadProgress != curr.downloadProgress ||
             prev.errorMessage != curr.errorMessage;
       },
       builder: (context, state) {
+        // Debug log (only on meaningful changes to avoid log flooding)
         if (kDebugMode) {
-          debugPrint(
-            '[MiniPlayer][$debugTag] build: phase=${state.phase} surah=${state.currentSurah} '
-            'isPlaying=${state.isPlaying} urlSet=${state.url != null}',
+          _MiniPlayerDebugLog.maybeLog(
+            tag: debugTag,
+            phase: state.phase,
+            surah: state.currentSurah,
+            isPlaying: state.isPlaying,
+            urlSet: state.url != null,
           );
         }
         // ✅ Different behavior based on hideWhenIdle flag
@@ -89,11 +92,6 @@ class MiniAudioPlayer extends StatelessWidget {
         }
 
         final scheme = Theme.of(context).colorScheme;
-        final duration = state.duration ?? Duration.zero;
-        final pos = state.position;
-        final pct = (duration.inMilliseconds == 0)
-            ? 0.0
-            : (pos.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0);
         final sNum = state.currentSurah ?? 1;
         final info = QuranLibrary().getSurahInfo(surahNumber: sNum - 1);
         final verses = quran.getVerseCount(sNum);
@@ -208,27 +206,16 @@ class MiniAudioPlayer extends StatelessWidget {
                   ),
                 ),
 
-                // Times row
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(_fmt(pos), style: Theme.of(context).textTheme.bodySmall),
-                      Text(_fmt(duration), style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
+                // Times row (updates only when position/duration changes)
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: _MiniTimesRow(),
                 ),
 
-                // Full-width progress bar at bottom
-                SizedBox(
-                  height: 3,
-                  child: LinearProgressIndicator(
-                    value: pct,
-                    backgroundColor: scheme.surface.withValues(alpha: 0.4),
-                    valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
-                    minHeight: 3,
-                  ),
+                // Full-width progress bar at bottom (updates only when position/duration changes)
+                _MiniProgressBar(
+                  backgroundColor: scheme.surface.withValues(alpha: 0.4),
+                  color: scheme.primary,
                 ),
               ],
             ),
@@ -243,5 +230,78 @@ class MiniAudioPlayer extends StatelessWidget {
     final mm = d.inMinutes.remainder(60).toString().padLeft(2, '0');
     final ss = d.inSeconds.remainder(60).toString().padLeft(2, '0');
     return hh > 0 ? '$hh:$mm:$ss' : '$mm:$ss';
+  }
+}
+
+class _MiniPlayerDebugLog {
+  static final Map<String, String> _lastKeyByTag = <String, String>{};
+
+  static void maybeLog({
+    required String tag,
+    required AudioPhase phase,
+    required int? surah,
+    required bool isPlaying,
+    required bool urlSet,
+  }) {
+    // Log only when these key values change
+    final key = 'phase=$phase surah=$surah isPlaying=$isPlaying urlSet=$urlSet';
+    final last = _lastKeyByTag[tag];
+    if (last == key) return;
+    _lastKeyByTag[tag] = key;
+    debugPrint('[MiniPlayer][$tag] $key');
+  }
+}
+
+/// Updates only when [AudioState.position] or [AudioState.duration] changes.
+class _MiniTimesRow extends StatelessWidget {
+  const _MiniTimesRow();
+
+  String _fmt(Duration d) {
+    final hh = d.inHours;
+    final mm = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final ss = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return hh > 0 ? '$hh:$mm:$ss' : '$mm:$ss';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pos = context.select((AudioCubit c) => c.state.position);
+    final dur = context.select((AudioCubit c) => c.state.duration ?? Duration.zero);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(_fmt(pos), style: Theme.of(context).textTheme.bodySmall),
+        Text(_fmt(dur), style: Theme.of(context).textTheme.bodySmall),
+      ],
+    );
+  }
+}
+
+/// Updates only when [AudioState.position] or [AudioState.duration] changes.
+class _MiniProgressBar extends StatelessWidget {
+  final Color backgroundColor;
+  final Color color;
+
+  const _MiniProgressBar({required this.backgroundColor, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final pos = context.select((AudioCubit c) => c.state.position);
+    final dur = context.select((AudioCubit c) => c.state.duration ?? Duration.zero);
+
+    final pct = (dur.inMilliseconds == 0)
+        ? 0.0
+        : (pos.inMilliseconds / dur.inMilliseconds).clamp(0.0, 1.0);
+
+    return SizedBox(
+      height: 3,
+      child: LinearProgressIndicator(
+        value: pct,
+        backgroundColor: backgroundColor,
+        valueColor: AlwaysStoppedAnimation<Color>(color),
+        minHeight: 3,
+      ),
+    );
   }
 }
