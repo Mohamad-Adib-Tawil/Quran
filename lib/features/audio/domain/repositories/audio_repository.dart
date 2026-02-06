@@ -9,6 +9,7 @@ abstract class AudioRepository {
   Future<void> pause();
   Future<void> stop();
   Future<void> seek(Duration position);
+  Future<void> setSpeed(double speed);
 
   bool get isPlaying;
   Duration? get duration;

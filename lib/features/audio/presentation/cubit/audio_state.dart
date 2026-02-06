@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 enum AudioPhase { idle, downloading, preparing, playing, paused, error }
-enum OnCompleteBehavior { repeatOne, stop, next }
+/// Visual/behavioral repeat configuration
+enum RepeatMode { one, off, next }
 
 class AudioState extends Equatable {
   final String? url;
@@ -14,7 +15,10 @@ class AudioState extends Equatable {
   final AudioPhase phase; // idle | downloading | preparing | playing | paused | error
   final double downloadProgress; // 0..1
   final String? errorMessage;
-  final OnCompleteBehavior onComplete; // repeatOne | stop | next
+  final RepeatMode repeatMode; // one | off | next
+  final double speed; // 0.5 .. 2.0
+  final bool autoDownload; // auto download when playing a surah
+  final Duration? sleepTimer; // null = off
 
   const AudioState({
     required this.url,
@@ -25,7 +29,10 @@ class AudioState extends Equatable {
     required this.phase,
     required this.downloadProgress,
     required this.errorMessage,
-    required this.onComplete,
+    required this.repeatMode,
+    required this.speed,
+    required this.autoDownload,
+    required this.sleepTimer,
   });
 
   factory AudioState.initial() => const AudioState(
@@ -37,7 +44,10 @@ class AudioState extends Equatable {
         phase: AudioPhase.idle,
         downloadProgress: 0.0,
         errorMessage: null,
-        onComplete: OnCompleteBehavior.repeatOne,
+        repeatMode: RepeatMode.one,
+        speed: 1.0,
+        autoDownload: true,
+        sleepTimer: null,
       );
 
   AudioState copyWith({
@@ -49,7 +59,10 @@ class AudioState extends Equatable {
     AudioPhase? phase,
     double? downloadProgress,
     String? errorMessage,
-    OnCompleteBehavior? onComplete,
+    RepeatMode? repeatMode,
+    double? speed,
+    bool? autoDownload,
+    Duration? sleepTimer,
   }) =>
       AudioState(
         url: url ?? this.url,
@@ -60,7 +73,10 @@ class AudioState extends Equatable {
         phase: phase ?? this.phase,
         downloadProgress: downloadProgress ?? this.downloadProgress,
         errorMessage: errorMessage ?? this.errorMessage,
-        onComplete: onComplete ?? this.onComplete,
+        repeatMode: repeatMode ?? this.repeatMode,
+        speed: speed ?? this.speed,
+        autoDownload: autoDownload ?? this.autoDownload,
+        sleepTimer: sleepTimer ?? this.sleepTimer,
       );
 
   @override
@@ -73,6 +89,11 @@ class AudioState extends Equatable {
         phase,
         downloadProgress,
         errorMessage,
-        onComplete,
+        repeatMode,
+        speed,
+        autoDownload,
+        sleepTimer,
       ];
+
+  bool get isLoading => phase == AudioPhase.downloading || phase == AudioPhase.preparing;
 }

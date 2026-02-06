@@ -98,7 +98,24 @@ class MiniAudioPlayer extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Flexible(
+                                 Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    color: scheme.primary,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: SvgPicture.asset(
+                                    AppAssets.icQuranGray,
+                                    width: 20,
+                                    height: 20,
+                                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                  ),
+                                ),
+                             
+                                const SizedBox(width: 8),
+                                   Flexible(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
@@ -118,22 +135,7 @@ class MiniAudioPlayer extends StatelessWidget {
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  width: 36,
-                                  height: 36,
-                                  decoration: BoxDecoration(
-                                    color: scheme.primary,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: SvgPicture.asset(
-                                    AppAssets.icQuranGray,
-                                    width: 20,
-                                    height: 20,
-                                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                                  ),
-                                ),
+                               
                               ],
                             ),
                           ),
@@ -151,7 +153,7 @@ class MiniAudioPlayer extends StatelessWidget {
                         ),
                         // Close button
                         IconButton(
-                          icon: SvgPicture.asset(AppAssets.icExitGreyCross, width: 20, height: 20),
+                          icon: SvgPicture.asset(AppAssets.icExitGreyCross, width: 14, height: 14),
                           onPressed: () => context.read<AudioCubit>().stop(),
                           tooltip: t.stop,
                         ),

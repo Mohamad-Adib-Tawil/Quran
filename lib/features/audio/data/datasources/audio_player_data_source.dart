@@ -18,6 +18,7 @@ class AudioPlayerDataSource {
   Future<void> pause() => _player.pause();
   Future<void> stop() => _player.stop();
   Future<void> seek(Duration position) => _player.seek(position);
+  Future<void> setSpeed(double speed) => _player.setSpeed(speed);
 
   bool get playing => _player.playing;
   Duration? get duration => _player.duration;
