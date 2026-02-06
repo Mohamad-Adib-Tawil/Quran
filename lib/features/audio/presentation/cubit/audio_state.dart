@@ -11,6 +11,11 @@ class AudioState extends Equatable {
   final Duration? duration;
   final int? currentSurah;
 
+  // ✅ Playback details
+  /// True when the underlying player is buffering/loading while having a selected track.
+  /// We keep [phase] stable (e.g., playing/paused) and expose buffering separately to avoid UI flicker.
+  final bool isBuffering;
+
   // New fields for unified flow
   final AudioPhase phase; // idle | downloading | preparing | playing | paused | error
   final double downloadProgress; // 0..1
@@ -26,6 +31,7 @@ class AudioState extends Equatable {
     required this.position,
     required this.duration,
     required this.currentSurah,
+    required this.isBuffering,
     required this.phase,
     required this.downloadProgress,
     required this.errorMessage,
@@ -41,6 +47,7 @@ class AudioState extends Equatable {
         position: Duration.zero,
         duration: null,
         currentSurah: null,
+        isBuffering: false,
         phase: AudioPhase.idle,
         downloadProgress: 0.0,
         errorMessage: null,
@@ -56,6 +63,7 @@ class AudioState extends Equatable {
     Duration? position,
     Duration? duration,
     int? currentSurah,
+    bool? isBuffering,
     AudioPhase? phase,
     double? downloadProgress,
     String? errorMessage,
@@ -70,6 +78,7 @@ class AudioState extends Equatable {
         position: position ?? this.position,
         duration: duration ?? this.duration,
         currentSurah: currentSurah ?? this.currentSurah,
+        isBuffering: isBuffering ?? this.isBuffering,
         phase: phase ?? this.phase,
         downloadProgress: downloadProgress ?? this.downloadProgress,
         errorMessage: errorMessage ?? this.errorMessage,
@@ -86,6 +95,7 @@ class AudioState extends Equatable {
         position,
         duration,
         currentSurah,
+        isBuffering,
         phase,
         downloadProgress,
         errorMessage,
