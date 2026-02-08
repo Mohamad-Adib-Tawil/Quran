@@ -105,7 +105,7 @@ class _HomeViewState extends State<_HomeView> {
                     )
                   : Text(t.appTitle),
               pinned: true,
-                           actions: [
+              actions: [
                 IconButton(
                   onPressed: () {
                     setState(() {
@@ -116,22 +116,27 @@ class _HomeViewState extends State<_HomeView> {
                       }
                     });
                   },
-                  icon: SvgPicture.asset(AppAssets.icSearch, width: 22, height: 22),
+                  icon: SvgPicture.asset(
+                    AppAssets.icSearch,
+                    width: 22,
+                    height: 22,
+                  ),
                   tooltip: t.searchSurahHint,
                 ),
                 IconButton(
                   onPressed: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const SettingsPage(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const SettingsPage()),
                     );
                   },
-                  icon: SvgPicture.asset(AppAssets.icSettingsGreen, width: 22, height: 22),
+                  icon: SvgPicture.asset(
+                    AppAssets.icSettingsGreen,
+                    width: 22,
+                    height: 22,
+                  ),
                   tooltip: t.settings,
                 ),
               ],
-
             ),
             // ✅ Always show last read card (defaults to Al-Fatiha)
             SliverToBoxAdapter(
@@ -199,7 +204,7 @@ class _HomeViewState extends State<_HomeView> {
                             onTap: () {
                               if (!ctx.mounted) return;
                               _setLastRead(s, 1);
-                              context.read<AudioCubit>().selectSurah(s);
+                              context.read<AudioCubit>().playSurah(s);
                               Navigator.of(ctx).push(
                                 MaterialPageRoute(
                                   builder: (_) => SurahListPage(
