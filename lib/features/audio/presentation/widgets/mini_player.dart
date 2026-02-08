@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
@@ -65,6 +66,60 @@ class MiniAudioPlayer extends StatelessWidget {
           }
         }
 
+        // Pre-calculate info for both downloading and normal phases
+        final sNum = state.currentSurah ?? 1;
+        final info = QuranLibrary().getSurahInfo(surahNumber: sNum - 1);
+
+        // Downloading phase
+        if (state.phase == AudioPhase.downloading) {
+          return Material(
+            color: Theme.of(context).colorScheme.surface,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                children: [
+                  const SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: CircularProgressIndicator(strokeWidth: 3),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          t.downloadingSurah,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.white
+                                    : null,
+                              ),
+                        ),
+                        const SizedBox(height: 6),
+                        LinearProgressIndicator(
+                          value: state.downloadProgress.clamp(0.0, 1.0),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final scheme = Theme.of(context).colorScheme;
+        final loaded = state.loadedSurah;
+        final isQueuedNotLoaded = loaded != null && loaded != sNum;
+        final verses = quran.getVerseCount(sNum);
+        final place = quran.getPlaceOfRevelation(sNum).toLowerCase();
+        final isMadani = place.contains('mad');
+
         // Downloading phase
         if (state.phase == AudioPhase.downloading) {
           return Material(
@@ -101,39 +156,70 @@ class MiniAudioPlayer extends StatelessWidget {
           );
         }
 
-        final scheme = Theme.of(context).colorScheme;
-        final sNum = state.currentSurah ?? 1;
-        final loaded = state.loadedSurah;
-        final isQueuedNotLoaded = loaded != null && loaded != sNum;
-        final info = QuranLibrary().getSurahInfo(surahNumber: sNum - 1);
-        final verses = quran.getVerseCount(sNum);
-        final place = quran.getPlaceOfRevelation(sNum).toLowerCase();
-        final isMadani = place.contains('mad');
-
         return Material(
           elevation: 4,
           color: Colors.transparent,
           child: Container(
             decoration: BoxDecoration(
-              color: scheme.surface.withValues(alpha: 0.9),
-              image: const DecorationImage(
+              color: scheme.surface.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark
+                    ? 0.95
+                    : 0.9,
+              ),
+              image: DecorationImage(
                 image: AssetImage(AppAssets.imgPlayerBgMini),
                 fit: BoxFit.cover,
+                opacity: Theme.of(context).brightness == Brightness.dark
+                    ? 0.2
+                    : 0.1,
               ),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
               ),
+              border: Border.all(
+                color: scheme.outline.withValues(
+                  alpha: Theme.of(context).brightness == Brightness.dark
+                      ? 0.3
+                      : 0.1,
+                ),
+                width: 0.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(
+                    alpha: Theme.of(context).brightness == Brightness.dark
+                        ? 0.3
+                        : 0.1,
+                  ),
+                  blurRadius: 8,
+                  offset: const Offset(0, -2),
+                ),
+              ],
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header row (tap to open full player)
-                InkWell(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const FullPlayerPage()),
-                    );
+                // Header row (tap or swipe up to open full player)
+                GestureDetector(
+                  onTap: () => _navigateToFullPlayer(context),
+                  onVerticalDragUpdate: (details) {
+                    // Provide haptic feedback during upward drag
+                    if (details.primaryDelta! < -15) {
+                      HapticFeedback.lightImpact();
+                    }
+                  },
+                  onVerticalDragEnd: (details) {
+                    // Professional swipe detection with velocity thresholds
+                    if (details.primaryVelocity! < -300) {
+                      // Fast swipe - premium animation with strong haptic
+                      HapticFeedback.mediumImpact();
+                      _navigateToFullPlayerWithAnimation(context);
+                    } else if (details.primaryVelocity! < -150) {
+                      // Normal swipe - standard animation with light haptic
+                      HapticFeedback.lightImpact();
+                      _navigateToFullPlayer(context);
+                    }
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -192,9 +278,18 @@ class MiniAudioPlayer extends StatelessWidget {
                                       const SizedBox(height: 2),
                                       Text(
                                         '${isMadani ? t.madani : t.makki} • $verses ${t.aya}',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.bodySmall,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color:
+                                                  Theme.of(
+                                                        context,
+                                                      ).brightness ==
+                                                      Brightness.dark
+                                                  ? Colors.white70
+                                                  : null,
+                                            ),
                                         textAlign: TextAlign.right,
                                       ),
                                     ],
@@ -272,6 +367,67 @@ class MiniAudioPlayer extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  void _navigateToFullPlayer(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const FullPlayerPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: animation.drive(
+              Tween(
+                begin: const Offset(0, 1),
+                end: Offset.zero,
+              ).chain(CurveTween(curve: Curves.easeOutCubic)),
+            ),
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 400),
+      ),
+    );
+  }
+
+  void _navigateToFullPlayerWithAnimation(BuildContext context) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const FullPlayerPage(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: animation.drive(
+              Tween(
+                begin: const Offset(0, 1),
+                end: Offset.zero,
+              ).chain(CurveTween(curve: Curves.easeOutCubic)),
+            ),
+            child: FadeTransition(
+              opacity: animation.drive(
+                Tween(
+                  begin: 0.3,
+                  end: 1.0,
+                ).chain(CurveTween(curve: Curves.easeOut)),
+              ),
+              child: ScaleTransition(
+                scale: animation.drive(
+                  Tween(
+                    begin: 0.95,
+                    end: 1.0,
+                  ).chain(CurveTween(curve: Curves.easeOutCubic)),
+                ),
+                child: child,
+              ),
+            ),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 600),
+        reverseTransitionDuration: const Duration(milliseconds: 400),
+        barrierColor: Colors.black54,
+        opaque: false,
+      ),
     );
   }
 
