@@ -7,7 +7,12 @@ class JuzListItem extends StatelessWidget {
   final int index; // 1-based
   final String? subtitle;
   final VoidCallback? onTap;
-  const JuzListItem({super.key, required this.index, this.subtitle, this.onTap});
+  const JuzListItem({
+    super.key,
+    required this.index,
+    this.subtitle,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,16 +29,30 @@ class JuzListItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(t.juzName, style: FigmaTypography.body15(color: Theme.of(context).colorScheme.onSurface)),
+                  Text(
+                    t.juzName,
+                    style: FigmaTypography.body15(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                   if (subtitle != null && !subtitle!.contains(t.juzName)) ...[
                     const SizedBox(height: 4),
-                    Text(subtitle!, style: FigmaTypography.caption12(color: Theme.of(context).hintColor), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(
+                      subtitle!,
+                      style: FigmaTypography.caption12(
+                        color: Theme.of(context).hintColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ],
               ),
             ),
             Icon(
-              Directionality.of(context) == TextDirection.rtl ? Icons.chevron_right : Icons.chevron_left,
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_right
+                  : Icons.chevron_left,
               color: Colors.grey,
             ),
           ],
@@ -47,7 +66,12 @@ class HizbListItem extends StatelessWidget {
   final int index; // 1-based
   final String? subtitle;
   final VoidCallback? onTap;
-  const HizbListItem({super.key, required this.index, this.subtitle, this.onTap});
+  const HizbListItem({
+    super.key,
+    required this.index,
+    this.subtitle,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -64,16 +88,30 @@ class HizbListItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(t.hizbName, style: FigmaTypography.body15(color: Theme.of(context).colorScheme.onSurface)),
+                  Text(
+                    t.hizbName,
+                    style: FigmaTypography.body15(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                   if (subtitle != null && !subtitle!.contains(t.hizbName)) ...[
                     const SizedBox(height: 4),
-                    Text(subtitle!, style: FigmaTypography.caption12(color: Theme.of(context).hintColor), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text(
+                      subtitle!,
+                      style: FigmaTypography.caption12(
+                        color: Theme.of(context).hintColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ],
               ),
             ),
             Icon(
-              Directionality.of(context) == TextDirection.rtl ? Icons.chevron_right : Icons.chevron_left,
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.chevron_right
+                  : Icons.chevron_left,
               color: Colors.grey,
             ),
           ],
@@ -95,7 +133,12 @@ class _Pill extends StatelessWidget {
         border: Border.all(color: FigmaPalette.divider),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(label, style: FigmaTypography.body13(color: Theme.of(context).colorScheme.onSurface)),
+      child: Text(
+        label,
+        style: FigmaTypography.body13(
+          color: Theme.of(context).colorScheme.primary,
+        ),
+      ),
     );
   }
 }
