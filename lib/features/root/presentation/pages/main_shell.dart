@@ -15,7 +15,7 @@ class MainShell extends StatefulWidget {
 }
 
 class _MainShellState extends State<MainShell> {
-  int _index = 2; // default to Mushaf as per screenshots (right-most)
+  int _index = 2; // الافتراضي هو المصحف
   final _pages = const [
     FavoritesPage(),
     AudioDownloadsPage(),
@@ -30,8 +30,10 @@ class _MainShellState extends State<MainShell> {
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // ✅ Hide mini player when idle (only show when actively playing)
+          // Mini Player - يظهر فقط عند التشغيل النشط
           const MiniAudioPlayer(hideWhenIdle: true, debugTag: 'MainShell'),
+          
+          // Bottom Navigation Bar
           NavigationBarTheme(
             data: NavigationBarThemeData(
               indicatorColor: Colors.transparent,

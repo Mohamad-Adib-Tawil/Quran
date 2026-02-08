@@ -14,6 +14,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tr;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(title: Text(t.settings)),
       body: BlocBuilder<SettingsCubit, SettingsState>(
@@ -29,18 +30,21 @@ class SettingsPage extends StatelessWidget {
                 title: Text(t.light),
                 value: ThemeMode.light,
                 groupValue: state.themeMode,
+                activeColor: Theme.of(context).colorScheme.primary,
                 onChanged: (v) => context.read<SettingsCubit>().setTheme(v!),
               ),
               RadioListTile<ThemeMode>(
                 title: Text(t.dark),
                 value: ThemeMode.dark,
                 groupValue: state.themeMode,
+                activeColor: Theme.of(context).colorScheme.primary,
                 onChanged: (v) => context.read<SettingsCubit>().setTheme(v!),
               ),
               RadioListTile<ThemeMode>(
                 title: Text(t.system),
                 value: ThemeMode.system,
                 groupValue: state.themeMode,
+                activeColor: Theme.of(context).colorScheme.primary,
                 onChanged: (v) => context.read<SettingsCubit>().setTheme(v!),
               ),
               const Divider(height: 24),
@@ -49,46 +53,23 @@ class SettingsPage extends StatelessWidget {
                 title: Text(t.arabic),
                 value: 'ar',
                 groupValue: state.localeCode ?? 'ar',
+                activeColor: Theme.of(context).colorScheme.primary,
                 onChanged: (v) => context.read<SettingsCubit>().setLocale(v!),
               ),
               RadioListTile<String>(
                 title: Text(t.german),
                 value: 'de',
                 groupValue: state.localeCode ?? 'ar',
+                activeColor: Theme.of(context).colorScheme.primary,
                 onChanged: (v) => context.read<SettingsCubit>().setLocale(v!),
               ),
-              const Divider(height: 24),
-              _SectionTitle(title: t.fontSize),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    const Text('A-'),
-                    Expanded(
-                      child: Slider(
-                        value: 1.0, // frozen
-                        min: 1.0,
-                        max: 1.0,
-                        divisions: 1,
-                        onChanged: null, // disabled temporarily
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        const Text('A+'),
-                        const SizedBox(width: 8),
-                        Chip(label: Text(t.soon)),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(height: 24),
+
               // SwitchListTile(
               //   title: Text(t.showVerseEndSymbol),
               //   value: state.verseEndSymbol,
               //   onChanged: (v) => context.read<SettingsCubit>().toggleVerseEndSymbol(v),
               // ),
+              const Divider(height: 24),
               const SizedBox(height: 24),
               Container(
                 height: 150,
@@ -101,7 +82,21 @@ class SettingsPage extends StatelessWidget {
                     fit: BoxFit.contain,
                   ),
                   shape: BoxShape.circle,
-                  // color: FigmaPalette.primary.withOpacity(0.1),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.2),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(
+                        context,
+                      ).shadowColor.withValues(alpha: 0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 24),
@@ -109,9 +104,10 @@ class SettingsPage extends StatelessWidget {
                 "الشيخ أحمد كراسي رحمه الله",
                 textAlign: TextAlign.center,
                 style: FigmaTypography.body15(
-                  color: FigmaPalette.textDark,
-                  // fontWeight: FontWeight.bold,
-                ),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).colorScheme.onSurface
+                      : FigmaPalette.textDark,
+                ).copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 24),
             ],
@@ -139,7 +135,11 @@ class _SectionTitle extends StatelessWidget {
           ],
           Text(
             title,
-            style: FigmaTypography.body15(color: FigmaPalette.textDark),
+            style: FigmaTypography.body15(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.onSurface
+                  : FigmaPalette.textDark,
+            ),
           ),
         ],
       ),
