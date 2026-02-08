@@ -123,11 +123,7 @@ class _DownloadedTab extends StatelessWidget {
                   ),
                   IconButton(
                     tooltip: t.delete,
-                    icon: SvgPicture.asset(
-                      AppAssets.icTrash,
-                      width: 20,
-                      height: 20,
-                    ),
+                    icon: Text(t.delete, style: TextStyle(fontSize: 12)),
                     onPressed: () async {
                       final downloadCubit = context.read<AudioDownloadCubit>();
                       final messenger = ScaffoldMessenger.of(context);
