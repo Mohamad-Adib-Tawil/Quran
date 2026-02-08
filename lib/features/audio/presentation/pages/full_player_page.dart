@@ -17,374 +17,390 @@ class FullPlayerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const SizedBox.shrink(),
-      //   centerTitle: false,
-      //   backgroundColor: Colors.transparent,
-      // ),
-      body: SafeArea(
-        child: BlocBuilder<AudioCubit, AudioState>(
-          // ✅ Prevent full-page rebuilds on position updates.
-          // Position/duration/progress are handled by dedicated selectors.
-          buildWhen: (prev, curr) {
-            return prev.currentSurah != curr.currentSurah ||
-                prev.url != curr.url ||
-                prev.isPlaying != curr.isPlaying ||
-                prev.phase != curr.phase ||
-                prev.isBuffering != curr.isBuffering ||
-                prev.downloadProgress != curr.downloadProgress ||
-                prev.errorMessage != curr.errorMessage ||
-                prev.repeatMode != curr.repeatMode ||
-                prev.speed != curr.speed ||
-                prev.autoDownload != curr.autoDownload ||
-                prev.sleepTimer != curr.sleepTimer;
-          },
-          builder: (context, state) {
-            final t = context.tr;
-            
-            // ✅ Error boundary - Show error state
-            if (state.phase == AudioPhase.error) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        state.errorMessage ?? t.errorOccurred,
-                        style: Theme.of(context).textTheme.titleMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () => context.read<AudioCubit>().retry(),
-                        icon: const Icon(Icons.refresh),
-                        label: Text(t.retry),
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: Text(t.back),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-            
-            // ✅ Loading boundary - Show loading state
-            if (state.phase == AudioPhase.downloading || state.phase == AudioPhase.preparing) {
-              return Center(
+      appBar: AppBar(
+        title: const SizedBox.shrink(),
+        centerTitle: false,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.keyboard_arrow_down, size: 28),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: BlocBuilder<AudioCubit, AudioState>(
+        // ✅ Prevent full-page rebuilds on position updates.
+        // Position/duration/progress are handled by dedicated selectors.
+        buildWhen: (prev, curr) {
+          return prev.currentSurah != curr.currentSurah ||
+              prev.url != curr.url ||
+              prev.isPlaying != curr.isPlaying ||
+              prev.phase != curr.phase ||
+              prev.isBuffering != curr.isBuffering ||
+              prev.downloadProgress != curr.downloadProgress ||
+              prev.errorMessage != curr.errorMessage ||
+              prev.repeatMode != curr.repeatMode ||
+              prev.speed != curr.speed ||
+              prev.autoDownload != curr.autoDownload ||
+              prev.sleepTimer != curr.sleepTimer;
+        },
+        builder: (context, state) {
+          final t = context.tr;
+
+          // ✅ Error boundary - Show error state
+          if (state.phase == AudioPhase.error) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const CircularProgressIndicator(),
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                     const SizedBox(height: 16),
                     Text(
-                      state.phase == AudioPhase.downloading
-                          ? t.downloadingSurah
-                          : t.preparing,
+                      state.errorMessage ?? t.errorOccurred,
                       style: Theme.of(context).textTheme.titleMedium,
+                      textAlign: TextAlign.center,
                     ),
-                    if (state.phase == AudioPhase.downloading) ...[
-                      const SizedBox(height: 12),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 48),
-                        child: LinearProgressIndicator(
-                          value: state.downloadProgress.clamp(0.0, 1.0),
-                        ),
-                      ),
-                    ],
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () => context.read<AudioCubit>().retry(),
+                      icon: const Icon(Icons.refresh),
+                      label: Text(t.retry),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(t.back),
+                    ),
                   ],
                 ),
-              );
-            }
-            
-            // ✅ Validate state before rendering
-            if (state.currentSurah == null) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.music_note,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        t.noSurahSelected,
-                        style: Theme.of(context).textTheme.titleMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: Text(t.back),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-            
-            final sNum = state.currentSurah!;
-            final info = QuranLibrary().getSurahInfo(surahNumber: sNum - 1);
-            final verses = quran.getVerseCount(sNum);
-            final place = quran.getPlaceOfRevelation(sNum).toLowerCase();
-            final isMadani = place.contains('mad');
-            final titleLatin = quran.getSurahName(sNum);
-
-            final verseWord = context.tr.aya;
-            return Stack(
-              children: [
-                Column(
-                  children: [
-                AppBar(
-                  title: Text("${info.name} • $titleLatin"),
-                  centerTitle: true,
-                  backgroundColor: Colors.transparent,
-                ),
-                // Surah image taking half of screen height
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.55,
-
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Image.asset(
-                            AppAssets.imgPlayerBgBig,
-                            width: double.infinity,
-                            height: double.infinity,
-                            fit: BoxFit.cover,
-                          ),
-                          Container(
-                            width: double.infinity,
-                            height: double.infinity,
-                            color: Colors.black.withOpacity(0.12),
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                titleLatin,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineMedium
-                                    ?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 28,
-                                    ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                info.name,
-                                style: Theme.of(context).textTheme.titleLarge
-                                    ?.copyWith(
-                                      color: Colors.white,
-                                      fontSize: 24,
-                                    ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 12),
-                              Text(
-                                '$verses $verseWord • ${isMadani ? t.madani : t.makki}',
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(
-                                      color: Colors.white70,
-                                      fontSize: 16,
-                                    ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Spacer to push controls to bottom
-                const Spacer(),
-
-                // Progress slider (updates independently of main BlocBuilder)
-                const Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  child: _FullPlayerProgressSection(),
-                ),
-
-                // Controls at bottom with padding
-                Padding(
-                  padding: const EdgeInsets.only(
-                    left: 16,
-                    right: 16,
-                    bottom: 30,
-                    top: 8,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      // Repeat button on the left
-                      _RepeatButton(),
-
-                      // Previous button
-                      IconButton(
-                        icon: SvgPicture.asset(
-                          AppAssets.icNext,
-                          width: 32,
-                          height: 32,
-                          colorFilter: ColorFilter.mode(
-                            scheme.onSurface,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                        onPressed: () =>
-                            context.read<AudioCubit>().playNextFromCatalog(),
-                        tooltip: t.next,
-                      ),
-
-                      // Play/Pause button
-                      RawMaterialButton(
-                        onPressed: () => context.read<AudioCubit>().toggle(),
-                        fillColor: scheme.primary,
-                        elevation: 2,
-                        shape: const CircleBorder(),
-                        constraints: const BoxConstraints.tightFor(
-                          width: 72,
-                          height: 72,
-                        ),
-                        child: Icon(
-                          state.isPlaying ? Icons.pause : Icons.play_arrow,
-                          color: Colors.white,
-                          size: 36,
-                        ),
-                      ),
-
-                      // Next button
-                      IconButton(
-                        icon: SvgPicture.asset(
-                          AppAssets.icPrev,
-                          width: 32,
-                          height: 32,
-                          colorFilter: ColorFilter.mode(
-                            scheme.onSurface,
-                            BlendMode.srcIn,
-                          ),
-                        ),
-                        onPressed: () =>
-                            context.read<AudioCubit>().playPrevFromCatalog(),
-                        tooltip: t.previous,
-                      ),
-                      // Settings button
-                      IconButton(
-                        icon: const Icon(Icons.settings_outlined, size: 28),
-                        onPressed: () {
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            useSafeArea: true,
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(16),
-                              ),
-                            ),
-                            builder: (_) => const AudioSettingsSheet(),
-                          );
-                        },
-                        tooltip: t.settings,
-                      ),
-                    ],
-                  ),
-                ),
-                if (state.phase == AudioPhase.error)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.red.withOpacity(0.2)),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.error_outline, color: Colors.red),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              state.errorMessage ?? 'Error',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          TextButton(
-                            onPressed: () => context.read<AudioCubit>().retry(),
-                            child: Text(t.retry),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  ],
-                ),
-
-                // ✅ Buffering overlay (does not affect layout)
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: AnimatedOpacity(
-                    opacity: state.isBuffering ? 1 : 0,
-                    duration: const Duration(milliseconds: 150),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.35),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            'Buffering',
-                            style: TextStyle(color: Colors.white, fontSize: 12),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             );
-          },
-        ),
+          }
+
+          // ✅ Loading boundary - Show loading state
+          if (state.phase == AudioPhase.downloading ||
+              state.phase == AudioPhase.preparing) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(
+                    state.phase == AudioPhase.downloading
+                        ? t.downloadingSurah
+                        : t.preparing,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  if (state.phase == AudioPhase.downloading) ...[
+                    const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 48),
+                      child: LinearProgressIndicator(
+                        value: state.downloadProgress.clamp(0.0, 1.0),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            );
+          }
+
+          // ✅ Validate state before rendering
+          if (state.currentSurah == null) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.music_note,
+                      size: 64,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      t.noSurahSelected,
+                      style: Theme.of(context).textTheme.titleMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(t.back),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          final sNum = state.currentSurah!;
+          final info = QuranLibrary().getSurahInfo(surahNumber: sNum - 1);
+          final verses = quran.getVerseCount(sNum);
+          final place = quran.getPlaceOfRevelation(sNum).toLowerCase();
+          final isMadani = place.contains('mad');
+          final titleLatin = quran.getSurahName(sNum);
+
+          final verseWord = context.tr.aya;
+          return Stack(
+            children: [
+              Column(
+                children: [
+                  // AppBar(
+                  //   title: Text("${info.name} • $titleLatin"),
+                  //   centerTitle: true,
+                  //   backgroundColor: Colors.transparent,
+                  //   leading: IconButton(
+                  //     icon: const Icon(Icons.keyboard_arrow_down),
+                  //     onPressed: () => Navigator.of(context).pop(),
+                  //   ),
+                  // ),
+                  // Surah image taking half of screen height
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.55,
+
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Image.asset(
+                              AppAssets.imgPlayerBgBig,
+                              width: double.infinity,
+                              height: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                            Container(
+                              width: double.infinity,
+                              height: double.infinity,
+                              color: Colors.black.withOpacity(0.12),
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  titleLatin,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 28,
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  info.name,
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontSize: 24,
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  '$verses $verseWord • ${isMadani ? t.madani : t.makki}',
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(
+                                        color: Colors.white70,
+                                        fontSize: 16,
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Spacer to push controls to bottom
+                  const Spacer(),
+
+                  // Progress slider (updates independently of main BlocBuilder)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    child: _FullPlayerProgressSection(),
+                  ),
+
+                  // Controls at bottom with padding
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      bottom: 30,
+                      top: 8,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Repeat button on the left
+                        _RepeatButton(),
+
+                        // Previous button
+                        IconButton(
+                          icon: SvgPicture.asset(
+                            AppAssets.icNext,
+                            width: 32,
+                            height: 32,
+                            colorFilter: ColorFilter.mode(
+                              scheme.onSurface,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          onPressed: () =>
+                              context.read<AudioCubit>().playNextFromCatalog(),
+                          tooltip: t.next,
+                        ),
+
+                        // Play/Pause button
+                        RawMaterialButton(
+                          onPressed: () => context.read<AudioCubit>().toggle(),
+                          fillColor: scheme.primary,
+                          elevation: 2,
+                          shape: const CircleBorder(),
+                          constraints: const BoxConstraints.tightFor(
+                            width: 72,
+                            height: 72,
+                          ),
+                          child: Icon(
+                            state.isPlaying ? Icons.pause : Icons.play_arrow,
+                            color: Colors.white,
+                            size: 36,
+                          ),
+                        ),
+
+                        // Next button
+                        IconButton(
+                          icon: SvgPicture.asset(
+                            AppAssets.icPrev,
+                            width: 32,
+                            height: 32,
+                            colorFilter: ColorFilter.mode(
+                              scheme.onSurface,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          onPressed: () =>
+                              context.read<AudioCubit>().playPrevFromCatalog(),
+                          tooltip: t.previous,
+                        ),
+                        // Settings button
+                        IconButton(
+                          icon: const Icon(Icons.settings_outlined, size: 28),
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              useSafeArea: true,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(16),
+                                ),
+                              ),
+                              builder: (_) => const AudioSettingsSheet(),
+                            );
+                          },
+                          tooltip: t.settings,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (state.phase == AudioPhase.error)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.red.withOpacity(0.2),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error_outline, color: Colors.red),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                state.errorMessage ?? 'Error',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            TextButton(
+                              onPressed: () =>
+                                  context.read<AudioCubit>().retry(),
+                              child: Text(t.retry),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+
+              // ✅ Buffering overlay (does not affect layout)
+              Positioned(
+                top: 12,
+                right: 12,
+                child: AnimatedOpacity(
+                  opacity: state.isBuffering ? 1 : 0,
+                  duration: const Duration(milliseconds: 150),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.35),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'Buffering',
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -431,9 +447,7 @@ class _FullPlayerProgressSection extends StatelessWidget {
             inactiveTrackColor: scheme.primary.withOpacity(0.2),
             thumbColor: scheme.primary,
             trackHeight: 4,
-            thumbShape: const RoundSliderThumbShape(
-              enabledThumbRadius: 8,
-            ),
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
           ),
           child: Slider(
             value: val,
@@ -449,10 +463,7 @@ class _FullPlayerProgressSection extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                _fmt(pos),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+              Text(_fmt(pos), style: Theme.of(context).textTheme.bodySmall),
               Text(
                 _fmt(duration),
                 style: Theme.of(context).textTheme.bodySmall,
