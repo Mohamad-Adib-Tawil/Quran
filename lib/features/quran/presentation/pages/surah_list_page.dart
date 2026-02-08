@@ -19,7 +19,6 @@ class _SurahListPageState extends State<SurahListPage> {
   @override
   void initState() {
     super.initState();
-    // نفّذ القفزة للهدف بعد أول إطار لضمان تهيئة الكنترولرز داخليًا
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_applied) return;
       final t = widget.openTarget;
@@ -37,7 +36,7 @@ class _SurahListPageState extends State<SurahListPage> {
         }
       }
       _applied = true;
-      setState(() {}); // لإعادة بناء الشاشة بعد تطبيق القفزة
+      setState(() {});
     });
   }
 
@@ -48,12 +47,10 @@ class _SurahListPageState extends State<SurahListPage> {
     final primary = Theme.of(context).colorScheme.primary;
     final textColor =
         Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black;
+        
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text(t.appTitle),
-      // ),
       body: QuranLibraryScreen(
-        key: _screenKey, // مفتاح فريد يمنع إعادة استخدام Controllers قديمة
+        key: _screenKey,
         parentContext: context,
         withPageView: true,
         useDefaultAppBar: true,
@@ -62,9 +59,8 @@ class _SurahListPageState extends State<SurahListPage> {
         isDark: isDark,
         backgroundColor: Theme.of(context).colorScheme.surface,
         textColor: textColor,
-        ayahSelectedBackgroundColor: primary.withValues(alpha: 0.12),
+        ayahSelectedBackgroundColor: primary.withOpacity(0.12),
         ayahIconColor: primary,
-
         onAyahLongPress: (details, ayah) {},
         surahInfoStyle: SurahInfoStyle.defaults(
           isDark: isDark,
@@ -72,20 +68,15 @@ class _SurahListPageState extends State<SurahListPage> {
         ),
         basmalaStyle: BasmalaStyle(
           verticalPadding: 0.0,
-          basmalaColor: textColor.withValues(alpha: 0.85),
+          basmalaColor: textColor.withOpacity(0.85),
           basmalaFontSize: 28.0,
         ),
-        // لا نمرر AyahAudioStyle حتى لا تُنشّط منظومة الصوت الداخلية للحزمة
         topBarStyle: QuranTopBarStyle.defaults(isDark: isDark, context: context)
             .copyWith(
               showAudioButton: false,
               showFontsButton: true,
               showMenuButton: true,
               showBackButton: true,
-              // backgroundColor: Theme.of(context).colorScheme.surface,
-              // textColor: Theme.of(context).colorScheme.onSurface,
-              // accentColor: primary,
-              // iconColor: Theme.of(context).colorScheme.onSurface,
               iconSize: 22,
               elevation: 20,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -94,8 +85,6 @@ class _SurahListPageState extends State<SurahListPage> {
               tabSearchLabel: t.searchTab,
               tabJozzLabel: t.tabJuz,
               tabSurahsLabel: t.tabSurahs,
-
-              backgroundColor: Colors.amber,
             ),
         indexTabStyle: IndexTabStyle.defaults(isDark: isDark, context: context)
             .copyWith(
@@ -136,29 +125,14 @@ class _SurahListPageState extends State<SurahListPage> {
               surahNameColor: Theme.of(context).colorScheme.onSurface,
               juzTextColor: primary,
               hizbTextColor: primary,
-              pageNumberColor: Theme.of(
-                context,
-              ).colorScheme.onSurface.withOpacity(0.6),
+              pageNumberColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               sajdaNameColor: primary,
             ),
       ),
-      // ✅ IMPORTANT: Do NOT use SurahAutoSync here.
-      // QuranLibrary().currentAndLastSurahNumber is tied to quran_library's internal AudioCtrl
-      // (not the currently displayed surah), and can transiently reset to Al-Fatiha (1),
-      // which would override the user's selected surah in our AudioCubit.
-      bottomNavigationBar: const Padding(
-        padding: EdgeInsets.only(bottom: 40, left: 20, right: 20),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
         child: MiniAudioPlayer(debugTag: 'SurahListPage'),
       ),
-      // floatingActionButton: FloatingActionButton.extended(
-      //   onPressed: () {
-      //     Navigator.of(context).push(
-      //       MaterialPageRoute(builder: (_) => const AudioDownloadsPage()),
-      //     );
-      //   },
-      //   icon: SvgPicture.asset(AppAssets.icDownloadGreen, width: 20, height: 20),
-      //   label: Text(t.manageAudio),
-      // ),
     );
   }
 }
