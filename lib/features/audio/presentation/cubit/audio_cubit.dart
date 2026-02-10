@@ -228,13 +228,17 @@ class AudioCubit extends Cubit<AudioState> {
 
       // If already downloaded, play it directly without asking for confirmation
       if (hasFile) {
-        debugPrint('📞 [playSurah] Surah already downloaded, calling confirmAndPlaySurah directly');
+        debugPrint(
+          '📞 [playSurah] Surah already downloaded, calling confirmAndPlaySurah directly',
+        );
         await confirmAndPlaySurah(surah, from: from);
         return;
       }
 
       // For non-downloaded surahs, ask for confirmation
-      debugPrint('📞 [playSurah] Surah not downloaded, emitting awaitingConfirmation state');
+      debugPrint(
+        '📞 [playSurah] Surah not downloaded, emitting awaitingConfirmation state',
+      );
       emit(
         state.copyWith(
           pendingSurah: surah,
@@ -243,7 +247,9 @@ class AudioCubit extends Cubit<AudioState> {
           errorMessage: null,
         ),
       );
-      debugPrint('📞 [playSurah] Emitted state with pendingSurah: $surah, phase: awaitingConfirmation');
+      debugPrint(
+        '📞 [playSurah] Emitted state with pendingSurah: $surah, phase: awaitingConfirmation',
+      );
     } on ArgumentError catch (e) {
       debugPrint('❌ [playSurah] Argument error: ${e.message}');
       emit(state.copyWith(phase: AudioPhase.error, errorMessage: e.message));
@@ -263,7 +269,9 @@ class AudioCubit extends Cubit<AudioState> {
     _lastRequestedSurah = surah;
     debugPrint('✅ [confirmAndPlaySurah] Called for Surah: $surah, from: $from');
     // currentSurah is the queued/selected surah
-    debugPrint('✅ [confirmAndPlaySurah] Emitting state with currentSurah: $surah, clearing pendingSurah');
+    debugPrint(
+      '✅ [confirmAndPlaySurah] Emitting state with currentSurah: $surah, clearing pendingSurah',
+    );
     emit(
       state.copyWith(
         currentSurah: surah,
@@ -282,7 +290,9 @@ class AudioCubit extends Cubit<AudioState> {
 
       // If switching to a new surah, stop the previous engine source first.
       if (state.loadedSurah != null && state.loadedSurah != surah) {
-        debugPrint('✅ [confirmAndPlaySurah] Switching from surah ${state.loadedSurah} to $surah, stopping old engine');
+        debugPrint(
+          '✅ [confirmAndPlaySurah] Switching from surah ${state.loadedSurah} to $surah, stopping old engine',
+        );
         await _repo.stop();
         emit(
           state.copyWith(
@@ -301,7 +311,9 @@ class AudioCubit extends Cubit<AudioState> {
 
       // Honor autoDownload preference
       if (!hasFile) {
-        debugPrint('✅ [confirmAndPlaySurah] File not found, autoDownload: ${state.autoDownload}');
+        debugPrint(
+          '✅ [confirmAndPlaySurah] File not found, autoDownload: ${state.autoDownload}',
+        );
         if (state.autoDownload) {
           debugPrint('✅ [confirmAndPlaySurah] Starting download flow');
           await _startDownloadFlow(surah);
@@ -342,8 +354,12 @@ class AudioCubit extends Cubit<AudioState> {
 
   // Reject pending surah (user declined to load)
   void rejectPendingSurah() {
-    debugPrint('⏹️ [rejectPendingSurah] Called, pendingSurah: ${state.pendingSurah}');
-    debugPrint('⏹️ [rejectPendingSurah] Emitting state to clear pending and reset to idle');
+    debugPrint(
+      '⏹️ [rejectPendingSurah] Called, pendingSurah: ${state.pendingSurah}',
+    );
+    debugPrint(
+      '⏹️ [rejectPendingSurah] Emitting state to clear pending and reset to idle',
+    );
     emit(
       state.copyWith(
         pendingSurah: null,
