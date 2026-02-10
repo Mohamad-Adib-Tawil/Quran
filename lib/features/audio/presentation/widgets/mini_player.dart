@@ -32,6 +32,8 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
   int? _lastShownPendingSurah;
   bool _dialogShown = false;
   bool _isDialogProcessing = false;
+  bool _dialogOpenedInThisBuild = false;
+  static bool _globalDialogOpen = false; // Prevent multiple dialogs globally
 
   void _openFullPlayer(BuildContext context) {
     if (widget.onOpenFullPlayer != null) {
@@ -150,12 +152,25 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
             state.pendingSurah != null) {
           final pendingSurahNum = state.pendingSurah!;
 
+          debugPrint('🔵 [Dialog Check] Phase: awaitingConfirmation, Surah: $pendingSurahNum');
+          debugPrint('🔵 [Dialog Check] _dialogShown: $_dialogShown, _lastShownPendingSurah: $_lastShownPendingSurah');
+          debugPrint('🔵 [Dialog Check] _isDialogProcessing: $_isDialogProcessing');
+          debugPrint('🔵 [Dialog Check] _dialogOpenedInThisBuild: $_dialogOpenedInThisBuild');
+          debugPrint('🔵 [Dialog Check] Condition to show: ${(!_dialogShown || _lastShownPendingSurah != pendingSurahNum) && !_isDialogProcessing && !_dialogOpenedInThisBuild}');
+
           // Only show dialog if we haven't shown it yet for this surah
           // AND we're not currently processing a dialog action
+          // AND we haven't already opened a dialog in this build cycle
+          // AND there's no global dialog already open
           if ((!_dialogShown || _lastShownPendingSurah != pendingSurahNum) &&
-              !_isDialogProcessing) {
+              !_isDialogProcessing && 
+              !_dialogOpenedInThisBuild &&
+              !_globalDialogOpen) {
+            debugPrint('✅ [Dialog Show] Showing dialog for Surah: $pendingSurahNum');
             _dialogShown = true;
             _isDialogProcessing = true;
+            _dialogOpenedInThisBuild = true;
+            _globalDialogOpen = true;
             _lastShownPendingSurah = pendingSurahNum;
 
             final pendingInfo = QuranLibrary().getSurahInfo(
@@ -165,6 +180,7 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
             // Show confirmation dialog
             Future.microtask(() {
               if (!context.mounted) return;
+              debugPrint('📱 [Dialog Display] Opening dialog for Surah: $pendingSurahNum');
               showDialog(
                 context: context,
                 barrierDismissible: false,
@@ -174,12 +190,14 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
                   actions: [
                     TextButton(
                       onPressed: () {
+                        debugPrint('❌ [Dialog Action] User clicked NO');
                         Navigator.of(dialogContext).pop(false);
                       },
                       child: Text(t.no),
                     ),
                     TextButton(
                       onPressed: () {
+                        debugPrint('✅ [Dialog Action] User clicked YES');
                         Navigator.of(dialogContext).pop(true);
                       },
                       child: Text(t.yes),
@@ -187,32 +205,50 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
                   ],
                 ),
               ).then((confirmed) {
-                if (!context.mounted) return;
+                debugPrint('🔄 [Dialog Result] Dialog closed, confirmed: $confirmed');
+                debugPrint('🔄 [Dialog Result] context.mounted: ${context.mounted}');
+                if (!context.mounted) {
+                  debugPrint('⚠️ [Dialog Result] Context not mounted, returning');
+                  return;
+                }
 
+                debugPrint('🔄 [Dialog Result] Setting _isDialogProcessing = false');
                 _isDialogProcessing = false;
 
                 if (confirmed == true) {
+                  debugPrint('▶️ [Dialog Action] Calling confirmAndPlaySurah for Surah: $pendingSurahNum');
                   // User clicked "Yes" - start playing
                   context.read<AudioCubit>().confirmAndPlaySurah(
                     pendingSurahNum,
                     from: state.pendingInitialPosition,
                   );
                 } else {
+                  debugPrint('⏹️ [Dialog Action] Calling rejectPendingSurah');
                   // User clicked "No" - reject
                   context.read<AudioCubit>().rejectPendingSurah();
                 }
 
-                // Reset dialog flag after handling
+                // Reset dialog flags after handling
+                debugPrint('🔄 [Dialog Result] Setting _dialogShown = false and _globalDialogOpen = false');
                 _dialogShown = false;
+                _globalDialogOpen = false;
               });
             });
+          } else {
+            debugPrint('⏭️ [Dialog Skip] Skipping dialog - already shown or processing');
           }
 
           return const SizedBox.shrink();
         } else {
           // Reset the flag when not in awaiting confirmation state
+          if (_dialogShown || _isDialogProcessing || _lastShownPendingSurah != null) {
+            debugPrint('🔄 [State Exit] Exiting awaitingConfirmation, resetting flags');
+            debugPrint('🔄 [State Exit] Phase: ${state.phase}, pendingSurah: ${state.pendingSurah}');
+          }
           _dialogShown = false;
           _isDialogProcessing = false;
+          _dialogOpenedInThisBuild = false;
+          _globalDialogOpen = false;
           _lastShownPendingSurah = null;
         }
         final sNum = state.currentSurah ?? 1;
