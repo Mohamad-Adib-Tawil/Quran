@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_app/core/theme/figma_palette.dart';
+import 'package:quran_app/core/theme/figma_typography.dart';
 import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -87,7 +89,47 @@ class _DownloadedTab extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (list.isEmpty) {
-          return Center(child: Text(t.noDownloaded));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Icon with gradient background
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        FigmaPalette.primary.withValues(alpha: 0.15),
+                        FigmaPalette.primary.withValues(alpha: 0.05),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Center(
+                    child: SvgPicture.asset(
+                      AppAssets.icDownloadGreen,
+                      width: 60,
+                      height: 60,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                // Title
+                Text(
+                  t.noDownloaded,
+                  style: FigmaTypography.title18(color: FigmaPalette.textDark),
+                  textAlign: TextAlign.center,
+                ),
+
+                // Description
+                const SizedBox(height: 48),
+              ],
+            ),
+          );
         }
         return ListView.separated(
           itemCount: list.length,
