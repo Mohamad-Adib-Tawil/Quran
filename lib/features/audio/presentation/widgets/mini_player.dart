@@ -112,7 +112,8 @@ class MiniAudioPlayer extends StatelessWidget {
             prev.isPlaying != curr.isPlaying ||
             prev.phase != curr.phase ||
             prev.downloadProgress != curr.downloadProgress ||
-            prev.errorMessage != curr.errorMessage;
+            prev.errorMessage != curr.errorMessage ||
+            prev.pendingSurah != curr.pendingSurah;
       },
       builder: (context, state) {
         if (kDebugMode) {
@@ -126,14 +127,61 @@ class MiniAudioPlayer extends StatelessWidget {
         }
 
         if (hideWhenIdle) {
-          if ((state.currentSurah == null && state.url == null) ||
+          if ((state.currentSurah == null &&
+                  state.url == null &&
+                  state.pendingSurah == null) ||
               state.phase == AudioPhase.idle) {
             return const SizedBox.shrink();
           }
         } else {
-          if (state.currentSurah == null && state.url == null) {
+          if (state.currentSurah == null &&
+              state.url == null &&
+              state.pendingSurah == null) {
             return const SizedBox.shrink();
           }
+        }
+
+        // Handle awaiting confirmation state - show confirmation dialog
+        if (state.phase == AudioPhase.awaitingConfirmation &&
+            state.pendingSurah != null) {
+          final pendingSurahNum = state.pendingSurah!;
+          final pendingInfo = QuranLibrary().getSurahInfo(
+            surahNumber: pendingSurahNum - 1,
+          );
+
+          // Show confirmation dialog
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) return;
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (dialogContext) => AlertDialog(
+                title: Text(t.confirmLoadSurah),
+                content: Text('${t.loadSurah} ${pendingInfo.name}؟'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                      context.read<AudioCubit>().rejectPendingSurah();
+                    },
+                    child: Text(t.no),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                      context.read<AudioCubit>().confirmAndPlaySurah(
+                        pendingSurahNum,
+                        from: state.pendingInitialPosition,
+                      );
+                    },
+                    child: Text(t.yes),
+                  ),
+                ],
+              ),
+            );
+          });
+
+          return const SizedBox.shrink();
         }
 
         final sNum = state.currentSurah ?? 1;
@@ -231,8 +279,6 @@ class MiniAudioPlayer extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                
-
                   // صف المحتوى الرئيسي
                   Padding(
                     padding: const EdgeInsets.symmetric(

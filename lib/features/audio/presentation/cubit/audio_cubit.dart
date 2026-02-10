@@ -191,10 +191,49 @@ class AudioCubit extends Cubit<AudioState> {
   }
 
   // New API: unified play that auto-downloads if needed
+  // Now sets pending state and waits for user confirmation
   Future<void> playSurah(int surah, {Duration? from}) async {
     _lastRequestedSurah = surah;
+
+    try {
+      // ✅ Validate input
+      if (surah < 1 || surah > 114) {
+        throw ArgumentError('رقم السورة غير صحيح: $surah');
+      }
+
+      // Set pending surah and wait for user confirmation via MiniAudioPlayer
+      emit(
+        state.copyWith(
+          pendingSurah: surah,
+          pendingInitialPosition: from,
+          phase: AudioPhase.awaitingConfirmation,
+          errorMessage: null,
+        ),
+      );
+    } on ArgumentError catch (e) {
+      emit(state.copyWith(phase: AudioPhase.error, errorMessage: e.message));
+    } catch (e) {
+      emit(
+        state.copyWith(
+          phase: AudioPhase.error,
+          errorMessage: 'فشل تشغيل السورة: ${e.toString()}',
+        ),
+      );
+    }
+  }
+
+  // Confirms and starts playing the pending surah
+  Future<void> confirmAndPlaySurah(int surah, {Duration? from}) async {
+    _lastRequestedSurah = surah;
     // currentSurah is the queued/selected surah
-    emit(state.copyWith(currentSurah: surah, errorMessage: null));
+    emit(
+      state.copyWith(
+        currentSurah: surah,
+        pendingSurah: null,
+        pendingInitialPosition: null,
+        errorMessage: null,
+      ),
+    );
 
     try {
       // ✅ Validate input
@@ -249,8 +288,19 @@ class AudioCubit extends Cubit<AudioState> {
   Future<void> retry() async {
     final s = _lastRequestedSurah ?? state.currentSurah;
     if (s != null) {
-      await playSurah(s, from: Duration.zero);
+      await confirmAndPlaySurah(s, from: Duration.zero);
     }
+  }
+
+  // Reject pending surah (user declined to load)
+  void rejectPendingSurah() {
+    emit(
+      state.copyWith(
+        pendingSurah: null,
+        pendingInitialPosition: null,
+        phase: AudioPhase.idle,
+      ),
+    );
   }
 
   // Repeat mode control

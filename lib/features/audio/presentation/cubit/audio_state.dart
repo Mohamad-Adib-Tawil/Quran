@@ -1,6 +1,15 @@
 import 'package:equatable/equatable.dart';
 
-enum AudioPhase { idle, downloading, preparing, playing, paused, error }
+enum AudioPhase {
+  idle,
+  downloading,
+  preparing,
+  playing,
+  paused,
+  error,
+  awaitingConfirmation,
+}
+
 /// Visual/behavioral repeat configuration
 enum RepeatMode { one, off, next }
 
@@ -10,6 +19,7 @@ class AudioState extends Equatable {
   final bool isPlaying;
   final Duration position;
   final Duration? duration;
+
   /// The surah currently selected/queued in the UI.
   final int? currentSurah;
 
@@ -22,13 +32,16 @@ class AudioState extends Equatable {
   final bool isBuffering;
 
   // New fields for unified flow
-  final AudioPhase phase; // idle | downloading | preparing | playing | paused | error
+  final AudioPhase
+  phase; // idle | downloading | preparing | playing | paused | error
   final double downloadProgress; // 0..1
   final String? errorMessage;
   final RepeatMode repeatMode; // one | off | next
   final double speed; // 0.5 .. 2.0
   final bool autoDownload; // auto download when playing a surah
   final Duration? sleepTimer; // null = off
+  final int? pendingSurah; // surah awaiting user confirmation
+  final Duration? pendingInitialPosition; // initial position for pending surah
 
   const AudioState({
     required this.url,
@@ -45,24 +58,28 @@ class AudioState extends Equatable {
     required this.speed,
     required this.autoDownload,
     required this.sleepTimer,
+    this.pendingSurah,
+    this.pendingInitialPosition,
   });
 
   factory AudioState.initial() => const AudioState(
-        url: null,
-        isPlaying: false,
-        position: Duration.zero,
-        duration: null,
-        currentSurah: null,
-        loadedSurah: null,
-        isBuffering: false,
-        phase: AudioPhase.idle,
-        downloadProgress: 0.0,
-        errorMessage: null,
-        repeatMode: RepeatMode.one,
-        speed: 1.0,
-        autoDownload: true,
-        sleepTimer: null,
-      );
+    url: null,
+    isPlaying: false,
+    position: Duration.zero,
+    duration: null,
+    currentSurah: null,
+    loadedSurah: null,
+    isBuffering: false,
+    phase: AudioPhase.idle,
+    downloadProgress: 0.0,
+    errorMessage: null,
+    repeatMode: RepeatMode.one,
+    speed: 1.0,
+    autoDownload: true,
+    sleepTimer: null,
+    pendingSurah: null,
+    pendingInitialPosition: null,
+  );
 
   /// copyWith supports clearing nullable fields by passing explicit `null`.
   /// For nullable fields we use a sentinel value to differentiate between
@@ -82,41 +99,59 @@ class AudioState extends Equatable {
     double? speed,
     bool? autoDownload,
     Object? sleepTimer = _noChange,
-  }) =>
-      AudioState(
-        url: url == _noChange ? this.url : url as String?,
-        isPlaying: isPlaying ?? this.isPlaying,
-        position: position ?? this.position,
-        duration: duration == _noChange ? this.duration : duration as Duration?,
-        currentSurah: currentSurah == _noChange ? this.currentSurah : currentSurah as int?,
-        loadedSurah: loadedSurah == _noChange ? this.loadedSurah : loadedSurah as int?,
-        isBuffering: isBuffering ?? this.isBuffering,
-        phase: phase ?? this.phase,
-        downloadProgress: downloadProgress ?? this.downloadProgress,
-        errorMessage: errorMessage == _noChange ? this.errorMessage : errorMessage as String?,
-        repeatMode: repeatMode ?? this.repeatMode,
-        speed: speed ?? this.speed,
-        autoDownload: autoDownload ?? this.autoDownload,
-        sleepTimer: sleepTimer == _noChange ? this.sleepTimer : sleepTimer as Duration?,
-      );
+    Object? pendingSurah = _noChange,
+    Object? pendingInitialPosition = _noChange,
+  }) => AudioState(
+    url: url == _noChange ? this.url : url as String?,
+    isPlaying: isPlaying ?? this.isPlaying,
+    position: position ?? this.position,
+    duration: duration == _noChange ? this.duration : duration as Duration?,
+    currentSurah: currentSurah == _noChange
+        ? this.currentSurah
+        : currentSurah as int?,
+    loadedSurah: loadedSurah == _noChange
+        ? this.loadedSurah
+        : loadedSurah as int?,
+    isBuffering: isBuffering ?? this.isBuffering,
+    phase: phase ?? this.phase,
+    downloadProgress: downloadProgress ?? this.downloadProgress,
+    errorMessage: errorMessage == _noChange
+        ? this.errorMessage
+        : errorMessage as String?,
+    repeatMode: repeatMode ?? this.repeatMode,
+    speed: speed ?? this.speed,
+    autoDownload: autoDownload ?? this.autoDownload,
+    sleepTimer: sleepTimer == _noChange
+        ? this.sleepTimer
+        : sleepTimer as Duration?,
+    pendingSurah: pendingSurah == _noChange
+        ? this.pendingSurah
+        : pendingSurah as int?,
+    pendingInitialPosition: pendingInitialPosition == _noChange
+        ? this.pendingInitialPosition
+        : pendingInitialPosition as Duration?,
+  );
 
   @override
   List<Object?> get props => [
-        url,
-        isPlaying,
-        position,
-        duration,
-        currentSurah,
-        loadedSurah,
-        isBuffering,
-        phase,
-        downloadProgress,
-        errorMessage,
-        repeatMode,
-        speed,
-        autoDownload,
-        sleepTimer,
-      ];
+    url,
+    isPlaying,
+    position,
+    duration,
+    currentSurah,
+    loadedSurah,
+    isBuffering,
+    phase,
+    downloadProgress,
+    errorMessage,
+    repeatMode,
+    speed,
+    autoDownload,
+    sleepTimer,
+    pendingSurah,
+    pendingInitialPosition,
+  ];
 
-  bool get isLoading => phase == AudioPhase.downloading || phase == AudioPhase.preparing;
+  bool get isLoading =>
+      phase == AudioPhase.downloading || phase == AudioPhase.preparing;
 }

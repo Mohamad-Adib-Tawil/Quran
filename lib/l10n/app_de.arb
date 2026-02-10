@@ -60,5 +60,9 @@
   "back": "Zurück",
   "preparing": "Vorbereitung...",
   "noSurahSelected": "Keine Sure ausgewählt",
-  "ready": "Bereit"
+  "ready": "Bereit",
+  "confirmLoadSurah": "Sure zum Herunterladen bestätigen",
+  "loadSurah": "Möchten Sie",
+  "yes": "Ja",
+  "no": "Nein"
 }

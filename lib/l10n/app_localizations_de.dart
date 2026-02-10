@@ -199,4 +199,16 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get ready => 'Bereit';
+
+  @override
+  String get confirmLoadSurah => 'Sure zum Herunterladen bestätigen';
+
+  @override
+  String get loadSurah => 'Möchten Sie';
+
+  @override
+  String get yes => 'Ja';
+
+  @override
+  String get no => 'Nein';
 }

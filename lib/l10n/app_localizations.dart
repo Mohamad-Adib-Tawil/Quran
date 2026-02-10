@@ -469,6 +469,30 @@ abstract class AppLocalizations {
   /// In ar, this message translates to:
   /// **'جاهزة'**
   String get ready;
+
+  /// No description provided for @confirmLoadSurah.
+  ///
+  /// In ar, this message translates to:
+  /// **'تأكيد تحميل السورة'**
+  String get confirmLoadSurah;
+
+  /// No description provided for @loadSurah.
+  ///
+  /// In ar, this message translates to:
+  /// **'هل تريد تحميل'**
+  String get loadSurah;
+
+  /// No description provided for @yes.
+  ///
+  /// In ar, this message translates to:
+  /// **'نعم'**
+  String get yes;
+
+  /// No description provided for @no.
+  ///
+  /// In ar, this message translates to:
+  /// **'لا'**
+  String get no;
 }
 
 class _AppLocalizationsDelegate
