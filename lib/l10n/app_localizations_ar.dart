@@ -199,4 +199,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get ready => 'جاهزة';
+
+  @override
+  String get confirmLoadSurah => 'تأكيد تحميل السورة';
+
+  @override
+  String get loadSurah => 'هل تريد تحميل';
+
+  @override
+  String get yes => 'نعم';
+
+  @override
+  String get no => 'لا';
 }

@@ -60,5 +60,9 @@
   "back": "رجوع",
   "preparing": "جاري التحضير...",
   "noSurahSelected": "لم يتم اختيار سورة",
-  "ready": "جاهزة"
+  "ready": "جاهزة",
+  "confirmLoadSurah": "تأكيد تحميل السورة",
+  "loadSurah": "هل تريد تحميل",
+  "yes": "نعم",
+  "no": "لا"
 }
