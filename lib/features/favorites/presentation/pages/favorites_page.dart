@@ -64,6 +64,89 @@ class _FavoritesPageState extends State<FavoritesPage> {
     _load();
   }
 
+  Widget _buildEmptyState(BuildContext context, dynamic t) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Icon with gradient background
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  FigmaPalette.primary.withValues(alpha: 0.15),
+                  FigmaPalette.primary.withValues(alpha: 0.05),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Center(
+              child: SvgPicture.asset(
+                AppAssets.icStarGray,
+                width: 60,
+                height: 60,
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          // Title
+          Text(
+            t.noFavorites,
+            style: FigmaTypography.title18(color: FigmaPalette.textDark),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          // Description
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'اضفهم إلى المفضلة عن طريق النقر على النجمة',
+              style: FigmaTypography.body13(color: Colors.black54),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 48),
+          // Illustration with animation
+          // Container(
+          //   width: 200,
+          //   height: 150,
+          //   decoration: BoxDecoration(
+          //     color: FigmaPalette.primary.withValues(alpha: 0.08),
+          //     borderRadius: BorderRadius.circular(20),
+          //     border: Border.all(
+          //       color: FigmaPalette.primary.withValues(alpha: 0.2),
+          //       width: 1.5,
+          //     ),
+          //   ),
+          //   child: Column(
+          //     mainAxisAlignment: MainAxisAlignment.center,
+          //     children: [
+          //       SvgPicture.asset(
+          //         AppAssets.icStarGreen,
+          //         width: 40,
+          //         height: 40,
+          //       ),
+          //       const SizedBox(height: 16),
+          //       Text(
+          //         'ابدأ بإضافة سور مفضلة',
+          //         style: FigmaTypography.body13(
+          //           color: FigmaPalette.primary,
+          //         ),
+          //         textAlign: TextAlign.center,
+          //       ),
+          //     ],
+          //   ),
+          // ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final t = context.tr;
@@ -96,7 +179,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
         ],
       ),
       body: _favorites.isEmpty
-          ? Center(child: Text(t.noFavorites))
+          ? _buildEmptyState(context, t)
           : ListView.separated(
               padding: const EdgeInsets.all(12),
               itemCount: _favorites.length,
