@@ -73,7 +73,7 @@ class AudioState extends Equatable {
     phase: AudioPhase.idle,
     downloadProgress: 0.0,
     errorMessage: null,
-    repeatMode: RepeatMode.one,
+    repeatMode: RepeatMode.off,
     speed: 1.0,
     autoDownload: true,
     sleepTimer: null,
