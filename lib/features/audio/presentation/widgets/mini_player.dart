@@ -31,6 +31,7 @@ class MiniAudioPlayer extends StatefulWidget {
 class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
   int? _lastShownPendingSurah;
   bool _dialogShown = false;
+  bool _isDialogProcessing = false;
 
   void _openFullPlayer(BuildContext context) {
     if (widget.onOpenFullPlayer != null) {
@@ -150,15 +151,18 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
           final pendingSurahNum = state.pendingSurah!;
 
           // Only show dialog if we haven't shown it yet for this surah
-          if (!_dialogShown || _lastShownPendingSurah != pendingSurahNum) {
+          // AND we're not currently processing a dialog action
+          if ((!_dialogShown || _lastShownPendingSurah != pendingSurahNum) &&
+              !_isDialogProcessing) {
             _dialogShown = true;
+            _isDialogProcessing = true;
             _lastShownPendingSurah = pendingSurahNum;
 
             final pendingInfo = QuranLibrary().getSurahInfo(
               surahNumber: pendingSurahNum - 1,
             );
 
-            // Show confirmation dialog directly
+            // Show confirmation dialog
             Future.microtask(() {
               if (!context.mounted) return;
               showDialog(
@@ -170,26 +174,37 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
                   actions: [
                     TextButton(
                       onPressed: () {
-                        Navigator.of(dialogContext).pop();
-                        _dialogShown = false;
-                        context.read<AudioCubit>().rejectPendingSurah();
+                        Navigator.of(dialogContext).pop(false);
                       },
                       child: Text(t.no),
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.of(dialogContext).pop();
-                        _dialogShown = false;
-                        context.read<AudioCubit>().confirmAndPlaySurah(
-                          pendingSurahNum,
-                          from: state.pendingInitialPosition,
-                        );
+                        Navigator.of(dialogContext).pop(true);
                       },
                       child: Text(t.yes),
                     ),
                   ],
                 ),
-              );
+              ).then((confirmed) {
+                if (!context.mounted) return;
+
+                _isDialogProcessing = false;
+
+                if (confirmed == true) {
+                  // User clicked "Yes" - start playing
+                  context.read<AudioCubit>().confirmAndPlaySurah(
+                    pendingSurahNum,
+                    from: state.pendingInitialPosition,
+                  );
+                } else {
+                  // User clicked "No" - reject
+                  context.read<AudioCubit>().rejectPendingSurah();
+                }
+
+                // Reset dialog flag after handling
+                _dialogShown = false;
+              });
             });
           }
 
@@ -197,6 +212,7 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
         } else {
           // Reset the flag when not in awaiting confirmation state
           _dialogShown = false;
+          _isDialogProcessing = false;
           _lastShownPendingSurah = null;
         }
         final sNum = state.currentSurah ?? 1;
