@@ -12,7 +12,7 @@ import 'package:quran_app/features/audio/presentation/pages/full_player_page.dar
 import '../cubit/audio_cubit.dart';
 import '../cubit/audio_state.dart';
 
-class MiniAudioPlayer extends StatelessWidget {
+class MiniAudioPlayer extends StatefulWidget {
   final bool hideWhenIdle;
   final String debugTag;
   final VoidCallback? onOpenFullPlayer;
@@ -24,9 +24,17 @@ class MiniAudioPlayer extends StatelessWidget {
     this.onOpenFullPlayer,
   });
 
+  @override
+  State<MiniAudioPlayer> createState() => _MiniAudioPlayerState();
+}
+
+class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
+  int? _lastShownPendingSurah;
+  bool _dialogShown = false;
+
   void _openFullPlayer(BuildContext context) {
-    if (onOpenFullPlayer != null) {
-      onOpenFullPlayer!();
+    if (widget.onOpenFullPlayer != null) {
+      widget.onOpenFullPlayer!();
     } else {
       _navigateToFullPlayerWithPremiumAnimation(context);
     }
@@ -39,11 +47,6 @@ class MiniAudioPlayer extends StatelessWidget {
             const FullPlayerPage(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           // متعدد الطبقات - أنيميشن احترافية
-          final curvedAnimation = CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOutCubic,
-          );
-
           return Stack(
             children: [
               // خلفية تتلاشى
@@ -118,7 +121,7 @@ class MiniAudioPlayer extends StatelessWidget {
       builder: (context, state) {
         if (kDebugMode) {
           _MiniPlayerDebugLog.maybeLog(
-            tag: debugTag,
+            tag: widget.debugTag,
             phase: state.phase,
             surah: state.currentSurah,
             isPlaying: state.isPlaying,
@@ -126,7 +129,7 @@ class MiniAudioPlayer extends StatelessWidget {
           );
         }
 
-        if (hideWhenIdle) {
+        if (widget.hideWhenIdle) {
           if ((state.currentSurah == null &&
                   state.url == null &&
                   state.pendingSurah == null) ||
@@ -145,45 +148,57 @@ class MiniAudioPlayer extends StatelessWidget {
         if (state.phase == AudioPhase.awaitingConfirmation &&
             state.pendingSurah != null) {
           final pendingSurahNum = state.pendingSurah!;
-          final pendingInfo = QuranLibrary().getSurahInfo(
-            surahNumber: pendingSurahNum - 1,
-          );
 
-          // Show confirmation dialog
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (!context.mounted) return;
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (dialogContext) => AlertDialog(
-                title: Text(t.confirmLoadSurah),
-                content: Text('${t.loadSurah} ${pendingInfo.name}؟'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(dialogContext).pop();
-                      context.read<AudioCubit>().rejectPendingSurah();
-                    },
-                    child: Text(t.no),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(dialogContext).pop();
-                      context.read<AudioCubit>().confirmAndPlaySurah(
-                        pendingSurahNum,
-                        from: state.pendingInitialPosition,
-                      );
-                    },
-                    child: Text(t.yes),
-                  ),
-                ],
-              ),
+          // Only show dialog if we haven't shown it yet for this surah
+          if (!_dialogShown || _lastShownPendingSurah != pendingSurahNum) {
+            _dialogShown = true;
+            _lastShownPendingSurah = pendingSurahNum;
+
+            final pendingInfo = QuranLibrary().getSurahInfo(
+              surahNumber: pendingSurahNum - 1,
             );
-          });
+
+            // Show confirmation dialog directly
+            Future.microtask(() {
+              if (!context.mounted) return;
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (dialogContext) => AlertDialog(
+                  title: Text(t.confirmLoadSurah),
+                  content: Text('${t.loadSurah} ${pendingInfo.name}؟'),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop();
+                        _dialogShown = false;
+                        context.read<AudioCubit>().rejectPendingSurah();
+                      },
+                      child: Text(t.no),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(dialogContext).pop();
+                        _dialogShown = false;
+                        context.read<AudioCubit>().confirmAndPlaySurah(
+                          pendingSurahNum,
+                          from: state.pendingInitialPosition,
+                        );
+                      },
+                      child: Text(t.yes),
+                    ),
+                  ],
+                ),
+              );
+            });
+          }
 
           return const SizedBox.shrink();
+        } else {
+          // Reset the flag when not in awaiting confirmation state
+          _dialogShown = false;
+          _lastShownPendingSurah = null;
         }
-
         final sNum = state.currentSurah ?? 1;
         final info = QuranLibrary().getSurahInfo(surahNumber: sNum - 1);
 
@@ -389,7 +404,8 @@ class MiniAudioPlayer extends StatelessWidget {
                               width: 14,
                               height: 14,
                             ),
-                            onPressed: () => context.read<AudioCubit>().stop(),
+                            onPressed: () =>
+                                context.read<AudioCubit>().clearAudio(),
                             tooltip: t.stop,
                           ),
                         ),

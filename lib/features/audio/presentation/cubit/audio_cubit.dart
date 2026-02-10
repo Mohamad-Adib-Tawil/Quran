@@ -162,7 +162,26 @@ class AudioCubit extends Cubit<AudioState> {
   }
 
   Future<void> pause() => _repo.pause();
+
   Future<void> stop() => _repo.stop();
+
+  // Clear audio player completely (stop and clear all state)
+  Future<void> clearAudio() async {
+    await _repo.stop();
+    emit(
+      state.copyWith(
+        currentSurah: null,
+        loadedSurah: null,
+        url: null,
+        position: Duration.zero,
+        duration: null,
+        isPlaying: false,
+        isBuffering: false,
+        phase: AudioPhase.idle,
+      ),
+    );
+  }
+
   Future<void> seek(Duration position) => _repo.seek(position);
 
   Future<void> toggle() async {
@@ -191,7 +210,7 @@ class AudioCubit extends Cubit<AudioState> {
   }
 
   // New API: unified play that auto-downloads if needed
-  // Now sets pending state and waits for user confirmation
+  // Now sets pending state and waits for user confirmation only for non-downloaded surahs
   Future<void> playSurah(int surah, {Duration? from}) async {
     _lastRequestedSurah = surah;
 
@@ -201,7 +220,16 @@ class AudioCubit extends Cubit<AudioState> {
         throw ArgumentError('رقم السورة غير صحيح: $surah');
       }
 
-      // Set pending surah and wait for user confirmation via MiniAudioPlayer
+      // Check if the surah is already downloaded
+      final hasFile = await _downloadRepo.isDownloaded(surah);
+
+      // If already downloaded, play it directly without asking for confirmation
+      if (hasFile) {
+        await confirmAndPlaySurah(surah, from: from);
+        return;
+      }
+
+      // For non-downloaded surahs, ask for confirmation
       emit(
         state.copyWith(
           pendingSurah: surah,
@@ -231,6 +259,7 @@ class AudioCubit extends Cubit<AudioState> {
         currentSurah: surah,
         pendingSurah: null,
         pendingInitialPosition: null,
+        phase: AudioPhase.preparing,
         errorMessage: null,
       ),
     );
