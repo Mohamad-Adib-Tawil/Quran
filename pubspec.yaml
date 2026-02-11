@@ -26,6 +26,7 @@ dependencies:
   flutter_cache_manager: ^3.3.1
   background_downloader: ^8.7.2
   path_provider: ^2.1.4
+  share_plus: ^11.0.0
   intl: ^0.20.2
   google_fonts: ^6.2.1
   flutter_svg: ^2.0.10+1
