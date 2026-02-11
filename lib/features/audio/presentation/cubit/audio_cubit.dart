@@ -322,11 +322,19 @@ class AudioCubit extends Cubit<AudioState> {
   }
 
   // Reject pending surah (user declined to load)
-  void rejectPendingSurah() {
+  Future<void> rejectPendingSurah() async {
+    await _repo.stop();
     emit(
       state.copyWith(
         pendingSurah: null,
         pendingInitialPosition: null,
+        currentSurah: null,
+        loadedSurah: null,
+        url: null,
+        position: Duration.zero,
+        duration: null,
+        isPlaying: false,
+        isBuffering: false,
         phase: AudioPhase.idle,
       ),
     );
