@@ -5,7 +5,7 @@ import 'dart:math' as math;
 import 'package:quran_library/quran_library.dart';
 import 'package:quran/quran.dart' as quran;
 import 'package:quran_app/core/theme/design_tokens.dart';
-import 'package:quran_app/features/quran/presentation/pages/surah_list_page.dart';
+import 'package:quran_app/features/quran/presentation/pages/quran_surah_page.dart';
 import 'package:quran_app/features/quran/presentation/navigation/quran_open_target.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,7 +23,9 @@ class LastReadCard extends StatelessWidget {
     final theme = Theme.of(context);
     final t = context.tr;
     final info = QuranLibrary().getSurahInfo(surahNumber: surah - 1);
-    final isGerman = Localizations.localeOf(context).languageCode.startsWith('de');
+    final isGerman = Localizations.localeOf(
+      context,
+    ).languageCode.startsWith('de');
     final surahTitle = isGerman ? quran.getSurahName(surah) : info.name;
     return InkWell(
       onTap: () {
@@ -31,7 +33,8 @@ class LastReadCard extends StatelessWidget {
         context.read<AudioCubit>().selectSurah(surah);
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(surah)),
+            builder: (_) =>
+                QuranSurahPage(openTarget: QuranOpenTarget.surah(surah)),
           ),
         );
       },
@@ -50,10 +53,7 @@ class LastReadCard extends StatelessWidget {
                         fit: BoxFit.cover,
                       ),
                     )
-                  : Image.asset(
-                      AppAssets.imgLastReadBg,
-                      fit: BoxFit.cover,
-                    ),
+                  : Image.asset(AppAssets.imgLastReadBg, fit: BoxFit.cover),
             ),
             Container(
               padding: const EdgeInsets.all(16),
@@ -63,9 +63,22 @@ class LastReadCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      SvgPicture.asset(AppAssets.icBookmarkSaved, width: 18, height: 18, colorFilter: const ColorFilter.mode(Colors.white70, BlendMode.srcIn)),
+                      SvgPicture.asset(
+                        AppAssets.icBookmarkSaved,
+                        width: 18,
+                        height: 18,
+                        colorFilter: const ColorFilter.mode(
+                          Colors.white70,
+                          BlendMode.srcIn,
+                        ),
+                      ),
                       const SizedBox(width: 8),
-                      Text(t.lastRead, style: theme.textTheme.labelLarge?.copyWith(color: Colors.white70)),
+                      Text(
+                        t.lastRead,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: Colors.white70,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -73,7 +86,10 @@ class LastReadCard extends StatelessWidget {
                     alignment: AlignmentDirectional.centerStart,
                     child: Text(
                       surahTitle,
-                      style: theme.textTheme.titleLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.start,
                     ),
                   ),
@@ -84,7 +100,9 @@ class LastReadCard extends StatelessWidget {
                       // Surah info (e.g., مدنية • 200 آية)
                       Text(
                         '${_revelationText(context, surah)} • ${_verseCountText(context, surah)}',
-                        style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white,
+                        ),
                       ),
                       const SizedBox(width: 12),
                       _AyahChip(ayah: ayah),
@@ -129,7 +147,12 @@ class _AyahChip extends StatelessWidget {
         children: [
           SvgPicture.asset(AppAssets.icLastAya, width: 16, height: 16),
           const SizedBox(width: 6),
-          Text(context.tr.ayahNumber(ayah), style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white)),
+          Text(
+            context.tr.ayahNumber(ayah),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.white),
+          ),
           const SizedBox(width: 8),
           // SvgPicture.asset(AppAssets.icPlayMini, width: 18, height: 18, colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn)),
         ],

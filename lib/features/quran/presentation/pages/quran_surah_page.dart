@@ -4,15 +4,15 @@ import 'package:quran_app/features/audio/presentation/widgets/mini_player.dart';
 import 'package:quran_app/features/quran/presentation/navigation/quran_open_target.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 
-class SurahListPage extends StatefulWidget {
+class QuranSurahPage extends StatefulWidget {
   final QuranOpenTarget? openTarget;
-  const SurahListPage({super.key, this.openTarget});
+  const QuranSurahPage({super.key, this.openTarget});
 
   @override
-  State<SurahListPage> createState() => _SurahListPageState();
+  State<QuranSurahPage> createState() => _QuranSurahPageState();
 }
 
-class _SurahListPageState extends State<SurahListPage> {
+class _QuranSurahPageState extends State<QuranSurahPage> {
   bool _applied = false;
   final Key _screenKey = UniqueKey();
 
@@ -47,7 +47,7 @@ class _SurahListPageState extends State<SurahListPage> {
     final primary = Theme.of(context).colorScheme.primary;
     final textColor =
         Theme.of(context).textTheme.bodyMedium?.color ?? Colors.black;
-        
+
     return Scaffold(
       body: QuranLibraryScreen(
         key: _screenKey,
@@ -125,7 +125,9 @@ class _SurahListPageState extends State<SurahListPage> {
               surahNameColor: Theme.of(context).colorScheme.onSurface,
               juzTextColor: primary,
               hizbTextColor: primary,
-              pageNumberColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              pageNumberColor: Theme.of(
+                context,
+              ).colorScheme.onSurface.withOpacity(0.6),
               sajdaNameColor: primary,
             ),
       ),

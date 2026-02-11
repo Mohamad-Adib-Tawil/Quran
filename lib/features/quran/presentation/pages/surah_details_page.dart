@@ -6,7 +6,7 @@ import 'package:quran_app/core/theme/figma_palette.dart';
 import 'package:quran_app/core/theme/figma_typography.dart';
 import 'package:quran_app/core/theme/design_tokens.dart';
 import 'package:quran_app/features/quran/presentation/navigation/quran_open_target.dart';
-import 'package:quran_app/features/quran/presentation/pages/surah_list_page.dart';
+import 'package:quran_app/features/quran/presentation/pages/quran_surah_page.dart';
 import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
 import 'package:quran_app/core/di/service_locator.dart';
@@ -64,7 +64,9 @@ class _SurahDetailsPageState extends State<SurahDetailsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final info = QuranLibrary().getSurahInfo(surahNumber: widget.surahNumber - 1);
+    final info = QuranLibrary().getSurahInfo(
+      surahNumber: widget.surahNumber - 1,
+    );
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
@@ -72,7 +74,11 @@ class _SurahDetailsPageState extends State<SurahDetailsPage> {
         actions: [
           IconButton(
             onPressed: _toggleFav,
-            icon: SvgPicture.asset(_isFav ? AppAssets.icStarGreen : AppAssets.icStarGray, width: 22, height: 22),
+            icon: SvgPicture.asset(
+              _isFav ? AppAssets.icStarGreen : AppAssets.icStarGray,
+              width: 22,
+              height: 22,
+            ),
             tooltip: _isFav ? 'إزالة من المفضلة' : 'إضافة إلى المفضلة',
           ),
         ],
@@ -90,7 +96,9 @@ class _SurahDetailsPageState extends State<SurahDetailsPage> {
               context.read<AudioCubit>().selectSurah(widget.surahNumber);
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => SurahListPage(openTarget: QuranOpenTarget.surah(widget.surahNumber)),
+                  builder: (_) => QuranSurahPage(
+                    openTarget: QuranOpenTarget.surah(widget.surahNumber),
+                  ),
                 ),
               );
             },
@@ -101,7 +109,12 @@ class _SurahDetailsPageState extends State<SurahDetailsPage> {
           _InfoTile(title: 'الاسم', value: info.name),
           const Divider(height: 1, color: FigmaPalette.divider),
           const SizedBox(height: 16),
-          Text('التفسير', style: FigmaTypography.title18(color: Theme.of(context).colorScheme.onSurface)),
+          Text(
+            'التفسير',
+            style: FigmaTypography.title18(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
           const SizedBox(height: 12),
           if (_loadingTafsir)
             const Center(child: CircularProgressIndicator())
@@ -115,7 +128,10 @@ class _SurahDetailsPageState extends State<SurahDetailsPage> {
               ),
             )
           else
-            Text('تعذّر تحميل التفسير حاليًا', style: FigmaTypography.body13(color: Theme.of(context).hintColor)),
+            Text(
+              'تعذّر تحميل التفسير حاليًا',
+              style: FigmaTypography.body13(color: Theme.of(context).hintColor),
+            ),
         ],
       ),
     );
@@ -148,13 +164,26 @@ class _HeaderCard extends StatelessWidget {
               color: Colors.white.withValues(alpha: .15),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text('$surahNumber', style: FigmaTypography.title18(color: Colors.white)),
+            child: Text(
+              '$surahNumber',
+              style: FigmaTypography.title18(color: Colors.white),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(title, style: FigmaTypography.title19(color: Colors.white), maxLines: 1, overflow: TextOverflow.ellipsis),
+            child: Text(
+              title,
+              style: FigmaTypography.title19(color: Colors.white),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          SvgPicture.asset(AppAssets.icPlayMini, width: 28, height: 28, colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn)),
+          SvgPicture.asset(
+            AppAssets.icPlayMini,
+            width: 28,
+            height: 28,
+            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          ),
         ],
       ),
     );
@@ -165,7 +194,11 @@ class _PrimaryAction extends StatelessWidget {
   final String label;
   final String iconPath;
   final VoidCallback onTap;
-  const _PrimaryAction({required this.label, required this.iconPath, required this.onTap});
+  const _PrimaryAction({
+    required this.label,
+    required this.iconPath,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -175,10 +208,17 @@ class _PrimaryAction extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: FigmaPalette.primary,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.l)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.l),
+          ),
         ),
         onPressed: onTap,
-        icon: SvgPicture.asset(iconPath, width: 20, height: 20, colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn)),
+        icon: SvgPicture.asset(
+          iconPath,
+          width: 20,
+          height: 20,
+          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+        ),
         label: Text(label, style: FigmaTypography.body15(color: Colors.white)),
       ),
     );
@@ -196,8 +236,18 @@ class _InfoTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
-          Expanded(child: Text(title, style: FigmaTypography.body13(color: Theme.of(context).hintColor))),
-          Text(value, style: FigmaTypography.body15(color: Theme.of(context).colorScheme.onSurface)),
+          Expanded(
+            child: Text(
+              title,
+              style: FigmaTypography.body13(color: Theme.of(context).hintColor),
+            ),
+          ),
+          Text(
+            value,
+            style: FigmaTypography.body15(
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
         ],
       ),
     );
