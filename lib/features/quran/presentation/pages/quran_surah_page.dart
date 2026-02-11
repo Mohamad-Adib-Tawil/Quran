@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/features/audio/presentation/widgets/mini_player.dart';
+import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
+import 'package:quran_app/features/audio/presentation/cubit/audio_state.dart';
 import 'package:quran_app/features/quran/presentation/navigation/quran_open_target.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 
@@ -15,6 +19,7 @@ class QuranSurahPage extends StatefulWidget {
 class _QuranSurahPageState extends State<QuranSurahPage> {
   bool _applied = false;
   final Key _screenKey = UniqueKey();
+  int? _lastHandledPageNumber;
 
   @override
   void initState() {
@@ -61,7 +66,8 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
         textColor: textColor,
         ayahSelectedBackgroundColor: primary.withOpacity(0.12),
         ayahIconColor: primary,
-        onAyahLongPress: (details, ayah) {},
+        onPageChanged: _handlePageChanged,
+        onAyahLongPress: _onAyahLongPress,
         surahInfoStyle: SurahInfoStyle.defaults(
           isDark: isDark,
           context: context,
@@ -133,8 +139,100 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-        child: MiniAudioPlayer(debugTag: 'QuranSurahPage'),
+        child: MiniAudioPlayer(
+          debugTag: 'QuranSurahPage',
+          hideWhenIdle: true,
+        ),
       ),
     );
   }
+
+  bool _hasMiniPlayerContext(AudioState state) {
+    return state.currentSurah != null ||
+        state.url != null ||
+        state.pendingSurah != null;
+  }
+
+  void _handlePageChanged(int pageIndex) {
+    final pageNumber = pageIndex + 1;
+    if (_lastHandledPageNumber == pageNumber) return;
+    _lastHandledPageNumber = pageNumber;
+
+    final audioCubit = context.read<AudioCubit>();
+    final audioState = audioCubit.state;
+    if (!_hasMiniPlayerContext(audioState)) return;
+
+    final currentSurah = QuranLibrary()
+        .getCurrentSurahDataByPageNumber(pageNumber: pageNumber)
+        .surahNumber;
+
+    if (audioState.currentSurah == currentSurah) return;
+    audioCubit.playSurah(currentSurah);
+  }
+
+  Future<void> _onAyahLongPress(
+    LongPressStartDetails details,
+    AyahModel ayah,
+  ) async {
+    final action = await showModalBottomSheet<_AyahAction>(
+      context: context,
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.copy_rounded),
+                title: Text('نسخ الآية'),
+                dense: true,
+                onTap: () => Navigator.of(ctx).pop(_AyahAction.copy),
+              ),
+              ListTile(
+                leading: Icon(Icons.play_circle_outline_rounded),
+                title: Text('تشغيل السورة في المشغل'),
+                dense: true,
+                onTap: () => Navigator.of(ctx).pop(_AyahAction.playSurah),
+              ),
+              ListTile(
+                leading: Icon(Icons.menu_book_outlined),
+                title: Text('إظهار تفسير الآية'),
+                dense: true,
+                onTap: () => Navigator.of(ctx).pop(_AyahAction.showTafsir),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (!mounted || action == null) return;
+
+    switch (action) {
+      case _AyahAction.copy:
+        await Clipboard.setData(ClipboardData(text: ayah.text.trim()));
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.tr.copied)),
+        );
+        break;
+      case _AyahAction.playSurah:
+        final surahNumber = ayah.surahNumber ??
+            QuranLibrary().getCurrentSurahDataByAyah(ayah: ayah).surahNumber;
+        context.read<AudioCubit>().playSurah(surahNumber);
+        break;
+      case _AyahAction.showTafsir:
+        await QuranLibrary().showTafsir(
+          context: context,
+          ayahNum: ayah.ayahNumber,
+          pageIndex: ayah.page - 1,
+          ayahTextN: ayah.text,
+          ayahUQNum: ayah.ayahUQNumber,
+          ayahNumber: ayah.ayahNumber,
+          isDark: Theme.of(context).brightness == Brightness.dark,
+        );
+        break;
+    }
+  }
 }
+
+enum _AyahAction { copy, playSurah, showTafsir }
