@@ -7,7 +7,7 @@ import 'package:quran_app/core/assets/app_assets.dart';
 import 'package:quran_app/features/settings/presentation/pages/settings_page.dart';
 import 'package:quran_library/quran_library.dart';
 
-import '../../../quran/presentation/pages/surah_list_page.dart';
+import '../../../quran/presentation/pages/quran_surah_page.dart';
 import '../../../quran/presentation/navigation/quran_open_target.dart';
 import 'package:quran_app/services/last_read_service.dart';
 import 'package:quran_app/core/di/service_locator.dart';
@@ -207,7 +207,7 @@ class _HomeViewState extends State<_HomeView> {
                               context.read<AudioCubit>().playSurah(s);
                               Navigator.of(ctx).push(
                                 MaterialPageRoute(
-                                  builder: (_) => SurahListPage(
+                                  builder: (_) => QuranSurahPage(
                                     openTarget: QuranOpenTarget.surah(s),
                                   ),
                                 ),
@@ -253,7 +253,7 @@ class _HomeViewState extends State<_HomeView> {
                       if (!ctx.mounted) return;
                       Navigator.of(ctx).push(
                         MaterialPageRoute(
-                          builder: (_) => SurahListPage(
+                          builder: (_) => QuranSurahPage(
                             openTarget: QuranOpenTarget.juz(i + 1),
                           ),
                         ),
@@ -277,7 +277,7 @@ class _HomeViewState extends State<_HomeView> {
                       if (!ctx.mounted) return;
                       Navigator.of(ctx).push(
                         MaterialPageRoute(
-                          builder: (_) => SurahListPage(
+                          builder: (_) => QuranSurahPage(
                             openTarget: QuranOpenTarget.hizb(i + 1),
                           ),
                         ),
