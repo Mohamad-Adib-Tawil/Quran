@@ -3,12 +3,14 @@
 هذا الملف يشرح بنية المشروع، الاعتمادات، طريقة العمل، ونقاط التوسعة لتسهيل تطويرك مستقبلاً.
 
 ## نظرة عامة
+
 - **الهدف**: تطبيق قرآن كريم بواجهة عربية، يعرض السور والآيات مع دعم تشغيل الصوت.
 - **الحزمة الأساسية للعرض**: `quran_library` (تعطي واجهات جاهزة مثل `QuranLibraryScreen`).
 - **إدارة الحالة**: `flutter_bloc` مع Cubits لكل من الإعدادات، القرآن، والصوت.
 - **الاعتمادات**: `just_audio` للتشغيل، `get_it` للـDI، و`shared_preferences` لتخزين الإعدادات، و`quran_library` للواجهة. الصوت يُحمَّل من ملف أصول JSON.
 
 ## بنية المجلدات
+
 - `lib/main.dart`: نقطة الدخول. يهيّئ `QuranLibrary.init()` و`setupLocator()` ويطلق `QuranApp`.
 - `lib/core/di/service_locator.dart`: تسجيل الكيانات في `GetIt` (AudioPlayer/Prefs/DataSources/Repositories).
 - `lib/core/theme/`
@@ -18,7 +20,7 @@
   - `quran/`
     - `domain/`: كيان `Surah` وتجريد `QuranRepository`.
     - `data/`: مصدر بيانات محلي Placeholder، ومستودع `QuranRepositoryImpl`.
-    - `presentation/`: `QuranCubit` + `QuranState`، وصفحة `SurahListPage` التي تبني `QuranLibraryScreen`.
+    - `presentation/`: `QuranCubit` + `QuranState`، وصفحة `QuranSurahPage` التي تبني `QuranLibraryScreen`.
   - `audio/`
     - `domain/`: `AudioRepository` (واجهات التحكم والتدفق).
     - `data/`: `AudioRemoteDataSource` (منفّذ لتحميل روابط السور من الأصول)، `AudioPlayerDataSource`، `AudioRepositoryImpl`.
@@ -28,6 +30,7 @@
 - `assets/`: يحتوي `assets/audio/audio_urls.json` لخريطة روابط الصوت لكل سورة.
 
 ## تدفق التهيئة والتشغيل
+
 1. `main()`:
    - `WidgetsFlutterBinding.ensureInitialized()`.
    - `QuranLibrary.init()` لتهيئة الحزمة.
@@ -36,9 +39,10 @@
 2. `QuranApp`:
    - `MultiBlocProvider` يوفر: `SettingsCubit`, `QuranCubit`, `AudioCubit` باستخدام `sl()` من `GetIt`.
    - `MaterialApp` يستخدم `AppTheme.light/dark` و`themeMode` من `SettingsState`.
-   - الشاشة الأساسية: `SurahListPage`.
+   - الشاشة الأساسية: `QuranSurahPage`.
 
 ## إدارة الاعتمادية (DI)
+
 - موجودة في `core/di/service_locator.dart`:
   - تسجيل `AudioPlayer` كـ lazy singleton.
   - جلب `SharedPreferences` وتسجيله كـ singleton.
@@ -50,7 +54,8 @@
 - استخدم `sl<T>()` للحصول على أي خدمة.
 
 ## الواجهة وعرض القرآن
-- `SurahListPage` تبني `QuranLibraryScreen` مباشرة وتضبط الألوان والأنماط بناءً على الثيم.
+
+- `QuranSurahPage` تبني `QuranLibraryScreen` مباشرة وتضبط الألوان والأنماط بناءً على الثيم.
 - الخصائص المفعلة:
   - `withPageView`, `useDefaultAppBar`, تبويبات الفهرس/العلامات/البحث.
   - تخصيص نصوص عربية: مثل `القراء`، `الفهرس`، `العلامات`.
@@ -60,6 +65,7 @@
 - تمت إضافة مشغل بسيط أسفل الشاشة: `MiniAudioPlayer` (تشغيل/إيقاف/شريط تقدم) يعتمد على `AudioCubit`.
 
 ## إدارة القرآن (QuranCubit)
+
 - ملف: `features/quran/presentation/cubit/quran_cubit.dart`.
 - يبدأ بتحميل الفهرس والسورة 1.
 - يعتمد على `QuranRepository`:
@@ -67,6 +73,7 @@
 - ملاحظة: `QuranLocalDataSource` حالياً يعيد قوائم فارغة (Placeholder). الاعتماد الحقيقي على واجهة `quran_library` للعرض. لو احتجت بيانات برمجية (غير الواجهة الجاهزة)، قم بتنفيذ `QuranLocalDataSource`.
 
 ## الصوت (Audio)
+
 - `AudioRemoteDataSource`: مُنفّذ الآن لقراءة الروابط من `assets/audio/audio_urls.json`، مع fallback إلى `baseUrl` بصيغة صفرية (001.mp3...114.mp3).
 - `AudioPlayerDataSource`: تغليف لـ `just_audio`.
 - `AudioRepositoryImpl`: يوفر `prepareSurah(surah)` لضبط رابط السورة على المشغل. دالة `prepareAyah` تفوّض مؤقتاً إلى `prepareSurah`.
@@ -75,6 +82,7 @@
 - القارئ ثابت: محمد كراسي. الروابط في `audio_urls.json` تخص هذا القارئ.
 
 ## الإعدادات (Settings)
+
 - المفاتيح المخزنة في `SharedPreferences`:
   - `themeMode`: `light`/`dark`/`system`.
   - `fontScale`: قيمة مضاعِف.
@@ -82,6 +90,7 @@
 - استخدم دوال `SettingsCubit`: `setTheme`, `setFontScale`, `toggleVerseEndSymbol`.
 
 ## الاعتمادات (pubspec.yaml)
+
 - Flutter SDK: `^3.10.3`.
 - الحزم:
   - `flutter_bloc`, `equatable`.
@@ -93,6 +102,7 @@
   - `assets/audio/audio_urls.json` مفعّل تحت `flutter/assets`.
 
 ## خطوات التشغيل محلياً
+
 1. تثبيت الاعتمادات:
    ```bash
    flutter pub get
@@ -104,6 +114,7 @@
 3. المنصات: Android, iOS, Web, Desktop بحسب تفعيلك في مشروع Flutter.
 
 ## نقاط توسعة سريعة
+
 - الواجهة:
   - تخصيص أنماط `QuranLibraryScreen` أكثر (الألوان، الرموز، أحجام الخطوط) وربط `fontScale`.
   - إضافة BottomNavigation/Drawer وصفحات إضافية (أذكار، مواقيت...)
@@ -116,6 +127,7 @@
   - شاشة إعدادات تضبط الثيم، حجم الخط، علامة نهاية الآية، والقارئ.
 
 ## مهام شائعة (كيف أفعل؟)
+
 - إضافة زر لتبديل الثيم:
   - استدعِ `context.read<SettingsCubit>().setTheme(ThemeMode.dark)` أو `light`.
 - تغيير حجم الخط:
@@ -127,8 +139,9 @@
   - أو: `final url = await context.read<AudioRepository>().prepareSurah(surah: 1); await context.read<AudioCubit>().setUrl(url); await context.read<AudioCubit>().play();`
 
 ## استكشاف الأخطاء
+
 - الشاشة فارغة/لا تظهر قائمة السور:
-  - هذا متوقع إن اعتمدت على `QuranCubit` فقط لأن `QuranLocalDataSource` فارغ. حالياً العرض يتم عبر `quran_library` داخل `SurahListPage`.
+  - هذا متوقع إن اعتمدت على `QuranCubit` فقط لأن `QuranLocalDataSource` فارغ. حالياً العرض يتم عبر `quran_library` داخل `QuranSurahPage`.
 - الصوت لا يعمل:
   - تأكد من وجود `assets/audio/audio_urls.json` ومساره مطابق في `pubspec.yaml`.
   - تحقق من اتصال الشبكة وصلاحيات الإنترنت على Android/iOS لأن الروابط خارجية.
@@ -136,12 +149,14 @@
   - تأكد من استدعاء `SettingsCubit.setTheme` وأن `MaterialApp.themeMode` يرتبط بـ `SettingsState` (مربوط بالفعل في `main.dart`).
 
 ## معايير وتنظيم
+
 - حافظ على الفصل بين: presentation / domain / data.
 - استخدم `Equatable` للحالات والنماذج.
 - سجّل كل خدمة في `service_locator.dart` واستخدم `sl<T>()` للحقن.
 - التزم بتسمية عربية واضحة في الواجهة، والإنجليزية في الكود.
 
 ## خريطة سريعة للملفات الهامة
+
 - `lib/main.dart`
 - `lib/core/di/service_locator.dart`
 - `lib/core/theme/app_theme.dart`, `lib/core/theme/app_colors.dart`
