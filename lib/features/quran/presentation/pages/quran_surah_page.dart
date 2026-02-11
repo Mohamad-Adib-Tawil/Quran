@@ -133,7 +133,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-        child: MiniAudioPlayer(debugTag: 'SurahListPage'),
+        child: MiniAudioPlayer(debugTag: 'QuranSurahPage'),
       ),
     );
   }
