@@ -79,8 +79,8 @@ class _FavoritesPageState extends State<FavoritesPage> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  FigmaPalette.primary.withValues(alpha: 0.15),
-                  FigmaPalette.primary.withValues(alpha: 0.05),
+                  FigmaPalette.primary.withValues(alpha: 0.9),
+                  FigmaPalette.primary.withValues(alpha: 0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(30),
@@ -88,6 +88,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
             child: Center(
               child: SvgPicture.asset(
                 AppAssets.icStarGray,
+                color: Colors.white,
                 width: 60,
                 height: 60,
               ),
@@ -97,20 +98,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
           // Title
           Text(
             t.noFavorites,
-            style: FigmaTypography.title18(color: FigmaPalette.textDark),
+            style: FigmaTypography.title18(),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 12),
+
           // Description
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              'اضفهم إلى المفضلة عن طريق النقر على النجمة',
-              style: FigmaTypography.body13(color: Colors.black54),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 48),
           // Illustration with animation
           // Container(
           //   width: 200,

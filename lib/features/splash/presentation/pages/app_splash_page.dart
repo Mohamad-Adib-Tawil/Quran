@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_app/features/settings/cubit/settings_cubit.dart';
@@ -15,12 +13,10 @@ class AppSplashPage extends StatefulWidget {
 }
 
 class _AppSplashPageState extends State<AppSplashPage> {
-  Timer? _timer;
-
   @override
   void initState() {
     super.initState();
-    _timer = Timer(const Duration(milliseconds: 1500), () {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final locale = context.read<SettingsCubit>().state.localeCode;
       final next = (locale == null || locale.isEmpty)
@@ -30,12 +26,6 @@ class _AppSplashPageState extends State<AppSplashPage> {
         MaterialPageRoute(builder: (_) => next),
       );
     });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
   }
 
   @override
