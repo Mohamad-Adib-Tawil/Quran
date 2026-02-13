@@ -121,7 +121,7 @@ class _DownloadedTab extends StatelessWidget {
                 // Title
                 Text(
                   t.noDownloaded,
-                  style: FigmaTypography.title18(color: FigmaPalette.textDark),
+                  style: FigmaTypography.title18(),
                   textAlign: TextAlign.center,
                 ),
 

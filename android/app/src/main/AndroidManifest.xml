@@ -3,7 +3,7 @@
     <!-- Android 13+ notifications permission (recommended for background download notifications) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <application
-        android:label="quran"
+        android:label="القارئ أحمد كراسي"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

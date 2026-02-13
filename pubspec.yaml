@@ -71,8 +71,3 @@ flutter_native_splash:
   android: true
   ios: true
   color: "#ffffff"
-  background_image: "assets/splash/Splash Screen app.jpg"
-  ios_content_mode: "scaleAspectFill"
-  android_12:
-    image: "assets/home/صورة الشيخ احمد كراسي الشخصية.png"
-    icon_background_color: "#ffffff"
