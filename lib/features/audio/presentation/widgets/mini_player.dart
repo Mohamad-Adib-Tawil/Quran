@@ -34,78 +34,51 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
   bool _isDialogProcessing = false;
   bool _dialogOpenedInThisBuild = false;
   static bool _globalDialogOpen = false; // Prevent multiple dialogs globally
+  bool _isOpeningFullPlayer = false;
 
   void _openFullPlayer(BuildContext context) {
     if (widget.onOpenFullPlayer != null) {
       widget.onOpenFullPlayer!();
     } else {
-      _navigateToFullPlayerWithPremiumAnimation(context);
+      _openFullPlayerBottomSheet(context);
     }
   }
 
-  void _navigateToFullPlayerWithPremiumAnimation(BuildContext context) {
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const FullPlayerPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          // متعدد الطبقات - أنيميشن احترافية
-          return Stack(
-            children: [
-              // خلفية تتلاشى
-              FadeTransition(
-                opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-                  CurvedAnimation(
-                    parent: animation,
-                    curve: const Interval(0.0, 0.3, curve: Curves.easeOut),
-                  ),
-                ),
-                child: Container(color: Colors.black.withOpacity(0.6)),
-              ),
+  Future<void> _openFullPlayerBottomSheet(BuildContext context) async {
+    if (_isOpeningFullPlayer || !mounted) return;
+    _isOpeningFullPlayer = true;
+    HapticFeedback.mediumImpact();
+    final height = MediaQuery.of(context).size.height * 0.94;
 
-              // المحتوى الرئيسي مع تحريك متعدد
-              ScaleTransition(
-                scale: Tween<double>(begin: 0.95, end: 1.0).animate(
-                  CurvedAnimation(
-                    parent: animation,
-                    curve: const Interval(0.2, 1.0, curve: Curves.easeOutBack),
-                  ),
-                ),
-                child: SlideTransition(
-                  position:
-                      Tween<Offset>(
-                        begin: const Offset(0, 0.1),
-                        end: Offset.zero,
-                      ).animate(
-                        CurvedAnimation(
-                          parent: animation,
-                          curve: const Interval(
-                            0.1,
-                            0.8,
-                            curve: Curves.easeOutCubic,
-                          ),
-                        ),
-                      ),
-                  child: FadeTransition(
-                    opacity: Tween<double>(begin: 0.5, end: 1.0).animate(
-                      CurvedAnimation(
-                        parent: animation,
-                        curve: const Interval(0.3, 1.0),
-                      ),
-                    ),
-                    child: child,
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 600),
-        reverseTransitionDuration: const Duration(milliseconds: 400),
-        barrierColor: Colors.black54,
-        opaque: false,
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      enableDrag: true,
+      isDismissible: true,
+      showDragHandle: false,
+      sheetAnimationStyle: const AnimationStyle(
+        duration: Duration(milliseconds: 420),
+        reverseDuration: Duration(milliseconds: 320),
       ),
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withOpacity(0.55),
+      builder: (_) {
+        return Container(
+          height: height,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: const FullPlayerPage(asBottomSheet: true),
+        );
+      },
     );
+
+    if (mounted) {
+      _isOpeningFullPlayer = false;
+    }
   }
 
   @override

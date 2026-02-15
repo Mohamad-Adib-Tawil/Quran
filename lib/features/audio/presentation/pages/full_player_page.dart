@@ -11,12 +11,15 @@ import 'package:quran_app/features/audio/settings/audio_settings_cubit.dart';
 import 'package:quran_app/features/audio/presentation/widgets/audio_settings_sheet.dart';
 
 class FullPlayerPage extends StatelessWidget {
-  const FullPlayerPage({super.key});
+  final bool asBottomSheet;
+
+  const FullPlayerPage({super.key, this.asBottomSheet = false});
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
+      backgroundColor: scheme.surface,
       appBar: AppBar(
         title: const SizedBox.shrink(),
         centerTitle: false,
@@ -24,10 +27,17 @@ class FullPlayerPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.keyboard_arrow_down, size: 28),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).maybePop(),
         ),
       ),
-      body: BlocBuilder<AudioCubit, AudioState>(
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onVerticalDragEnd: (details) {
+          if (asBottomSheet && (details.primaryVelocity ?? 0) > 600) {
+            Navigator.of(context).maybePop();
+          }
+        },
+        child: BlocBuilder<AudioCubit, AudioState>(
         // ✅ Prevent full-page rebuilds on position updates.
         // Position/duration/progress are handled by dedicated selectors.
         buildWhen: (prev, curr) {
@@ -401,6 +411,7 @@ class FullPlayerPage extends StatelessWidget {
             ],
           );
         },
+        ),
       ),
     );
   }
