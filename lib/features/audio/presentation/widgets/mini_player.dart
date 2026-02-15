@@ -420,20 +420,7 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // مؤشر التحميل
-                        SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: AnimatedOpacity(
-                            opacity: state.isBuffering ? 1 : 0,
-                            duration: const Duration(milliseconds: 150),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: scheme.primary,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
+
                         // زر التشغيل/الإيقاف
                         Semantics(
                           label: state.isPlaying ? t.pause : t.play,
