@@ -1,9 +1,7 @@
 # Quran App - Offline-First Quran Reader & Audio Platform (Multilingual: English, Arabic, German)
 
 ### Language Selector / محدد اللغة / Sprachauswahl
-- **[English](#english-section)**
-- **[العربية](#arabisch-section--القسم-العربي)**
-- **[Deutsch](#deutsch-section--القسم-الألماني)**
+**[English](#english-section)** | **[العربية](#arabisch-section--القسم-العربي)** | **[Deutsch](#deutsch-section--القسم-الألماني)**
 
 ## English Section
 
