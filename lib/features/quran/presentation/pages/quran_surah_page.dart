@@ -12,6 +12,8 @@ import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_state.dart';
 import 'package:quran_app/features/quran/presentation/navigation/quran_open_target.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
+import 'package:quran_app/core/di/service_locator.dart';
+import 'package:quran_app/services/last_read_service.dart';
 import 'package:share_plus/share_plus.dart';
 
 class QuranSurahPage extends StatefulWidget {
@@ -47,6 +49,9 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
           case QuranOpenTargetType.hizb:
             QuranLibrary().jumpToHizb(t.number);
             break;
+          case QuranOpenTargetType.page:
+            QuranLibrary().jumpToPage(t.number);
+            break;
         }
       }
       _applied = true;
@@ -56,6 +61,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
 
   @override
   void dispose() {
+    _persistLastReadOnExit();
     for (final timer in _tempHighlightTimers.values) {
       timer.cancel();
     }
@@ -64,6 +70,48 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       quranCtrl.removeExternalHighlight(ayahUq);
     }
     super.dispose();
+  }
+
+  void _persistLastReadOnExit() {
+    final pageNumber = _resolveCurrentPageNumber();
+    int surahNumber;
+    try {
+      surahNumber = QuranLibrary()
+          .getCurrentSurahDataByPageNumber(pageNumber: pageNumber)
+          .surahNumber;
+    } catch (_) {
+      final open = widget.openTarget;
+      surahNumber = (open != null && open.type == QuranOpenTargetType.surah)
+          ? open.number
+          : 1;
+    }
+
+    sl<LastReadService>().setLastRead(
+      surah: surahNumber,
+      ayah: 1,
+      page: pageNumber,
+    );
+  }
+
+  int _resolveCurrentPageNumber() {
+    final ctrl = QuranCtrl.instance;
+    final pagesController = ctrl.quranPagesController;
+
+    if (pagesController.hasClients) {
+      final controllerPage = pagesController.page;
+      if (controllerPage != null && controllerPage.isFinite) {
+        final pageNumber = controllerPage.round() + 1;
+        return pageNumber.clamp(1, 604);
+      }
+    }
+
+    final open = widget.openTarget;
+    if (open != null && open.type == QuranOpenTargetType.page) {
+      return open.number.clamp(1, 604);
+    }
+
+    final pageNumber = _lastHandledPageNumber ?? ctrl.state.currentPageNumber.value;
+    return pageNumber.clamp(1, 604);
   }
 
   @override

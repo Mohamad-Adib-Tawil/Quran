@@ -70,6 +70,13 @@ class _HomeViewState extends State<_HomeView> {
     setState(() => _lastRead = LastRead(surah: surah, ayah: ayah));
   }
 
+  void _refreshLastReadFromStorage() {
+    if (!mounted) return;
+    setState(() {
+      _lastRead = sl<LastReadService>().getLastRead();
+    });
+  }
+
   Future<void> _toggleFavorite(int surah) async {
     final favs = await sl<FavoritesService>().toggle(surah);
     if (!mounted) return;
@@ -145,6 +152,8 @@ class _HomeViewState extends State<_HomeView> {
                 child: LastReadCard(
                   surah: _lastRead.surah,
                   ayah: _lastRead.ayah,
+                  page: _lastRead.page,
+                  onReturn: _refreshLastReadFromStorage,
                 ),
               ),
             ),
@@ -201,17 +210,19 @@ class _HomeViewState extends State<_HomeView> {
                             subtitleAr: subtitleAr,
                             isFavorite: _isFavorite(s),
                             onFavoriteToggle: () => _toggleFavorite(s),
-                            onTap: () {
+                            onTap: () async {
                               if (!ctx.mounted) return;
-                              _setLastRead(s, 1);
+                              await _setLastRead(s, 1);
+                              if (!mounted || !ctx.mounted) return;
                               context.read<AudioCubit>().playSurah(s);
-                              Navigator.of(ctx).push(
+                              await Navigator.of(ctx).push(
                                 MaterialPageRoute(
                                   builder: (_) => QuranSurahPage(
                                     openTarget: QuranOpenTarget.surah(s),
                                   ),
                                 ),
                               );
+                              _refreshLastReadFromStorage();
                             },
                             onLongPress: () {
                               if (!ctx.mounted) return;
@@ -249,15 +260,16 @@ class _HomeViewState extends State<_HomeView> {
                   return JuzListItem(
                     index: i + 1,
                     subtitle: j,
-                    onTap: () {
+                    onTap: () async {
                       if (!ctx.mounted) return;
-                      Navigator.of(ctx).push(
+                      await Navigator.of(ctx).push(
                         MaterialPageRoute(
                           builder: (_) => QuranSurahPage(
                             openTarget: QuranOpenTarget.juz(i + 1),
                           ),
                         ),
                       );
+                      _refreshLastReadFromStorage();
                     },
                   );
                 },
@@ -273,15 +285,16 @@ class _HomeViewState extends State<_HomeView> {
                   return HizbListItem(
                     index: i + 1,
                     subtitle: h,
-                    onTap: () {
+                    onTap: () async {
                       if (!ctx.mounted) return;
-                      Navigator.of(ctx).push(
+                      await Navigator.of(ctx).push(
                         MaterialPageRoute(
                           builder: (_) => QuranSurahPage(
                             openTarget: QuranOpenTarget.hizb(i + 1),
                           ),
                         ),
                       );
+                      _refreshLastReadFromStorage();
                     },
                   );
                 },

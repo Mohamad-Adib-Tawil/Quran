@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:quran_library/quran_library.dart';
@@ -12,11 +10,21 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
+import 'package:quran_app/core/di/service_locator.dart';
+import 'package:quran_app/services/last_read_service.dart';
 
 class LastReadCard extends StatelessWidget {
   final int surah;
   final int ayah;
-  const LastReadCard({super.key, required this.surah, required this.ayah});
+  final int? page;
+  final VoidCallback? onReturn;
+  const LastReadCard({
+    super.key,
+    required this.surah,
+    required this.ayah,
+    this.page,
+    this.onReturn,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,15 +36,22 @@ class LastReadCard extends StatelessWidget {
     ).languageCode.startsWith('de');
     final surahTitle = isGerman ? quran.getSurahName(surah) : info.name;
     return InkWell(
-      onTap: () {
+      onTap: () async {
+        final latest = sl<LastReadService>().getLastRead();
+        final targetSurah = latest.surah;
+        final targetPage = latest.page;
         // keep audio context in sync with last read
-        context.read<AudioCubit>().selectSurah(surah);
-        Navigator.of(context).push(
+        context.read<AudioCubit>().selectSurah(targetSurah);
+        await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) =>
-                QuranSurahPage(openTarget: QuranOpenTarget.surah(surah)),
+            builder: (_) => QuranSurahPage(
+              openTarget: (targetPage != null && targetPage >= 1)
+                  ? QuranOpenTarget.page(targetPage)
+                  : QuranOpenTarget.surah(targetSurah),
+            ),
           ),
         );
+        onReturn?.call();
       },
       borderRadius: BorderRadius.circular(AppRadius.xl),
       child: ClipRRect(
