@@ -6,6 +6,7 @@ import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
 import 'package:quran_app/features/audio/presentation/widgets/mini_player.dart';
+import 'package:quran_app/features/study/presentation/pages/study_hub_page.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key});
@@ -15,8 +16,9 @@ class MainShell extends StatefulWidget {
 }
 
 class _MainShellState extends State<MainShell> {
-  int _index = 2; // الافتراضي هو المصحف
+  int _index = 3; // default tab is Home
   final _pages = const [
+    StudyHubPage(),
     FavoritesPage(),
     AudioDownloadsPage(),
     HomeScreen(),
@@ -32,7 +34,7 @@ class _MainShellState extends State<MainShell> {
         children: [
           // Mini Player - يظهر فقط عند التشغيل النشط
           const MiniAudioPlayer(hideWhenIdle: true, debugTag: 'MainShell'),
-          
+
           // Bottom Navigation Bar
           NavigationBarTheme(
             data: NavigationBarThemeData(
@@ -46,18 +48,60 @@ class _MainShellState extends State<MainShell> {
               labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
               destinations: [
                 NavigationDestination(
-                  icon: SvgPicture.asset(AppAssets.icStarGray, width: 24, height: 24),
-                  selectedIcon: SvgPicture.asset(AppAssets.icStarGreen, width: 24, height: 24),
+                  icon: SvgPicture.asset(
+                    AppAssets.icBookmarkSaved,
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+                  ),
+                  selectedIcon: SvgPicture.asset(
+                    AppAssets.icBookmarkSaved,
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(
+                      Theme.of(context).colorScheme.primary,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  label: t.studyHubNav,
+                ),
+                NavigationDestination(
+                  icon: SvgPicture.asset(
+                    AppAssets.icStarGray,
+                    width: 24,
+                    height: 24,
+                  ),
+                  selectedIcon: SvgPicture.asset(
+                    AppAssets.icStarGreen,
+                    width: 24,
+                    height: 24,
+                  ),
                   label: t.favoritesTitle,
                 ),
                 NavigationDestination(
-                  icon: SvgPicture.asset(AppAssets.icDownloadGray, width: 24, height: 24),
-                  selectedIcon: SvgPicture.asset(AppAssets.icDownloadGreen, width: 24, height: 24),
+                  icon: SvgPicture.asset(
+                    AppAssets.icDownloadGray,
+                    width: 24,
+                    height: 24,
+                  ),
+                  selectedIcon: SvgPicture.asset(
+                    AppAssets.icDownloadGreen,
+                    width: 24,
+                    height: 24,
+                  ),
                   label: t.manageAudio,
                 ),
                 NavigationDestination(
-                  icon: SvgPicture.asset(AppAssets.icQuranGray, width: 24, height: 24),
-                  selectedIcon: SvgPicture.asset(AppAssets.icQuranGreen, width: 24, height: 24),
+                  icon: SvgPicture.asset(
+                    AppAssets.icQuranGray,
+                    width: 24,
+                    height: 24,
+                  ),
+                  selectedIcon: SvgPicture.asset(
+                    AppAssets.icQuranGreen,
+                    width: 24,
+                    height: 24,
+                  ),
                   label: t.appTitle,
                 ),
               ],

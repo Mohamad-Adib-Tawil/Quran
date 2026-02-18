@@ -100,7 +100,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get fontSize => 'حجم الخط';
 
   @override
-  String get soon => 'Soon';
+  String get soon => 'قريبًا';
 
   @override
   String get showVerseEndSymbol => 'إظهار علامة نهاية الآية';
@@ -224,4 +224,225 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get scholarBioDescription =>
       'نبذة عن حياة شيخ قرّاء حلب\n(القارئ المقرئ الشيخ أحمد كراسي رحمه الله)\n(ولد في عام 1924م ـ وتوفي في عام 2008م)\n\nهو الشيخ المقرئ ذو الصوت القوي والنغم الجميل، والمخارج السليمة، والقراءة الفصيحة، الحسيب النسيب، فضيلة الشيخ أحمد كراسي بن عبد السلام.\n\nولد في حي الفرافرة عام (1924م / 1343هـ). ولما بلغ من العمر السادسة عشرة، زوّجه أبوه، وأكرمه الله بذكورٍ وإناثٍ صالحين، أكبرهم الحاج عبد السلام حفظه الله.\n\nعاش رحمه الله في بيئة محفوفة بالعلم والصلاح، فمنذ نعومة أظفاره لم يبارح مرافقة والده لمجالس الذكر والعلم، ومساعدته في عمله بتجارة الأخشاب.\n\nولبداية أخذه القرآن حكاية؛ إذ كان يومًا في زيارة للشيخ محمد مراد برفقة والده، فطلب منه الشيخ أن يقرأ ولو من قصار السور، فقرأ شيئًا من ذلك. فلما انتهى قال السيد محمد النسر ـ وكان من بين الحاضرين ـ: إن هذا الشاب عنده استعداد لحفظ كلام الله تعالى، وخلقته تساعده.\n\nفأثّرت هذه العبارة فيه، فأخذ يتردد على الشيخ محمد مراد، فجوّد عليه القرآن وبدأ يحفظ. ومرّت الأيام، فزار متجر والده العلامة الشيخ محمد نجيب خياطة، فلما رآه وسمعه حثّه على حفظ القرآن، فحفظه برواية حفص عليه، وأجازه الشيخ.\n\nثم انطلق يصدح بالقرآن هنا وهناك، ومما زاده نبوغًا على نبوغه التزامه بمجالس الذكر والعلم عند الشيخ عبد القادر عيسى رحمه الله، فكان المقدّم عنده في القراءة. ودارت السنون ليجد نفسه بين يدي الشيخ محمد ديب الشهيد رحمه الله، يتلقى عليه الشاطبية، فحفظها وجمع عليه القراءات السبع، وأجازه بها.\n\nوله شيوخ في نواحٍ شتى: في التربية الشيخ عبد القادر عيسى، وفي التجويد الشيخ محمد مراد، وفي حفظ القرآن الشيخ عبد الحميد بدور، وفي القراءات السبع الشيخ محمد ديب الشهيد.\n\nولما تصدّر للإقراء منذ أن حفظ القرآن برواية حفص، لم يتوقف سيل التلاميذ عليه، سواء في محلّه أمام جامع الترمانيني، أو في الجوامع، ولا سيما جامع العادلية، تحت رعاية شيخه الشيخ عبد القادر عيسى.\n\nوطلابه لا يُحصَون عددًا، أذكر منهم: الشيخ محمد نديم الشهابي، الشيخ محمود ديري، الشيخ محمود شحيبر، الشيخ مصطفى جليلاتي، الشيخ عمار بازرباشي، زياد محمد حموية، وكثير غيرهم.\n\nولما التقى بشيخ الإسلام سيدي الشيخ عبد الله سراج الدين قال له: أهل القرآن هم أولياء الله تعالى، وإذا لم يكن أهل القرآن هم الأولياء فليس لله ولي. وكان أحباب الشيخ أحمد كراسي رحمه الله كثيرًا ما ينادونه (حج أحمد)، فقال له سيدي شيخ الإسلام عبد الله سراج الدين: أنت (الشيخ أحمد).\n\nوشيخنا شيخ القرّاء رحمه الله تعالى صاحب كرمٍ وعطاء، وذو شمائل طيبة، أبرزها التواضع، ولين الجانب، وصفاء السريرة، وشدّة الحياء، والنصح للمسلمين. وله أثر يشهد له بالقراءة الجيدة، وجمال وعذوبة الصوت، وحسن الأداء. وله تسجيل كامل للقرآن الكريم بصوته العذب.\n\nوكان يتطلّع دائمًا إلى أن يمدّ الله في عمره، ليقرئ عددًا أكبر، ويخدم كتاب الله أكثر، حتى يلقى ربّه عز وجل بألف حافظ لكتابه سبحانه.\n\nتوفي في آخر يوم من عام 1429هـ، في 30/12/1429هـ الموافق 28/12/2008م، ودُفن يوم الإثنين في مقبرة جبل العظام بحلب.\n\nجزاه الله عنا وعن المسلمين خير الجزاء، وبلّغه وإيانا في الآخرة منازل الشهداء، وحشرنا معه يوم الدين تحت لواء سيد الأنبياء وإمام المرسلين صلى الله عليه وسلم.';
+
+  @override
+  String get studyHubNav => 'المحفوظات';
+
+  @override
+  String get studyHubTitle => 'المحفوظات الذكية';
+
+  @override
+  String get studyHubTagsTab => 'العلامات';
+
+  @override
+  String get studyHubNotesTab => 'ملاحظات الآيات';
+
+  @override
+  String get studyHubNoTags => 'لا توجد علامات بعد';
+
+  @override
+  String get studyHubNoNotes => 'لا توجد ملاحظات آيات بعد';
+
+  @override
+  String get studyHubTagReview => 'مراجعة';
+
+  @override
+  String get studyHubTagHifz => 'حفظ';
+
+  @override
+  String get studyHubTagTadabbur => 'تدبر';
+
+  @override
+  String studyHubItemsCount(int count) {
+    return '$count عنصر';
+  }
+
+  @override
+  String studyHubNotesCount(int count) {
+    return '$count ملاحظة';
+  }
+
+  @override
+  String studyHubPageLabel(int page) {
+    return 'صفحة $page';
+  }
+
+  @override
+  String get studySettingsSectionTitle => 'الدراسة والتقدم';
+
+  @override
+  String get studyGoalsEntryTitle => 'الأهداف والتقارير';
+
+  @override
+  String get studyGoalsEntrySubtitle =>
+      'يومي/أسبوعي للآيات والصفحات ودقائق الاستماع';
+
+  @override
+  String get goalsPageTitle => 'الأهداف والتقدم';
+
+  @override
+  String get goalsSetDialogTitle => 'تحديد الهدف';
+
+  @override
+  String get goalsSetDialogHint => 'ادخل الهدف الرقمي';
+
+  @override
+  String get goalsTargetDailyWeeklyTitle => 'الأهداف اليومية/الأسبوعية';
+
+  @override
+  String get goalsProgressReportTitle => 'تقرير التقدم';
+
+  @override
+  String get goalsNoGoalsYet => 'لم يتم إنشاء أهداف بعد.';
+
+  @override
+  String get goalsDailyButton => 'هدف يومي';
+
+  @override
+  String get goalsWeeklyButton => 'هدف أسبوعي';
+
+  @override
+  String get goalMetricAyahs => 'الآيات';
+
+  @override
+  String get goalMetricPages => 'الصفحات';
+
+  @override
+  String get goalMetricListeningMinutes => 'دقائق الاستماع';
+
+  @override
+  String get goalPeriodDaily => 'يومي';
+
+  @override
+  String get goalPeriodWeekly => 'أسبوعي';
+
+  @override
+  String get ayahActionCopyWithTashkeel => 'نسخ مع التشكيل';
+
+  @override
+  String get ayahActionCopyWithoutTashkeel => 'نسخ بدون تشكيل';
+
+  @override
+  String get ayahActionShareAsText => 'مشاركة كنص';
+
+  @override
+  String get ayahActionShareAsImage => 'مشاركة الآية كصورة';
+
+  @override
+  String get ayahActionTempHighlightAdd => 'تمييز لوني مؤقت (20 ثانية)';
+
+  @override
+  String get ayahActionTempHighlightRemove => 'إزالة التمييز المؤقت';
+
+  @override
+  String get ayahActionReviewLaterAdd => 'تمييز للمراجعة لاحقًا';
+
+  @override
+  String get ayahActionReviewLaterRemove => 'إلغاء تمييز المراجعة لاحقًا';
+
+  @override
+  String get ayahActionPlaySurahInPlayer => 'تشغيل السورة في المشغل';
+
+  @override
+  String get ayahActionShowTafsir => 'إظهار تفسير الآية';
+
+  @override
+  String get ayahColoringSection => 'تلوين الآية';
+
+  @override
+  String get ayahActionAdvancedTag => 'إضافة علامة متقدمة';
+
+  @override
+  String get ayahActionAddNote => 'إضافة ملاحظة على الآية';
+
+  @override
+  String get ayahActionShowNotes => 'عرض ملاحظات الآية';
+
+  @override
+  String get ayahActionRecitationTest => 'اختبار تسميع تفاعلي';
+
+  @override
+  String get ayahActionToggleHideAyah => 'إخفاء/إظهار الآية';
+
+  @override
+  String get ayahActionAyahHidden =>
+      'تم إخفاء الآية. اضغط مطولًا عليها لإظهارها';
+
+  @override
+  String get ayahActionAyahShown => 'تم إظهار الآية';
+
+  @override
+  String get ayahActionTagSaved => 'تم حفظ العلامة المتقدمة';
+
+  @override
+  String get ayahActionNoteDialogTitle => 'ملاحظة على الآية';
+
+  @override
+  String get ayahActionNoteDialogHint => 'اكتب ملاحظة قصيرة';
+
+  @override
+  String get ayahActionNoteSaved => 'تم حفظ الملاحظة';
+
+  @override
+  String get ayahActionNoNotesForAyah => 'لا توجد ملاحظات لهذه الآية';
+
+  @override
+  String get ayahActionRecitationModeProgressive => 'إخفاء تدريجي للكلمات';
+
+  @override
+  String get ayahActionRecitationModeFirstWord => 'عرض أول كلمة فقط';
+
+  @override
+  String get ayahActionRecitationModeTapReveal => 'إخفاء الآية وإظهارها بالضغط';
+
+  @override
+  String get ayahActionRecitationTapToRevealHint => 'اضغط على الآية لإظهارها';
+
+  @override
+  String get ayahActionRecitationTitle => 'اختبار تسميع';
+
+  @override
+  String get ayahActionRecitationResultTitle => 'نتيجة الاختبار';
+
+  @override
+  String get ayahActionRecitationHint => 'اكتب الآية كما تحفظها';
+
+  @override
+  String ayahActionRecitationScore(int score) {
+    return 'النتيجة: $score%';
+  }
+
+  @override
+  String get ayahActionTempReviewRemoved =>
+      'تم إلغاء تمييز الآية للمراجعة لاحقًا';
+
+  @override
+  String get ayahActionTempReviewAdded => 'تم تمييز الآية للمراجعة لاحقًا';
+
+  @override
+  String get ayahActionTagReview => 'مراجعة';
+
+  @override
+  String get ayahActionTagHifz => 'حفظ';
+
+  @override
+  String get ayahActionTagTadabbur => 'تدبر';
+
+  @override
+  String get ayahShareImageError => 'تعذر إنشاء صورة الآية للمشاركة';
+
+  @override
+  String get unknownSurahName => 'سورة غير معروفة';
+
+  @override
+  String get save => 'حفظ';
+
+  @override
+  String get close => 'إغلاق';
+
+  @override
+  String get verify => 'تحقق';
+
+  @override
+  String get done => 'تم';
 }

@@ -14,6 +14,7 @@ import 'package:quran_app/features/quran/presentation/navigation/quran_open_targ
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:quran_app/core/di/service_locator.dart';
 import 'package:quran_app/services/last_read_service.dart';
+import 'package:quran_app/services/study_tools_service.dart';
 import 'package:share_plus/share_plus.dart';
 
 class QuranSurahPage extends StatefulWidget {
@@ -33,6 +34,9 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
   bool _isPersistingLastRead = false;
   final Map<int, Timer> _tempHighlightTimers = {};
   static const int _reviewLaterColorCode = 0xAAF36077;
+  static const int _advancedReviewColorCode = 0xAAFFC107;
+  static const int _advancedHifzColorCode = 0xAA4CAF50;
+  static const int _advancedTadabburColorCode = 0xAA2196F3;
   ui.Rect? _shareOriginRect;
 
   @override
@@ -301,6 +305,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     if (_lastHandledPageNumber == pageNumber) return;
     _lastHandledPageNumber = pageNumber;
     _queueSaveLastReadSnapshot(forcedPageNumber: pageNumber);
+    unawaited(sl<StudyToolsService>().trackPageRead(pageNumber));
 
     final audioCubit = context.read<AudioCubit>();
     final audioState = audioCubit.state;
@@ -318,7 +323,9 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     LongPressStartDetails details,
     AyahModel ayah,
   ) async {
+    final t = context.tr;
     _lastLongPressedAyah = ayah;
+    unawaited(sl<StudyToolsService>().trackAyahRead(ayah.ayahUQNumber));
     final currentPage = _resolveCurrentPageNumber();
     if (ayah.page == currentPage) {
       _queueSaveLastReadSnapshot(
@@ -329,81 +336,157 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     _shareOriginRect = _calcShareOrigin(details);
     final isTempHighlighted = _tempHighlightTimers.containsKey(ayah.ayahUQNumber);
     final isReviewLaterHighlighted = _hasReviewLaterHighlight(ayah.ayahUQNumber);
+    final hasAyahNotes =
+        sl<StudyToolsService>().getNotesForAyah(ayah.ayahUQNumber).isNotEmpty;
     final action = await showModalBottomSheet<_AyahAction>(
       context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (ctx) {
+        final scheme = Theme.of(ctx).colorScheme;
+        Widget actionTile({
+          required IconData icon,
+          required String title,
+          required _AyahAction value,
+          Color? color,
+        }) {
+          return ListTile(
+            dense: true,
+            leading: Icon(icon, color: color ?? scheme.primary),
+            title: Text(title),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            onTap: () => Navigator.of(ctx).pop(value),
+          );
+        }
+
+        Widget section(String title, List<Widget> children) {
+          return Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: scheme.surface.withValues(alpha: 0.75),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: scheme.outline.withValues(alpha: 0.12)),
+            ),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: Text(
+                      title,
+                      style: Theme.of(ctx).textTheme.labelLarge?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+                ...children,
+              ],
+            ),
+          );
+        }
+
         return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: Container(
+            decoration: BoxDecoration(
+              color: scheme.surface,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+            ),
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+            child: ListView(
+              shrinkWrap: true,
             children: [
-              ListTile(
-                leading: Icon(Icons.copy_rounded),
-                title: const Text('نسخ مع التشكيل'),
-                dense: true,
-                onTap: () => Navigator.of(ctx).pop(_AyahAction.copyWithTashkeel),
+              section(
+                t.ayahActionCopyWithTashkeel,
+                [
+                  actionTile(
+                    icon: Icons.copy_rounded,
+                    title: t.ayahActionCopyWithTashkeel,
+                    value: _AyahAction.copyWithTashkeel,
+                  ),
+                  actionTile(
+                    icon: Icons.copy_all_rounded,
+                    title: t.ayahActionCopyWithoutTashkeel,
+                    value: _AyahAction.copyWithoutTashkeel,
+                  ),
+                  actionTile(
+                    icon: Icons.share_outlined,
+                    title: t.ayahActionShareAsText,
+                    value: _AyahAction.shareAsText,
+                  ),
+                  actionTile(
+                    icon: Icons.image_outlined,
+                    title: t.ayahActionShareAsImage,
+                    value: _AyahAction.shareAsImage,
+                  ),
+                ],
               ),
-              ListTile(
-                leading: const Icon(Icons.copy_all_rounded),
-                title: const Text('نسخ بدون تشكيل'),
-                dense: true,
-                onTap: () =>
-                    Navigator.of(ctx).pop(_AyahAction.copyWithoutTashkeel),
+              section(
+                t.studyHubTagsTab,
+                [
+                  actionTile(
+                    icon: Icons.bookmark_add_outlined,
+                    title: t.ayahActionAdvancedTag,
+                    value: _AyahAction.advancedTag,
+                  ),
+                  actionTile(
+                    icon: Icons.note_add_outlined,
+                    title: t.ayahActionAddNote,
+                    value: _AyahAction.addNote,
+                  ),
+                  if (hasAyahNotes)
+                    actionTile(
+                      icon: Icons.notes_outlined,
+                      title: t.ayahActionShowNotes,
+                      value: _AyahAction.showNotes,
+                    ),
+                ],
               ),
-              ListTile(
-                leading: const Icon(Icons.share_outlined),
-                title: const Text('مشاركة كنص'),
-                dense: true,
-                onTap: () => Navigator.of(ctx).pop(_AyahAction.shareAsText),
+              section(
+                t.settings,
+                [
+                  actionTile(
+                    icon: Icons.menu_book_outlined,
+                    title: t.ayahActionShowTafsir,
+                    value: _AyahAction.showTafsir,
+                  ),
+                  actionTile(
+                    icon: Icons.play_circle_outline_rounded,
+                    title: t.ayahActionPlaySurahInPlayer,
+                    value: _AyahAction.playSurah,
+                  ),
+                ],
               ),
-              ListTile(
-                leading: const Icon(Icons.image_outlined),
-                title: const Text('مشاركة الآية كصورة'),
-                dense: true,
-                onTap: () => Navigator.of(ctx).pop(_AyahAction.shareAsImage),
-              ),
-              ListTile(
-                leading: Icon(
-                  isTempHighlighted
-                      ? Icons.highlight_remove_rounded
-                      : Icons.highlight_alt_rounded,
-                ),
-                title: Text(
-                  isTempHighlighted
-                      ? 'إزالة التمييز المؤقت'
-                      : 'تمييز لوني مؤقت (20 ثانية)',
-                ),
-                dense: true,
-                onTap: () =>
-                    Navigator.of(ctx).pop(_AyahAction.toggleTempHighlight),
-              ),
-              ListTile(
-                leading: Icon(
-                  isReviewLaterHighlighted
-                      ? Icons.label_off_outlined
-                      : Icons.label_important_outline_rounded,
-                ),
-                title: Text(
-                  isReviewLaterHighlighted
-                      ? 'إلغاء تمييز المراجعة لاحقًا'
-                      : 'تمييز للمراجعة لاحقًا',
-                ),
-                dense: true,
-                onTap: () =>
-                    Navigator.of(ctx).pop(_AyahAction.toggleReviewLaterHighlight),
-              ),
-              ListTile(
-                leading: Icon(Icons.play_circle_outline_rounded),
-                title: Text('تشغيل السورة في المشغل'),
-                dense: true,
-                onTap: () => Navigator.of(ctx).pop(_AyahAction.playSurah),
-              ),
-              ListTile(
-                leading: Icon(Icons.menu_book_outlined),
-                title: Text('إظهار تفسير الآية'),
-                dense: true,
-                onTap: () => Navigator.of(ctx).pop(_AyahAction.showTafsir),
+              section(
+                t.ayahColoringSection,
+                [
+                  actionTile(
+                    icon: isTempHighlighted
+                        ? Icons.highlight_remove_rounded
+                        : Icons.highlight_alt_rounded,
+                    title: isTempHighlighted
+                        ? t.ayahActionTempHighlightRemove
+                        : t.ayahActionTempHighlightAdd,
+                    value: _AyahAction.toggleTempHighlight,
+                  ),
+                  actionTile(
+                    icon: isReviewLaterHighlighted
+                        ? Icons.label_off_outlined
+                        : Icons.label_important_outline_rounded,
+                    title: isReviewLaterHighlighted
+                        ? t.ayahActionReviewLaterRemove
+                        : t.ayahActionReviewLaterAdd,
+                    value: _AyahAction.toggleReviewLaterHighlight,
+                  ),
+                ],
               ),
             ],
+            ),
           ),
         );
       },
@@ -456,6 +539,15 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
           isDark: Theme.of(context).brightness == Brightness.dark,
         );
         break;
+      case _AyahAction.advancedTag:
+        await _pickAdvancedTag(ayah);
+        break;
+      case _AyahAction.addNote:
+        await _addAyahNote(ayah);
+        break;
+      case _AyahAction.showNotes:
+        await _showAyahNotes(ayah);
+        break;
     }
   }
 
@@ -496,7 +588,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       }
       return SurahNamesModel(
         number: surahNumber,
-        name: 'سورة غير معروفة',
+        name: context.tr.unknownSurahName,
         englishName: '',
         englishNameTranslation: '',
         revelationType: '',
@@ -545,7 +637,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تعذر إنشاء صورة الآية للمشاركة')),
+        SnackBar(content: Text(context.tr.ayahShareImageError)),
       );
     }
   }
@@ -682,7 +774,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('تم إلغاء تمييز الآية للمراجعة لاحقًا')),
+        SnackBar(content: Text(context.tr.ayahActionTempReviewRemoved)),
       );
       return;
     }
@@ -697,9 +789,177 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     );
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('تم تمييز الآية للمراجعة لاحقًا')),
+      SnackBar(content: Text(context.tr.ayahActionTempReviewAdded)),
     );
   }
+
+  Future<void> _pickAdvancedTag(AyahModel ayah) async {
+    final t = context.tr;
+    final tag = await showModalBottomSheet<AyahTagType>(
+      context: context,
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.rate_review_outlined, color: Colors.amber),
+                title: Text(t.ayahActionTagReview),
+                onTap: () => Navigator.of(ctx).pop(AyahTagType.review),
+              ),
+              ListTile(
+                leading: const Icon(Icons.auto_stories_outlined, color: Colors.green),
+                title: Text(t.ayahActionTagHifz),
+                onTap: () => Navigator.of(ctx).pop(AyahTagType.hifz),
+              ),
+              ListTile(
+                leading: const Icon(Icons.lightbulb_outline, color: Colors.blue),
+                title: Text(t.ayahActionTagTadabbur),
+                onTap: () => Navigator.of(ctx).pop(AyahTagType.tadabbur),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    if (tag == null) return;
+    final colorCode = _advancedColorCodeForTag(tag);
+    final color = Color(colorCode);
+    final surah = ayah.surahNumber ??
+        QuranLibrary().getCurrentSurahDataByAyah(ayah: ayah).surahNumber;
+    _removeAdvancedBookmarksForAyah(ayah.ayahUQNumber);
+    BookmarksCtrl.instance.saveBookmark(
+      surahName: _resolveSurahInfo(ayah).name,
+      ayahId: ayah.ayahUQNumber,
+      ayahNumber: ayah.ayahNumber,
+      page: ayah.page,
+      colorCode: colorCode,
+    );
+    await sl<StudyToolsService>().upsertTag(
+      AyahTagEntry(
+        ayahUq: ayah.ayahUQNumber,
+        surah: surah,
+        ayah: ayah.ayahNumber,
+        page: ayah.page,
+        type: tag,
+        colorValue: color.toARGB32(),
+        createdAt: DateTime.now(),
+      ),
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(t.ayahActionTagSaved)),
+    );
+  }
+
+  int _advancedColorCodeForTag(AyahTagType tag) {
+    switch (tag) {
+      case AyahTagType.review:
+        return _advancedReviewColorCode;
+      case AyahTagType.hifz:
+        return _advancedHifzColorCode;
+      case AyahTagType.tadabbur:
+        return _advancedTadabburColorCode;
+    }
+  }
+
+  void _removeAdvancedBookmarksForAyah(int ayahUq) {
+    final bookmarksCtrl = BookmarksCtrl.instance;
+    final codes = <int>{
+      _advancedReviewColorCode,
+      _advancedHifzColorCode,
+      _advancedTadabburColorCode,
+    };
+    for (final code in codes) {
+      final existing = (bookmarksCtrl.bookmarks[code] ?? [])
+          .where((b) => b.ayahId == ayahUq)
+          .toList();
+      for (final item in existing) {
+        bookmarksCtrl.removeBookmark(item.id);
+      }
+    }
+  }
+
+  Future<void> _addAyahNote(AyahModel ayah) async {
+    final t = context.tr;
+    final controller = TextEditingController();
+    final text = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(t.ayahActionNoteDialogTitle),
+          content: TextField(
+            controller: controller,
+            maxLines: 4,
+            decoration: InputDecoration(
+              hintText: t.ayahActionNoteDialogHint,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(t.no),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+              child: Text(t.save),
+            ),
+          ],
+        );
+      },
+    );
+    final note = text?.trim() ?? '';
+    if (note.isEmpty) return;
+    final surah = ayah.surahNumber ??
+        QuranLibrary().getCurrentSurahDataByAyah(ayah: ayah).surahNumber;
+    await sl<StudyToolsService>().addNote(
+      AyahNoteEntry(
+        id: '${ayah.ayahUQNumber}_${DateTime.now().millisecondsSinceEpoch}',
+        ayahUq: ayah.ayahUQNumber,
+        surah: surah,
+        ayah: ayah.ayahNumber,
+        page: ayah.page,
+        text: note,
+        createdAt: DateTime.now(),
+      ),
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(t.ayahActionNoteSaved)),
+    );
+  }
+
+  Future<void> _showAyahNotes(AyahModel ayah) async {
+    final t = context.tr;
+    final notes = sl<StudyToolsService>().getNotesForAyah(ayah.ayahUQNumber);
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) {
+        return SafeArea(
+          child: notes.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Text(t.ayahActionNoNotesForAyah),
+                )
+              : ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: notes.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (_, i) {
+                    final n = notes[i];
+                    return ListTile(
+                      title: Text(n.text),
+                      subtitle: Text(
+                        '${n.createdAt.year}-${n.createdAt.month.toString().padLeft(2, '0')}-${n.createdAt.day.toString().padLeft(2, '0')}',
+                      ),
+                    );
+                  },
+                ),
+        );
+      },
+    );
+  }
+
 }
 
 enum _AyahAction {
@@ -711,6 +971,9 @@ enum _AyahAction {
   toggleReviewLaterHighlight,
   playSurah,
   showTafsir,
+  advancedTag,
+  addNote,
+  showNotes,
 }
 
 class _LastReadSnapshot {

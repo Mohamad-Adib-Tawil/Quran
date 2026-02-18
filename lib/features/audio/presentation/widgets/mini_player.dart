@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:async';
 import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
 import 'package:quran_app/core/quran/surah_name_resolver.dart';
 import 'package:quran_app/core/theme/figma_typography.dart';
+import 'package:quran_app/core/di/service_locator.dart';
+import 'package:quran_app/services/study_tools_service.dart';
 import 'package:quran_app/features/audio/presentation/pages/full_player_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -37,6 +40,24 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
   bool _dialogOpenedInThisBuild = false;
   static bool _globalDialogOpen = false; // Prevent multiple dialogs globally
   bool _isOpeningFullPlayer = false;
+  Timer? _listenTrackingTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _listenTrackingTimer = Timer.periodic(const Duration(seconds: 15), (_) {
+      if (!mounted) return;
+      final state = context.read<AudioCubit>().state;
+      if (!state.isPlaying) return;
+      sl<StudyToolsService>().trackListeningSeconds(15);
+    });
+  }
+
+  @override
+  void dispose() {
+    _listenTrackingTimer?.cancel();
+    super.dispose();
+  }
 
   void _openFullPlayer(BuildContext context) {
     if (widget.onOpenFullPlayer != null) {
