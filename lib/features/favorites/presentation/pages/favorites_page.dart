@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_app/core/theme/figma_palette.dart';
 import 'package:quran_app/core/theme/figma_typography.dart';
-import 'package:quran_library/quran_library.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_app/core/di/service_locator.dart';
 import 'package:quran_app/services/favorites_service.dart';
@@ -9,7 +8,9 @@ import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
+import 'package:quran_app/core/quran/surah_name_resolver.dart';
 import 'package:quran_app/features/settings/presentation/pages/settings_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});
@@ -179,10 +180,10 @@ class _FavoritesPageState extends State<FavoritesPage> {
               separatorBuilder: (context, index) => const SizedBox(height: 10),
               itemBuilder: (context, i) {
                 final s = _favorites[i];
-                final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
+                final names = resolveSurahNamePair(s);
                 return _SurahCard(
-                  title: info.name,
-                  subtitle: t.favSurahNumber('$s'),
+                  title: names.arabic,
+                  subtitle: '${names.latin} • ${t.favSurahNumber('$s')}',
                   onPlay: () async {
                     try {
                       await context.read<AudioCubit>().playSurah(s);
@@ -255,12 +256,18 @@ class _SurahCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: FigmaTypography.body15(color: FigmaPalette.textDark),
+                  style: GoogleFonts.notoNaskhArabic(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: FigmaPalette.textDark,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: FigmaTypography.caption12(color: Colors.black54),
+                  style: FigmaTypography.latinBody15(
+                    color: Colors.black54,
+                  ).copyWith(fontSize: 12),
                 ),
               ],
             ),

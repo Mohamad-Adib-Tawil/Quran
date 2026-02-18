@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_app/core/theme/figma_palette.dart';
 import 'package:quran_app/core/theme/figma_typography.dart';
-import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
+import 'package:quran_app/core/quran/surah_name_resolver.dart';
 import 'package:quran_app/features/settings/presentation/pages/settings_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/repositories/audio_download_repository.dart';
 import '../cubit/audio_download_cubit.dart';
@@ -136,10 +137,19 @@ class _DownloadedTab extends StatelessWidget {
           separatorBuilder: (context, index) => const Divider(height: 1),
           itemBuilder: (ctx, i) {
             final s = list[i];
-            final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
+            final names = resolveSurahNamePair(s);
             return ListTile(
-              title: Text('${info.name} (${s.toString().padLeft(3, '0')})'),
-              subtitle: null,
+              title: Text(
+                names.arabic,
+                style: GoogleFonts.notoNaskhArabic(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              subtitle: Text(
+                '${names.latin} • ${s.toString().padLeft(3, '0')}',
+                style: FigmaTypography.latinBody15().copyWith(fontSize: 12),
+              ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -206,15 +216,39 @@ class _NotDownloadedTab extends StatelessWidget {
           separatorBuilder: (context, index) => const Divider(height: 1),
           itemBuilder: (ctx, i) {
             final s = list[i];
-            final info = QuranLibrary().getSurahInfo(surahNumber: s - 1);
+            final names = resolveSurahNamePair(s);
             final status = state.statusBySurah[s] ?? DownloadStatus.idle;
             final progress = state.progressBySurah[s] ?? 0.0;
             final downloading = status == DownloadStatus.downloading;
             return ListTile(
-              title: Text('${info.name} (${s.toString().padLeft(3, '0')})'),
+              title: Text(
+                names.arabic,
+                style: GoogleFonts.notoNaskhArabic(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               subtitle: downloading
-                  ? LinearProgressIndicator(value: progress)
-                  : null,
+                  ? Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${names.latin} • ${s.toString().padLeft(3, '0')}',
+                          style: FigmaTypography.latinBody15().copyWith(
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        LinearProgressIndicator(value: progress),
+                      ],
+                    )
+                  : Text(
+                      '${names.latin} • ${s.toString().padLeft(3, '0')}',
+                      style: FigmaTypography.latinBody15().copyWith(
+                        fontSize: 12,
+                      ),
+                    ),
               trailing: IconButton(
                 onPressed: downloading
                     ? null

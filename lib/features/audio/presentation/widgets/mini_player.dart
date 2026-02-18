@@ -6,8 +6,10 @@ import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
-import 'package:quran/quran.dart' as quran;
+import 'package:quran_app/core/quran/surah_name_resolver.dart';
+import 'package:quran_app/core/theme/figma_typography.dart';
 import 'package:quran_app/features/audio/presentation/pages/full_player_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../cubit/audio_cubit.dart';
 import '../cubit/audio_state.dart';
@@ -158,9 +160,7 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
             _globalDialogOpen = true;
             _lastShownPendingSurah = pendingSurahNum;
 
-            final pendingInfo = QuranLibrary().getSurahInfo(
-              surahNumber: pendingSurahNum - 1,
-            );
+            final pendingNames = resolveSurahNamePair(pendingSurahNum);
 
             // Show confirmation dialog
             Future.microtask(() {
@@ -173,7 +173,9 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
                 barrierDismissible: false,
                 builder: (dialogContext) => AlertDialog(
                   title: Text(t.confirmLoadSurah),
-                  content: Text('${t.loadSurah} ${pendingInfo.name}؟'),
+                  content: Text(
+                    '${t.loadSurah} ${pendingNames.arabic} (${pendingNames.latin})؟',
+                  ),
                   actions: [
                     TextButton(
                       onPressed: () {
@@ -260,6 +262,7 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
         }
         final sNum = state.currentSurah ?? 1;
         final info = QuranLibrary().getSurahInfo(surahNumber: sNum - 1);
+        final names = resolveSurahNamePair(sNum);
 
         if (state.phase == AudioPhase.downloading) {
           return Material(
@@ -297,8 +300,8 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
         }
 
         final scheme = Theme.of(context).colorScheme;
-        final verses = quran.getVerseCount(sNum);
-        final place = quran.getPlaceOfRevelation(sNum).toLowerCase();
+        final verses = info.ayahsNumber;
+        final place = info.revelationType.toLowerCase();
         final isMadani = place.contains('mad');
 
         return GestureDetector(
@@ -392,24 +395,24 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
                                       Text(
-                                        info.name,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.titleMedium,
+                                        names.arabic,
+                                        style: GoogleFonts.notoNaskhArabic(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                          color: scheme.onSurface,
+                                        ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         textAlign: TextAlign.right,
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        '${isMadani ? t.madani : t.makki} • $verses ${t.aya}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              color: scheme.onSurface
-                                                  .withOpacity(0.6),
-                                            ),
+                                        '${names.latin} • ${isMadani ? t.madani : t.makki} • $verses ${t.aya}',
+                                        style: FigmaTypography.latinBody15(
+                                          color: scheme.onSurface.withOpacity(
+                                            0.6,
+                                          ),
+                                        ).copyWith(fontSize: 12),
                                         textAlign: TextAlign.right,
                                       ),
                                     ],

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:quran_library/quran_library.dart';
-import 'package:quran/quran.dart' as quran;
 import 'package:quran_app/core/theme/design_tokens.dart';
 import 'package:quran_app/features/quran/presentation/pages/quran_surah_page.dart';
 import 'package:quran_app/features/quran/presentation/navigation/quran_open_target.dart';
@@ -11,6 +10,9 @@ import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
 import 'package:quran_app/core/di/service_locator.dart';
+import 'package:quran_app/core/quran/surah_name_resolver.dart';
+import 'package:quran_app/core/theme/figma_typography.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:quran_app/services/last_read_service.dart';
 
 class LastReadCard extends StatelessWidget {
@@ -30,11 +32,10 @@ class LastReadCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final t = context.tr;
-    final info = QuranLibrary().getSurahInfo(surahNumber: surah - 1);
+    final names = resolveSurahNamePair(surah);
     final isGerman = Localizations.localeOf(
       context,
     ).languageCode.startsWith('de');
-    final surahTitle = isGerman ? quran.getSurahName(surah) : info.name;
     return InkWell(
       onTap: () async {
         final latest = sl<LastReadService>().getLastRead();
@@ -99,20 +100,33 @@ class LastReadCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Align(
                     alignment: AlignmentDirectional.centerStart,
-                    child: Text(
-                      surahTitle,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.start,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          names.arabic,
+                          style: GoogleFonts.notoNaskhArabic(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.start,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          names.latin,
+                          style: FigmaTypography.latinBody15(
+                            color: Colors.white70,
+                          ),
+                          textAlign: TextAlign.start,
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      // Surah info (e.g., مدنية • 200 آية)
                       Text(
                         '${_revelationText(context, surah)} • ${_verseCountText(context, surah)}',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -135,13 +149,16 @@ class LastReadCard extends StatelessWidget {
 
 String _revelationText(BuildContext context, int surah) {
   final t = context.tr;
-  final place = quran.getPlaceOfRevelation(surah).toLowerCase();
+  final place = QuranLibrary()
+      .getSurahInfo(surahNumber: surah - 1)
+      .revelationType
+      .toLowerCase();
   final isMadani = place.contains('mad');
   return isMadani ? t.madani : t.makki;
 }
 
 String _verseCountText(BuildContext context, int surah) {
-  final count = quran.getVerseCount(surah);
+  final count = QuranLibrary().getSurahInfo(surahNumber: surah - 1).ayahsNumber;
   return '$count ${context.tr.aya}';
 }
 

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:quran/quran.dart' as quran;
 import 'package:quran_library/quran_library.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
 import 'package:quran_app/core/localization/app_localization_ext.dart';
+import 'package:quran_app/core/quran/surah_name_resolver.dart';
+import 'package:quran_app/core/theme/figma_typography.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_state.dart';
 import 'package:quran_app/features/audio/settings/audio_settings_cubit.dart';
 import 'package:quran_app/features/audio/presentation/widgets/audio_settings_sheet.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class FullPlayerPage extends StatelessWidget {
   final bool asBottomSheet;
@@ -155,10 +157,10 @@ class FullPlayerPage extends StatelessWidget {
 
           final sNum = state.currentSurah!;
           final info = QuranLibrary().getSurahInfo(surahNumber: sNum - 1);
-          final verses = quran.getVerseCount(sNum);
-          final place = quran.getPlaceOfRevelation(sNum).toLowerCase();
+          final names = resolveSurahNamePair(sNum);
+          final verses = info.ayahsNumber;
+          final place = info.revelationType.toLowerCase();
           final isMadani = place.contains('mad');
-          final titleLatin = quran.getSurahName(sNum);
 
           final verseWord = context.tr.aya;
           return Stack(
@@ -204,25 +206,20 @@ class FullPlayerPage extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  titleLatin,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineMedium
-                                      ?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 28,
-                                      ),
+                                  names.arabic,
+                                  style: GoogleFonts.notoNaskhArabic(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  info.name,
-                                  style: Theme.of(context).textTheme.titleLarge
-                                      ?.copyWith(
-                                        color: Colors.white,
-                                        fontSize: 24,
-                                      ),
+                                  names.latin,
+                                  style: FigmaTypography.latinBody15(
+                                    color: Colors.white,
+                                  ).copyWith(fontSize: 22),
                                   textAlign: TextAlign.center,
                                 ),
                                 const SizedBox(height: 12),
