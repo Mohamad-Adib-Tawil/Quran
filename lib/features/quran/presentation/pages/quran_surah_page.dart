@@ -28,6 +28,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
   bool _applied = false;
   final Key _screenKey = UniqueKey();
   int? _lastHandledPageNumber;
+  AyahModel? _lastLongPressedAyah;
   final Map<int, Timer> _tempHighlightTimers = {};
   static const int _reviewLaterColorCode = 0xAAF36077;
   ui.Rect? _shareOriginRect;
@@ -51,6 +52,8 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
             break;
           case QuranOpenTargetType.page:
             QuranLibrary().jumpToPage(t.number);
+            _lastHandledPageNumber = t.number;
+            unawaited(_saveLastReadSnapshot(forcedPageNumber: t.number));
             break;
         }
       }
@@ -73,24 +76,68 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
   }
 
   void _persistLastReadOnExit() {
-    final pageNumber = _resolveCurrentPageNumber();
-    int surahNumber;
+    unawaited(_saveLastReadSnapshot());
+  }
+
+  Future<void> _saveLastReadSnapshot({
+    int? forcedPageNumber,
+    AyahModel? preferredAyah,
+  }) async {
+    final pageNumber = forcedPageNumber ?? _resolveCurrentPageNumber();
+    final pageAyah = _resolveAyahForPage(
+      pageNumber,
+      preferredAyah: preferredAyah,
+    );
+    final surahNumber = _resolveSurahForPage(pageNumber, pageAyah);
+    final ayahNumber = pageAyah?.ayahNumber ?? 1;
+
+    await sl<LastReadService>().setLastRead(
+      surah: surahNumber,
+      ayah: ayahNumber,
+      page: pageNumber,
+    );
+  }
+
+  AyahModel? _resolveAyahForPage(
+    int pageNumber, {
+    AyahModel? preferredAyah,
+  }) {
+    final pressed = preferredAyah ?? _lastLongPressedAyah;
+    if (pressed != null && pressed.page == pageNumber) {
+      return pressed;
+    }
+
     try {
-      surahNumber = QuranLibrary()
+      final pageAyahs = QuranLibrary().getPageAyahsByPageNumber(
+        pageNumber: pageNumber,
+      );
+      if (pageAyahs.isEmpty) return null;
+      return pageAyahs.firstWhere(
+        (ayah) => ayah.ayahNumber >= 1,
+        orElse: () => pageAyahs.first,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  int _resolveSurahForPage(int pageNumber, AyahModel? pageAyah) {
+    final ayahSurah = pageAyah?.surahNumber;
+    if (ayahSurah != null && ayahSurah >= 1) {
+      return ayahSurah;
+    }
+
+    try {
+      return QuranLibrary()
           .getCurrentSurahDataByPageNumber(pageNumber: pageNumber)
           .surahNumber;
     } catch (_) {
       final open = widget.openTarget;
-      surahNumber = (open != null && open.type == QuranOpenTargetType.surah)
-          ? open.number
-          : 1;
+      if (open != null && open.type == QuranOpenTargetType.surah) {
+        return open.number;
+      }
+      return 1;
     }
-
-    sl<LastReadService>().setLastRead(
-      surah: surahNumber,
-      ayah: 1,
-      page: pageNumber,
-    );
   }
 
   int _resolveCurrentPageNumber() {
@@ -226,6 +273,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     final pageNumber = pageIndex + 1;
     if (_lastHandledPageNumber == pageNumber) return;
     _lastHandledPageNumber = pageNumber;
+    unawaited(_saveLastReadSnapshot(forcedPageNumber: pageNumber));
 
     final audioCubit = context.read<AudioCubit>();
     final audioState = audioCubit.state;
@@ -243,6 +291,16 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     LongPressStartDetails details,
     AyahModel ayah,
   ) async {
+    _lastLongPressedAyah = ayah;
+    final currentPage = _resolveCurrentPageNumber();
+    if (ayah.page == currentPage) {
+      unawaited(
+        _saveLastReadSnapshot(
+          forcedPageNumber: currentPage,
+          preferredAyah: ayah,
+        ),
+      );
+    }
     _shareOriginRect = _calcShareOrigin(details);
     final isTempHighlighted = _tempHighlightTimers.containsKey(ayah.ayahUQNumber);
     final isReviewLaterHighlighted = _hasReviewLaterHighlight(ayah.ayahUQNumber);
