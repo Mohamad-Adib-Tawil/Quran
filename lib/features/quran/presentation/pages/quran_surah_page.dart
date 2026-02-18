@@ -29,6 +29,8 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
   final Key _screenKey = UniqueKey();
   int? _lastHandledPageNumber;
   AyahModel? _lastLongPressedAyah;
+  _LastReadSnapshot? _pendingLastReadSnapshot;
+  bool _isPersistingLastRead = false;
   final Map<int, Timer> _tempHighlightTimers = {};
   static const int _reviewLaterColorCode = 0xAAF36077;
   ui.Rect? _shareOriginRect;
@@ -53,7 +55,6 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
           case QuranOpenTargetType.page:
             QuranLibrary().jumpToPage(t.number);
             _lastHandledPageNumber = t.number;
-            unawaited(_saveLastReadSnapshot(forcedPageNumber: t.number));
             break;
         }
       }
@@ -76,13 +77,15 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
   }
 
   void _persistLastReadOnExit() {
-    unawaited(_saveLastReadSnapshot());
+    _queueSaveLastReadSnapshot(
+      forcedPageNumber: _lastHandledPageNumber,
+    );
   }
 
-  Future<void> _saveLastReadSnapshot({
+  void _queueSaveLastReadSnapshot({
     int? forcedPageNumber,
     AyahModel? preferredAyah,
-  }) async {
+  }) {
     final pageNumber = forcedPageNumber ?? _resolveCurrentPageNumber();
     final pageAyah = _resolveAyahForPage(
       pageNumber,
@@ -90,12 +93,32 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     );
     final surahNumber = _resolveSurahForPage(pageNumber, pageAyah);
     final ayahNumber = pageAyah?.ayahNumber ?? 1;
-
-    await sl<LastReadService>().setLastRead(
+    _pendingLastReadSnapshot = _LastReadSnapshot(
       surah: surahNumber,
       ayah: ayahNumber,
       page: pageNumber,
     );
+    if (_isPersistingLastRead) return;
+    _isPersistingLastRead = true;
+    unawaited(_flushLastReadQueue());
+  }
+
+  Future<void> _flushLastReadQueue() async {
+    while (true) {
+      final snapshot = _pendingLastReadSnapshot;
+      if (snapshot == null) break;
+      _pendingLastReadSnapshot = null;
+      await sl<LastReadService>().setLastRead(
+        surah: snapshot.surah,
+        ayah: snapshot.ayah,
+        page: snapshot.page,
+      );
+    }
+    _isPersistingLastRead = false;
+    if (_pendingLastReadSnapshot != null && !_isPersistingLastRead) {
+      _isPersistingLastRead = true;
+      unawaited(_flushLastReadQueue());
+    }
   }
 
   AyahModel? _resolveAyahForPage(
@@ -152,13 +175,17 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       }
     }
 
+    final trackedPageNumber = _lastHandledPageNumber ?? ctrl.state.currentPageNumber.value;
+    if (trackedPageNumber >= 1) {
+      return trackedPageNumber.clamp(1, 604);
+    }
+
     final open = widget.openTarget;
     if (open != null && open.type == QuranOpenTargetType.page) {
       return open.number.clamp(1, 604);
     }
 
-    final pageNumber = _lastHandledPageNumber ?? ctrl.state.currentPageNumber.value;
-    return pageNumber.clamp(1, 604);
+    return 1;
   }
 
   @override
@@ -273,7 +300,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     final pageNumber = pageIndex + 1;
     if (_lastHandledPageNumber == pageNumber) return;
     _lastHandledPageNumber = pageNumber;
-    unawaited(_saveLastReadSnapshot(forcedPageNumber: pageNumber));
+    _queueSaveLastReadSnapshot(forcedPageNumber: pageNumber);
 
     final audioCubit = context.read<AudioCubit>();
     final audioState = audioCubit.state;
@@ -294,11 +321,9 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     _lastLongPressedAyah = ayah;
     final currentPage = _resolveCurrentPageNumber();
     if (ayah.page == currentPage) {
-      unawaited(
-        _saveLastReadSnapshot(
-          forcedPageNumber: currentPage,
-          preferredAyah: ayah,
-        ),
+      _queueSaveLastReadSnapshot(
+        forcedPageNumber: currentPage,
+        preferredAyah: ayah,
       );
     }
     _shareOriginRect = _calcShareOrigin(details);
@@ -686,4 +711,16 @@ enum _AyahAction {
   toggleReviewLaterHighlight,
   playSurah,
   showTafsir,
+}
+
+class _LastReadSnapshot {
+  final int surah;
+  final int ayah;
+  final int page;
+
+  const _LastReadSnapshot({
+    required this.surah,
+    required this.ayah,
+    required this.page,
+  });
 }
