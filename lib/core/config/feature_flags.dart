@@ -7,18 +7,19 @@ class FeatureFlagsService {
   static const _prefsKey = 'app.feature_flags';
 
   final SharedPreferences _prefs;
-  Map<String, bool> _flags;
+  final Map<String, bool> _flags;
 
-  FeatureFlagsService(this._prefs, {Map<String, bool>? defaults}) : _flags = {
-          // defaults
-          'mini_player': true,
-          'audio_downloads': true,
-          'in_app_review': true,
-          'update_checker': true,
-          'analytics': false,
-          'crash_reporting': false,
-          ...?defaults,
-        } {
+  FeatureFlagsService(this._prefs, {Map<String, bool>? defaults})
+    : _flags = {
+        // defaults
+        'mini_player': true,
+        'audio_downloads': true,
+        'in_app_review': true,
+        'update_checker': true,
+        'analytics': false,
+        'crash_reporting': false,
+        ...?defaults,
+      } {
     _load();
   }
 

@@ -89,9 +89,12 @@ class _FavoritesPageState extends State<FavoritesPage> {
             child: Center(
               child: SvgPicture.asset(
                 AppAssets.icStarGray,
-                color: Colors.white,
                 width: 60,
                 height: 60,
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
+                ),
               ),
             ),
           ),
@@ -185,10 +188,11 @@ class _FavoritesPageState extends State<FavoritesPage> {
                   title: names.arabic,
                   subtitle: '${names.latin} • ${t.favSurahNumber('$s')}',
                   onPlay: () async {
+                    final audioCubit = context.read<AudioCubit>();
                     try {
-                      await context.read<AudioCubit>().playSurah(s);
+                      await audioCubit.playSurah(s);
                     } catch (e) {
-                      if (!mounted) return;
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(t.errorPlaySurah('$e'))),
                       );

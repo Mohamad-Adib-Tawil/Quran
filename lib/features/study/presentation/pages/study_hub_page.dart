@@ -218,7 +218,7 @@ class _NotesTab extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.all(12),
       itemCount: surahs.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      separatorBuilder: (context, index) => const SizedBox(height: 10),
       itemBuilder: (ctx, i) {
         final s = surahs[i];
         final names = resolveSurahNamePair(s);
@@ -319,9 +319,7 @@ class _StudyEmptyState extends StatelessWidget {
 Future<void> _openQuranAtPage(BuildContext context, int page) async {
   await Navigator.of(context).push(
     MaterialPageRoute(
-      builder: (_) => QuranSurahPage(
-        openTarget: QuranOpenTarget.page(page),
-      ),
+      builder: (_) => QuranSurahPage(openTarget: QuranOpenTarget.page(page)),
     ),
   );
 }

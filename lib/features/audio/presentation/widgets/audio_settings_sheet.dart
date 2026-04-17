@@ -26,7 +26,10 @@ class AudioSettingsSheet extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text('Audio Settings', style: Theme.of(context).textTheme.titleMedium),
+                  child: Text(
+                    'Audio Settings',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
@@ -42,7 +45,9 @@ class AudioSettingsSheet extends StatelessWidget {
               max: 2.0,
               divisions: 15,
               label: '${settings.speed.toStringAsFixed(2)}x',
-              onChanged: (v) => context.read<AudioSettingsCubit>().setSpeed(double.parse(v.toStringAsFixed(2))),
+              onChanged: (v) => context.read<AudioSettingsCubit>().setSpeed(
+                double.parse(v.toStringAsFixed(2)),
+              ),
             ),
             const SizedBox(height: 12),
             Text('Repeat'),
@@ -50,16 +55,35 @@ class AudioSettingsSheet extends StatelessWidget {
             Wrap(
               spacing: 8,
               children: [
-                _repeatChip(context, label: 'One', mode: RepeatMode.one, selected: settings.repeatMode == RepeatMode.one, color: scheme.primary),
-                _repeatChip(context, label: 'Off', mode: RepeatMode.off, selected: settings.repeatMode == RepeatMode.off, color: scheme.primary),
-                _repeatChip(context, label: 'Next', mode: RepeatMode.next, selected: settings.repeatMode == RepeatMode.next, color: scheme.primary),
+                _repeatChip(
+                  context,
+                  label: 'One',
+                  mode: RepeatMode.one,
+                  selected: settings.repeatMode == RepeatMode.one,
+                  color: scheme.primary,
+                ),
+                _repeatChip(
+                  context,
+                  label: 'Off',
+                  mode: RepeatMode.off,
+                  selected: settings.repeatMode == RepeatMode.off,
+                  color: scheme.primary,
+                ),
+                _repeatChip(
+                  context,
+                  label: 'Next',
+                  mode: RepeatMode.next,
+                  selected: settings.repeatMode == RepeatMode.next,
+                  color: scheme.primary,
+                ),
               ],
             ),
             const SizedBox(height: 12),
             SwitchListTile(
               title: const Text('Auto download'),
               value: settings.autoDownload,
-              onChanged: (v) => context.read<AudioSettingsCubit>().setAutoDownload(v),
+              onChanged: (v) =>
+                  context.read<AudioSettingsCubit>().setAutoDownload(v),
             ),
             const SizedBox(height: 12),
             Text('Sleep timer'),
@@ -68,11 +92,23 @@ class AudioSettingsSheet extends StatelessWidget {
               children: [
                 _timerButton(context, label: 'Off', duration: null),
                 const SizedBox(width: 8),
-                _timerButton(context, label: '15m', duration: const Duration(minutes: 15)),
+                _timerButton(
+                  context,
+                  label: '15m',
+                  duration: const Duration(minutes: 15),
+                ),
                 const SizedBox(width: 8),
-                _timerButton(context, label: '30m', duration: const Duration(minutes: 30)),
+                _timerButton(
+                  context,
+                  label: '30m',
+                  duration: const Duration(minutes: 30),
+                ),
                 const SizedBox(width: 8),
-                _timerButton(context, label: '60m', duration: const Duration(hours: 1)),
+                _timerButton(
+                  context,
+                  label: '60m',
+                  duration: const Duration(hours: 1),
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -82,24 +118,44 @@ class AudioSettingsSheet extends StatelessWidget {
     );
   }
 
-  Widget _repeatChip(BuildContext context, {required String label, required RepeatMode mode, required bool selected, required Color color}) {
+  Widget _repeatChip(
+    BuildContext context, {
+    required String label,
+    required RepeatMode mode,
+    required bool selected,
+    required Color color,
+  }) {
     return ChoiceChip(
       label: Text(label),
       selected: selected,
       onSelected: (_) => context.read<AudioSettingsCubit>().setRepeat(mode),
-      selectedColor: color.withOpacity(0.15),
+      selectedColor: color.withValues(alpha: 0.15),
       labelStyle: TextStyle(color: selected ? color : null),
       side: BorderSide(color: selected ? color : Colors.grey.shade300),
     );
   }
 
-  Widget _timerButton(BuildContext context, {required String label, required Duration? duration}) {
-    final active = context.select<AudioCubit, bool>((c) => (c.state.sleepTimer != null && duration != null && c.state.sleepTimer == duration) || (duration == null && c.state.sleepTimer == null));
+  Widget _timerButton(
+    BuildContext context, {
+    required String label,
+    required Duration? duration,
+  }) {
+    final active = context.select<AudioCubit, bool>(
+      (c) =>
+          (c.state.sleepTimer != null &&
+              duration != null &&
+              c.state.sleepTimer == duration) ||
+          (duration == null && c.state.sleepTimer == null),
+    );
     return OutlinedButton(
       onPressed: () => context.read<AudioCubit>().setSleepTimer(duration),
       style: OutlinedButton.styleFrom(
         foregroundColor: active ? Theme.of(context).colorScheme.primary : null,
-        side: BorderSide(color: active ? Theme.of(context).colorScheme.primary : Colors.grey.shade400),
+        side: BorderSide(
+          color: active
+              ? Theme.of(context).colorScheme.primary
+              : Colors.grey.shade400,
+        ),
       ),
       child: Text(label),
     );

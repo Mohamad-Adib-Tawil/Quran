@@ -24,11 +24,13 @@ class LanguageSelectPage extends StatelessWidget {
             const SizedBox(height: 16),
             CircleAvatar(
               radius: 60,
-              backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
 
               child: CircleAvatar(
                 radius: 50,
-                backgroundColor: theme.colorScheme.primary.withOpacity(0.2),
+                backgroundColor: theme.colorScheme.primary.withValues(
+                  alpha: 0.2,
+                ),
                 child: SvgPicture.asset(
                   AppAssets.icLanguage,
                   height: 60,
@@ -85,7 +87,7 @@ class _LangButton extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
           width: 2,
         ),
         boxShadow: [],

@@ -81,9 +81,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
   }
 
   void _persistLastReadOnExit() {
-    _queueSaveLastReadSnapshot(
-      forcedPageNumber: _lastHandledPageNumber,
-    );
+    _queueSaveLastReadSnapshot(forcedPageNumber: _lastHandledPageNumber);
   }
 
   void _queueSaveLastReadSnapshot({
@@ -125,10 +123,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     }
   }
 
-  AyahModel? _resolveAyahForPage(
-    int pageNumber, {
-    AyahModel? preferredAyah,
-  }) {
+  AyahModel? _resolveAyahForPage(int pageNumber, {AyahModel? preferredAyah}) {
     final pressed = preferredAyah ?? _lastLongPressedAyah;
     if (pressed != null && pressed.page == pageNumber) {
       return pressed;
@@ -179,7 +174,8 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       }
     }
 
-    final trackedPageNumber = _lastHandledPageNumber ?? ctrl.state.currentPageNumber.value;
+    final trackedPageNumber =
+        _lastHandledPageNumber ?? ctrl.state.currentPageNumber.value;
     if (trackedPageNumber >= 1) {
       return trackedPageNumber.clamp(1, 604);
     }
@@ -286,10 +282,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-        child: MiniAudioPlayer(
-          debugTag: 'QuranSurahPage',
-          hideWhenIdle: true,
-        ),
+        child: MiniAudioPlayer(debugTag: 'QuranSurahPage', hideWhenIdle: true),
       ),
     );
   }
@@ -334,10 +327,15 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       );
     }
     _shareOriginRect = _calcShareOrigin(details);
-    final isTempHighlighted = _tempHighlightTimers.containsKey(ayah.ayahUQNumber);
-    final isReviewLaterHighlighted = _hasReviewLaterHighlight(ayah.ayahUQNumber);
-    final hasAyahNotes =
-        sl<StudyToolsService>().getNotesForAyah(ayah.ayahUQNumber).isNotEmpty;
+    final isTempHighlighted = _tempHighlightTimers.containsKey(
+      ayah.ayahUQNumber,
+    );
+    final isReviewLaterHighlighted = _hasReviewLaterHighlight(
+      ayah.ayahUQNumber,
+    );
+    final hasAyahNotes = sl<StudyToolsService>()
+        .getNotesForAyah(ayah.ayahUQNumber)
+        .isNotEmpty;
     final action = await showModalBottomSheet<_AyahAction>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -373,7 +371,10 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   child: Align(
                     alignment: AlignmentDirectional.centerStart,
                     child: Text(
@@ -395,15 +396,15 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
           child: Container(
             decoration: BoxDecoration(
               color: scheme.surface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(22),
+              ),
             ),
             padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
             child: ListView(
               shrinkWrap: true,
-            children: [
-              section(
-                t.ayahActionCopyWithTashkeel,
-                [
+              children: [
+                section(t.ayahActionCopyWithTashkeel, [
                   actionTile(
                     icon: Icons.copy_rounded,
                     title: t.ayahActionCopyWithTashkeel,
@@ -424,11 +425,8 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
                     title: t.ayahActionShareAsImage,
                     value: _AyahAction.shareAsImage,
                   ),
-                ],
-              ),
-              section(
-                t.studyHubTagsTab,
-                [
+                ]),
+                section(t.studyHubTagsTab, [
                   actionTile(
                     icon: Icons.bookmark_add_outlined,
                     title: t.ayahActionAdvancedTag,
@@ -445,11 +443,8 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
                       title: t.ayahActionShowNotes,
                       value: _AyahAction.showNotes,
                     ),
-                ],
-              ),
-              section(
-                t.settings,
-                [
+                ]),
+                section(t.settings, [
                   actionTile(
                     icon: Icons.menu_book_outlined,
                     title: t.ayahActionShowTafsir,
@@ -460,11 +455,8 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
                     title: t.ayahActionPlaySurahInPlayer,
                     value: _AyahAction.playSurah,
                   ),
-                ],
-              ),
-              section(
-                t.ayahColoringSection,
-                [
+                ]),
+                section(t.ayahColoringSection, [
                   actionTile(
                     icon: isTempHighlighted
                         ? Icons.highlight_remove_rounded
@@ -483,9 +475,8 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
                         : t.ayahActionReviewLaterAdd,
                     value: _AyahAction.toggleReviewLaterHighlight,
                   ),
-                ],
-              ),
-            ],
+                ]),
+              ],
             ),
           ),
         );
@@ -498,18 +489,18 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       case _AyahAction.copyWithTashkeel:
         await Clipboard.setData(ClipboardData(text: _ayahPlainText(ayah)));
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.tr.copied)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.tr.copied)));
         break;
       case _AyahAction.copyWithoutTashkeel:
         await Clipboard.setData(
           ClipboardData(text: _removeArabicDiacritics(_ayahPlainText(ayah))),
         );
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.tr.copied)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.tr.copied)));
         break;
       case _AyahAction.shareAsText:
         await _shareAyahAsText(ayah);
@@ -524,7 +515,8 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
         _toggleReviewLaterHighlight(ayah);
         break;
       case _AyahAction.playSurah:
-        final surahNumber = ayah.surahNumber ??
+        final surahNumber =
+            ayah.surahNumber ??
             QuranLibrary().getCurrentSurahDataByAyah(ayah: ayah).surahNumber;
         context.read<AudioCubit>().playSurah(surahNumber);
         break;
@@ -617,8 +609,8 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     await SharePlus.instance.share(
       ShareParams(
         text: text,
-        sharePositionOrigin: _shareOriginRect ??
-            const ui.Rect.fromLTWH(0, 0, 1, 1),
+        sharePositionOrigin:
+            _shareOriginRect ?? const ui.Rect.fromLTWH(0, 0, 1, 1),
       ),
     );
   }
@@ -630,15 +622,15 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
         ShareParams(
           files: [XFile(path)],
           text: _ayahReference(ayah),
-          sharePositionOrigin: _shareOriginRect ??
-              const ui.Rect.fromLTWH(0, 0, 1, 1),
+          sharePositionOrigin:
+              _shareOriginRect ?? const ui.Rect.fromLTWH(0, 0, 1, 1),
         ),
       );
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.tr.ayahShareImageError)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.tr.ayahShareImageError)));
     }
   }
 
@@ -669,10 +661,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       ..shader = ui.Gradient.linear(
         const Offset(0, 0),
         const Offset(width, height),
-        [
-          const Color(0xFFF9F6EE),
-          const Color(0xFFECE4D6),
-        ],
+        [const Color(0xFFF9F6EE), const Color(0xFFECE4D6)],
       );
     canvas.drawRect(const Rect.fromLTWH(0, 0, width, height), bgPaint);
 
@@ -704,10 +693,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       ),
     )..layout(maxWidth: width - 180);
 
-    versePainter.paint(
-      canvas,
-      Offset((width - versePainter.width) / 2, 210),
-    );
+    versePainter.paint(canvas, Offset((width - versePainter.width) / 2, 210));
 
     final refPainter = TextPainter(
       textDirection: TextDirection.rtl,
@@ -803,17 +789,26 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                leading: const Icon(Icons.rate_review_outlined, color: Colors.amber),
+                leading: const Icon(
+                  Icons.rate_review_outlined,
+                  color: Colors.amber,
+                ),
                 title: Text(t.ayahActionTagReview),
                 onTap: () => Navigator.of(ctx).pop(AyahTagType.review),
               ),
               ListTile(
-                leading: const Icon(Icons.auto_stories_outlined, color: Colors.green),
+                leading: const Icon(
+                  Icons.auto_stories_outlined,
+                  color: Colors.green,
+                ),
                 title: Text(t.ayahActionTagHifz),
                 onTap: () => Navigator.of(ctx).pop(AyahTagType.hifz),
               ),
               ListTile(
-                leading: const Icon(Icons.lightbulb_outline, color: Colors.blue),
+                leading: const Icon(
+                  Icons.lightbulb_outline,
+                  color: Colors.blue,
+                ),
                 title: Text(t.ayahActionTagTadabbur),
                 onTap: () => Navigator.of(ctx).pop(AyahTagType.tadabbur),
               ),
@@ -825,7 +820,8 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     if (tag == null) return;
     final colorCode = _advancedColorCodeForTag(tag);
     final color = Color(colorCode);
-    final surah = ayah.surahNumber ??
+    final surah =
+        ayah.surahNumber ??
         QuranLibrary().getCurrentSurahDataByAyah(ayah: ayah).surahNumber;
     _removeAdvancedBookmarksForAyah(ayah.ayahUQNumber);
     BookmarksCtrl.instance.saveBookmark(
@@ -847,9 +843,9 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       ),
     );
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(t.ayahActionTagSaved)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(t.ayahActionTagSaved)));
   }
 
   int _advancedColorCodeForTag(AyahTagType tag) {
@@ -891,9 +887,7 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
           content: TextField(
             controller: controller,
             maxLines: 4,
-            decoration: InputDecoration(
-              hintText: t.ayahActionNoteDialogHint,
-            ),
+            decoration: InputDecoration(hintText: t.ayahActionNoteDialogHint),
           ),
           actions: [
             TextButton(
@@ -910,7 +904,8 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
     );
     final note = text?.trim() ?? '';
     if (note.isEmpty) return;
-    final surah = ayah.surahNumber ??
+    final surah =
+        ayah.surahNumber ??
         QuranLibrary().getCurrentSurahDataByAyah(ayah: ayah).surahNumber;
     await sl<StudyToolsService>().addNote(
       AyahNoteEntry(
@@ -924,9 +919,9 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       ),
     );
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(t.ayahActionNoteSaved)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(t.ayahActionNoteSaved)));
   }
 
   Future<void> _showAyahNotes(AyahModel ayah) async {
@@ -944,7 +939,8 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
               : ListView.separated(
                   shrinkWrap: true,
                   itemCount: notes.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1),
                   itemBuilder: (_, i) {
                     final n = notes[i];
                     return ListTile(
@@ -959,7 +955,6 @@ class _QuranSurahPageState extends State<QuranSurahPage> {
       },
     );
   }
-
 }
 
 enum _AyahAction {

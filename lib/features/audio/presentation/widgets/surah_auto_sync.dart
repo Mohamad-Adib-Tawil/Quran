@@ -61,7 +61,9 @@ class _SurahAutoSyncState extends State<SurahAutoSync> {
     try {
       final surah = QuranLibrary().currentAndLastSurahNumber;
       if (kDebugMode) {
-        debugPrint('[SurahAutoSync] tick: surah=$surah lastApplied=$_lastAppliedSurah candidate=$_candidateSurah hits=$_candidateHits');
+        debugPrint(
+          '[SurahAutoSync] tick: surah=$surah lastApplied=$_lastAppliedSurah candidate=$_candidateSurah hits=$_candidateHits',
+        );
       }
       if (surah < 1 || surah > 114) return;
 
@@ -71,7 +73,9 @@ class _SurahAutoSyncState extends State<SurahAutoSync> {
         final until = _ignoreSurah1Until;
         if (until != null && DateTime.now().isBefore(until)) {
           if (kDebugMode) {
-            debugPrint('[SurahAutoSync] ignored transient surah=1 until=$until');
+            debugPrint(
+              '[SurahAutoSync] ignored transient surah=1 until=$until',
+            );
           }
           return;
         }
@@ -83,7 +87,9 @@ class _SurahAutoSyncState extends State<SurahAutoSync> {
         _candidateSurah = surah;
         _candidateHits = 1;
         if (kDebugMode) {
-          debugPrint('[SurahAutoSync] candidate set: surah=$surah hits=$_candidateHits');
+          debugPrint(
+            '[SurahAutoSync] candidate set: surah=$surah hits=$_candidateHits',
+          );
         }
         return;
       }
@@ -94,7 +100,9 @@ class _SurahAutoSyncState extends State<SurahAutoSync> {
       final requiredHits = (surah == 1) ? 3 : 2;
       if (_candidateHits < requiredHits) {
         if (kDebugMode) {
-          debugPrint('[SurahAutoSync] waiting stability: surah=$surah hits=$_candidateHits required=$requiredHits');
+          debugPrint(
+            '[SurahAutoSync] waiting stability: surah=$surah hits=$_candidateHits required=$requiredHits',
+          );
         }
         return;
       }

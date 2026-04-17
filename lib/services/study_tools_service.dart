@@ -31,31 +31,31 @@ class AyahTagEntry {
   });
 
   Map<String, dynamic> toJson() => {
-        'ayahUq': ayahUq,
-        'surah': surah,
-        'ayah': ayah,
-        'page': page,
-        'type': type.name,
-        'colorValue': colorValue,
-        'note': note,
-        'createdAt': createdAt.toIso8601String(),
-      };
+    'ayahUq': ayahUq,
+    'surah': surah,
+    'ayah': ayah,
+    'page': page,
+    'type': type.name,
+    'colorValue': colorValue,
+    'note': note,
+    'createdAt': createdAt.toIso8601String(),
+  };
 
   factory AyahTagEntry.fromJson(Map<String, dynamic> json) => AyahTagEntry(
-        ayahUq: (json['ayahUq'] as num?)?.toInt() ?? -1,
-        surah: (json['surah'] as num?)?.toInt() ?? 1,
-        ayah: (json['ayah'] as num?)?.toInt() ?? 1,
-        page: (json['page'] as num?)?.toInt() ?? 1,
-        type: AyahTagType.values.firstWhere(
-          (e) => e.name == json['type'],
-          orElse: () => AyahTagType.review,
-        ),
-        colorValue:
-            (json['colorValue'] as num?)?.toInt() ?? Colors.amber.value,
-        note: json['note'] as String?,
-        createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
-            DateTime.now(),
-      );
+    ayahUq: (json['ayahUq'] as num?)?.toInt() ?? -1,
+    surah: (json['surah'] as num?)?.toInt() ?? 1,
+    ayah: (json['ayah'] as num?)?.toInt() ?? 1,
+    page: (json['page'] as num?)?.toInt() ?? 1,
+    type: AyahTagType.values.firstWhere(
+      (e) => e.name == json['type'],
+      orElse: () => AyahTagType.review,
+    ),
+    colorValue:
+        (json['colorValue'] as num?)?.toInt() ?? Colors.amber.toARGB32(),
+    note: json['note'] as String?,
+    createdAt:
+        DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+  );
 }
 
 class AyahNoteEntry {
@@ -78,25 +78,25 @@ class AyahNoteEntry {
   });
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'ayahUq': ayahUq,
-        'surah': surah,
-        'ayah': ayah,
-        'page': page,
-        'text': text,
-        'createdAt': createdAt.toIso8601String(),
-      };
+    'id': id,
+    'ayahUq': ayahUq,
+    'surah': surah,
+    'ayah': ayah,
+    'page': page,
+    'text': text,
+    'createdAt': createdAt.toIso8601String(),
+  };
 
   factory AyahNoteEntry.fromJson(Map<String, dynamic> json) => AyahNoteEntry(
-        id: (json['id'] as String?) ?? '',
-        ayahUq: (json['ayahUq'] as num?)?.toInt() ?? -1,
-        surah: (json['surah'] as num?)?.toInt() ?? 1,
-        ayah: (json['ayah'] as num?)?.toInt() ?? 1,
-        page: (json['page'] as num?)?.toInt() ?? 1,
-        text: (json['text'] as String?) ?? '',
-        createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
-            DateTime.now(),
-      );
+    id: (json['id'] as String?) ?? '',
+    ayahUq: (json['ayahUq'] as num?)?.toInt() ?? -1,
+    surah: (json['surah'] as num?)?.toInt() ?? 1,
+    ayah: (json['ayah'] as num?)?.toInt() ?? 1,
+    page: (json['page'] as num?)?.toInt() ?? 1,
+    text: (json['text'] as String?) ?? '',
+    createdAt:
+        DateTime.tryParse(json['createdAt'] as String? ?? '') ?? DateTime.now(),
+  );
 }
 
 class GoalPlan {
@@ -111,22 +111,22 @@ class GoalPlan {
   });
 
   Map<String, dynamic> toJson() => {
-        'metric': metric.name,
-        'period': period.name,
-        'target': target,
-      };
+    'metric': metric.name,
+    'period': period.name,
+    'target': target,
+  };
 
   factory GoalPlan.fromJson(Map<String, dynamic> json) => GoalPlan(
-        metric: GoalMetric.values.firstWhere(
-          (e) => e.name == json['metric'],
-          orElse: () => GoalMetric.pages,
-        ),
-        period: GoalPeriod.values.firstWhere(
-          (e) => e.name == json['period'],
-          orElse: () => GoalPeriod.daily,
-        ),
-        target: (json['target'] as num?)?.toInt() ?? 0,
-      );
+    metric: GoalMetric.values.firstWhere(
+      (e) => e.name == json['metric'],
+      orElse: () => GoalMetric.pages,
+    ),
+    period: GoalPeriod.values.firstWhere(
+      (e) => e.name == json['period'],
+      orElse: () => GoalPeriod.daily,
+    ),
+    target: (json['target'] as num?)?.toInt() ?? 0,
+  );
 }
 
 class GoalProgressSnapshot {
@@ -181,27 +181,30 @@ class StudyToolsService {
   }
 
   List<AyahNoteEntry> getNotesForAyah(int ayahUq) {
-    final notes = _readJsonList(_kNotes)
-        .map((e) => AyahNoteEntry.fromJson(e))
-        .where((e) => e.ayahUq == ayahUq)
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final notes =
+        _readJsonList(_kNotes)
+            .map((e) => AyahNoteEntry.fromJson(e))
+            .where((e) => e.ayahUq == ayahUq)
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return notes;
   }
 
   List<AyahNoteEntry> getRecentNotes({int limit = 20}) {
-    final notes = _readJsonList(_kNotes).map((e) => AyahNoteEntry.fromJson(e)).toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final notes =
+        _readJsonList(_kNotes).map((e) => AyahNoteEntry.fromJson(e)).toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return notes.take(limit).toList();
   }
 
   List<AyahTagEntry> getAllTags() {
     final map = _readJsonMap(_kTags);
-    final tags = map.values
-        .whereType<Map<String, dynamic>>()
-        .map(AyahTagEntry.fromJson)
-        .toList()
-      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final tags =
+        map.values
+            .whereType<Map<String, dynamic>>()
+            .map(AyahTagEntry.fromJson)
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return tags;
   }
 
@@ -281,7 +284,8 @@ class StudyToolsService {
       final current = switch (goal.metric) {
         GoalMetric.pages => _intSetCount(bucket['pages']),
         GoalMetric.ayahs => _intSetCount(bucket['ayahs']),
-        GoalMetric.listeningMinutes => (((bucket['listenSec'] as num?)?.toInt() ?? 0) / 60).floor(),
+        GoalMetric.listeningMinutes =>
+          (((bucket['listenSec'] as num?)?.toInt() ?? 0) / 60).floor(),
       };
       return GoalProgressSnapshot(
         metric: goal.metric,
@@ -292,7 +296,8 @@ class StudyToolsService {
     }).toList();
   }
 
-  String _goalKey(GoalMetric metric, GoalPeriod period) => '${metric.name}_${period.name}';
+  String _goalKey(GoalMetric metric, GoalPeriod period) =>
+      '${metric.name}_${period.name}';
 
   Future<void> _trackIntSet({
     required String key,
@@ -328,18 +333,27 @@ class StudyToolsService {
   Map<String, dynamic> _readBucket(String key, String bucketId) {
     final root = _readJsonMap(key);
     final bucket = root[bucketId];
-    if (bucket is Map<String, dynamic>) return bucket;
+    if (bucket is Map<String, dynamic>) {
+      return bucket;
+    }
     return {};
   }
 
-  Map<String, dynamic> _bucketMutable(Map<String, dynamic> root, String bucketId) {
+  Map<String, dynamic> _bucketMutable(
+    Map<String, dynamic> root,
+    String bucketId,
+  ) {
     final existing = root[bucketId];
-    if (existing is Map<String, dynamic>) return Map<String, dynamic>.from(existing);
+    if (existing is Map<String, dynamic>) {
+      return Map<String, dynamic>.from(existing);
+    }
     return <String, dynamic>{};
   }
 
   int _intSetCount(dynamic raw) {
-    if (raw is! List) return 0;
+    if (raw is! List) {
+      return 0;
+    }
     return raw.map((e) => (e as num).toInt()).toSet().length;
   }
 

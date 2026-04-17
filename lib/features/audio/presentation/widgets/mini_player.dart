@@ -85,7 +85,7 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
         reverseDuration: Duration(milliseconds: 320),
       ),
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withOpacity(0.55),
+      barrierColor: Colors.black.withValues(alpha: 0.55),
       builder: (_) {
         return Container(
           height: height,
@@ -363,12 +363,12 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
                   topRight: Radius.circular(12),
                 ),
                 border: Border.all(
-                  color: scheme.outline.withOpacity(0.1),
+                  color: scheme.outline.withValues(alpha: 0.1),
                   width: 0.5,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 8,
                     offset: const Offset(0, -2),
                   ),
@@ -430,8 +430,8 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
                                       Text(
                                         '${names.latin} • ${isMadani ? t.madani : t.makki} • $verses ${t.aya}',
                                         style: FigmaTypography.latinBody15(
-                                          color: scheme.onSurface.withOpacity(
-                                            0.6,
+                                          color: scheme.onSurface.withValues(
+                                            alpha: 0.6,
                                           ),
                                         ).copyWith(fontSize: 12),
                                         textAlign: TextAlign.right,
@@ -489,7 +489,7 @@ class _MiniAudioPlayerState extends State<MiniAudioPlayer> {
                   ),
                   // شريط التقدم
                   _MiniProgressBar(
-                    backgroundColor: scheme.surface.withOpacity(0.4),
+                    backgroundColor: scheme.surface.withValues(alpha: 0.4),
                     color: scheme.primary,
                   ),
                 ],

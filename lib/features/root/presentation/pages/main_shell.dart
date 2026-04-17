@@ -40,7 +40,7 @@ class _MainShellState extends State<MainShell> {
             data: NavigationBarThemeData(
               indicatorColor: Colors.transparent,
               surfaceTintColor: Colors.transparent,
-              overlayColor: MaterialStatePropertyAll(Colors.transparent),
+              overlayColor: WidgetStatePropertyAll(Colors.transparent),
             ),
             child: NavigationBar(
               selectedIndex: _index,
