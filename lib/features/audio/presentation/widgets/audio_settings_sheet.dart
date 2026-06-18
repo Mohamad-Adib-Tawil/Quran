@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../settings/audio_settings_cubit.dart';
 import '../cubit/audio_cubit.dart';
-import '../cubit/audio_state.dart';
+import '../cubit/audio_state.dart' as audio_state;
 
 class AudioSettingsSheet extends StatelessWidget {
   const AudioSettingsSheet({super.key});
@@ -58,22 +58,22 @@ class AudioSettingsSheet extends StatelessWidget {
                 _repeatChip(
                   context,
                   label: 'One',
-                  mode: RepeatMode.one,
-                  selected: settings.repeatMode == RepeatMode.one,
+                  mode: audio_state.RepeatMode.one,
+                  selected: settings.repeatMode == audio_state.RepeatMode.one,
                   color: scheme.primary,
                 ),
                 _repeatChip(
                   context,
                   label: 'Off',
-                  mode: RepeatMode.off,
-                  selected: settings.repeatMode == RepeatMode.off,
+                  mode: audio_state.RepeatMode.off,
+                  selected: settings.repeatMode == audio_state.RepeatMode.off,
                   color: scheme.primary,
                 ),
                 _repeatChip(
                   context,
                   label: 'Next',
-                  mode: RepeatMode.next,
-                  selected: settings.repeatMode == RepeatMode.next,
+                  mode: audio_state.RepeatMode.next,
+                  selected: settings.repeatMode == audio_state.RepeatMode.next,
                   color: scheme.primary,
                 ),
               ],
@@ -121,7 +121,7 @@ class AudioSettingsSheet extends StatelessWidget {
   Widget _repeatChip(
     BuildContext context, {
     required String label,
-    required RepeatMode mode,
+    required audio_state.RepeatMode mode,
     required bool selected,
     required Color color,
   }) {

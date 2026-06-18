@@ -8,6 +8,7 @@ import 'package:quran_app/core/quran/surah_name_resolver.dart';
 import 'package:quran_app/core/theme/figma_typography.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
 import 'package:quran_app/features/audio/presentation/cubit/audio_state.dart';
+import 'package:quran_app/features/audio/presentation/cubit/audio_state.dart' as audio_state;
 import 'package:quran_app/features/audio/settings/audio_settings_cubit.dart';
 import 'package:quran_app/features/audio/presentation/widgets/audio_settings_sheet.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -500,12 +501,12 @@ class _RepeatButton extends StatelessWidget {
       builder: (context, state) {
         final scheme = Theme.of(context).colorScheme;
         final mode = state.repeatMode;
-        String label = mode == RepeatMode.one
+        String label = mode == audio_state.RepeatMode.one
             ? 'Repeat One'
-            : mode == RepeatMode.off
+            : mode == audio_state.RepeatMode.off
             ? 'No Repeat'
             : 'Next Surah';
-        final baseColor = mode == RepeatMode.off
+        final baseColor = mode == audio_state.RepeatMode.off
             ? scheme.onSurface.withValues(alpha: 0.4)
             : scheme.primary;
         return IconButton(
@@ -523,7 +524,7 @@ class _RepeatButton extends StatelessWidget {
                 height: 24,
                 colorFilter: ColorFilter.mode(baseColor, BlendMode.srcIn),
               ),
-              if (mode == RepeatMode.one)
+              if (mode == audio_state.RepeatMode.one)
                 Positioned(
                   right: -2,
                   top: -2,
@@ -552,14 +553,14 @@ class _RepeatButton extends StatelessWidget {
     );
   }
 
-  RepeatMode _cycle(RepeatMode b) {
+  audio_state.RepeatMode _cycle(audio_state.RepeatMode b) {
     switch (b) {
-      case RepeatMode.one:
-        return RepeatMode.off;
-      case RepeatMode.off:
-        return RepeatMode.next;
-      case RepeatMode.next:
-        return RepeatMode.one;
+      case audio_state.RepeatMode.one:
+        return audio_state.RepeatMode.off;
+      case audio_state.RepeatMode.off:
+        return audio_state.RepeatMode.next;
+      case audio_state.RepeatMode.next:
+        return audio_state.RepeatMode.one;
     }
   }
 }
