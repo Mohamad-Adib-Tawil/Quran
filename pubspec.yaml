@@ -1,7 +1,7 @@
 name: quran_app
-description: "A new Flutter project."
+description: "Ahmad Karasi Quran App."
 publish_to: 'none'
-version: 1.0.3+3
+version: 1.0.6+6
 
 environment:
   sdk: ^3.10.3
@@ -34,6 +34,10 @@ dependencies:
   sliding_up_panel: ^2.0.0+1
   audio_service: ^0.18.15
   connectivity_plus: ^7.0.0
+
+dependency_overrides:
+  quran_library:
+    path: packages/quran_library
 
 dev_dependencies:
   flutter_gen_runner: ^5.7.0
