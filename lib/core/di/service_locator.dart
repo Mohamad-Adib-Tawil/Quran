@@ -15,6 +15,7 @@ import '../../features/quran/data/repositories/quran_repository_impl.dart';
 import '../../features/quran/domain/repositories/quran_repository.dart';
 import '../../services/audio_session_manager.dart';
 import '../../services/audio_url_catalog_service.dart';
+import '../../services/connectivity_service.dart';
 import '../../services/last_read_service.dart';
 import '../../services/favorites_service.dart';
 import '../../services/study_tools_service.dart';
@@ -37,6 +38,7 @@ Future<void> setupLocator() async {
   sl.registerLazySingleton<AppLogger>(() => AppLogger());
   sl.registerLazySingleton<CrashReporter>(() => CrashReporter(sl<AppLogger>()));
   sl.registerLazySingleton<AudioSessionManager>(() => AudioSessionManager(sl<SharedPreferences>()));
+  sl.registerLazySingleton<ConnectivityService>(() => ConnectivityService());
   // Audio settings service
   sl.registerLazySingleton<AudioSettingsService>(() => AudioSettingsService(sl<SharedPreferences>()));
   // Last read storage service

@@ -58,7 +58,7 @@ packages:
     source: hosted
     version: "2.13.0"
   audio_service:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: audio_service
       sha256: cb122c7c2639d2a992421ef96b67948ad88c5221da3365ccef1031393a76e044
@@ -218,7 +218,7 @@ packages:
     source: hosted
     version: "3.0.0"
   connectivity_plus:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: connectivity_plus
       sha256: "33bae12a398f841c6cda09d1064212957265869104c478e5ad51e2fb26c3973c"

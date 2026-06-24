@@ -32,6 +32,8 @@ dependencies:
   flutter_svg: ^2.0.10+1
   flutter_screenutil: ^5.9.3
   sliding_up_panel: ^2.0.0+1
+  audio_service: ^0.18.15
+  connectivity_plus: ^7.0.0
 
 dev_dependencies:
   flutter_gen_runner: ^5.7.0

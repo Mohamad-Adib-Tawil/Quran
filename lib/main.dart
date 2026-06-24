@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_library/quran_library.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:audio_session/audio_session.dart';
+// ignore: unnecessary_import — quran_library re-exports these, but we depend on them directly for stability
+import 'package:audio_service/audio_service.dart';
+// ignore: unnecessary_import
+import 'package:just_audio/just_audio.dart' show AudioPlayer;
 import 'core/localization/localization_service.dart';
 import 'core/localization/app_localization_ext.dart';
 
@@ -18,6 +21,8 @@ import 'features/audio/domain/repositories/audio_repository.dart' as audio_domai
 import 'features/splash/presentation/pages/app_splash_page.dart';
 import 'services/audio_url_catalog_service.dart';
 import 'services/audio_session_manager.dart';
+import 'services/quran_audio_handler.dart';
+import 'services/connectivity_service.dart';
 import 'features/audio/settings/audio_settings_cubit.dart';
 import 'features/audio/settings/audio_settings_service.dart';
 import 'core/logging/logging.dart';
@@ -25,10 +30,24 @@ import 'core/logging/logging.dart';
 Future<void> main() async {
   await runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
-    final session = await AudioSession.instance;
-    await session.configure(const AudioSessionConfiguration.music());
     await QuranLibrary.init();
     await setupLocator();
+
+    // تهيئة audio_service — يُنشئ QuranAudioHandler ويربطه بنفس AudioPlayer المُسجَّل في GetIt
+    final handler = await AudioService.init(
+      builder: () => QuranAudioHandler(sl<AudioPlayer>()),
+      config: const AudioServiceConfig(
+        androidNotificationChannelId: 'com.ahmad_karasi.quran.audio',
+        androidNotificationChannelName: 'تشغيل التلاوة',
+        androidNotificationIcon: 'mipmap/ic_launcher',
+        androidShowNotificationBadge: true,
+        androidNotificationOngoing: true,
+        androidStopForegroundOnPause: true,
+        notificationColor: Color(0xFF0CAF60),
+      ),
+    );
+    sl.registerSingleton<QuranAudioHandler>(handler);
+
     // Hook crash reporting after DI ready
     final crash = sl<CrashReporter>();
     FlutterError.onError = (FlutterErrorDetails details) async {
@@ -55,11 +74,20 @@ class QuranApp extends StatelessWidget {
         BlocProvider(create: (_) => SettingsCubit(sl())),
         BlocProvider(create: (_) => QuranCubit(sl())),
         BlocProvider(create: (_) {
+          final handler = sl<QuranAudioHandler>();
           final cubit = AudioCubit(
             sl<audio_domain.AudioRepository>(),
             sl<AudioDownloadRepository>(),
             sl<AudioUrlCatalogService>(),
+            handler,
+            sl<ConnectivityService>(),
           );
+          // ربط أزرار النظام (شاشة القفل / الإشعار / سماعة) بالـ Cubit
+          handler.onPlayRequested = cubit.play;
+          handler.onPauseRequested = cubit.pause;
+          handler.onNextRequested = cubit.playNextFromCatalog;
+          handler.onPreviousRequested = cubit.playPrevFromCatalog;
+          handler.onStopRequested = cubit.clearAudio;
           // Attach and restore last session (non-blocking)
           final session = sl<AudioSessionManager>();
           session.attach(cubit);

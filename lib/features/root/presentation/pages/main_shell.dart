@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_app/features/home/presentation/pages/home_screen.dart';
 import 'package:quran_app/features/audio/presentation/pages/audio_downloads_page.dart';
 import 'package:quran_app/features/favorites/presentation/pages/favorites_page.dart';
@@ -6,6 +7,8 @@ import 'package:quran_app/core/localization/app_localization_ext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_app/core/assets/app_assets.dart';
 import 'package:quran_app/features/audio/presentation/widgets/mini_player.dart';
+import 'package:quran_app/features/audio/presentation/cubit/audio_cubit.dart';
+import 'package:quran_app/features/audio/presentation/cubit/audio_state.dart';
 import 'package:quran_app/features/study/presentation/pages/study_hub_page.dart';
 
 class MainShell extends StatefulWidget {
@@ -27,7 +30,47 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     final t = context.tr;
-    return Scaffold(
+    return BlocListener<AudioCubit, AudioState>(
+      listenWhen: (prev, curr) =>
+          curr.phase == AudioPhase.error &&
+          prev.phase != AudioPhase.error &&
+          curr.errorKind == AudioErrorKind.network,
+      listener: (ctx, state) {
+        ScaffoldMessenger.of(ctx)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(
+            duration: const Duration(seconds: 5),
+            backgroundColor: const Color(0xFF0CAF60),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            content: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.wifi_off, color: Colors.white, size: 16),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'لا يوجد اتصال بالإنترنت',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            action: SnackBarAction(
+              label: 'إعادة المحاولة',
+              textColor: Colors.white,
+              onPressed: () => ctx.read<AudioCubit>().retry(),
+            ),
+          ));
+      },
+      child: Scaffold(
       body: _pages[_index],
       bottomNavigationBar: Column(
         mainAxisSize: MainAxisSize.min,
@@ -108,6 +151,7 @@ class _MainShellState extends State<MainShell> {
             ),
           ),
         ],
+      ),
       ),
     );
   }

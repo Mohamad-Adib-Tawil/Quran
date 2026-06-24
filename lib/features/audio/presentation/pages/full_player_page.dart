@@ -66,6 +66,7 @@ class FullPlayerPage extends StatelessWidget {
 
             // ✅ Error boundary - Show error state
             if (state.phase == AudioPhase.error) {
+              final isNetworkError = state.errorKind == AudioErrorKind.network;
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(24),
@@ -73,9 +74,11 @@ class FullPlayerPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
-                        Icons.error_outline,
+                        isNetworkError ? Icons.wifi_off_rounded : Icons.error_outline,
                         size: 64,
-                        color: Theme.of(context).colorScheme.error,
+                        color: isNetworkError
+                            ? Theme.of(context).colorScheme.tertiary
+                            : Theme.of(context).colorScheme.error,
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -349,38 +352,45 @@ class FullPlayerPage extends StatelessWidget {
                     if (state.phase == AudioPhase.error)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.red.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.red.withValues(alpha: 0.2),
+                        child: Builder(builder: (context) {
+                          final isNet = state.errorKind == AudioErrorKind.network;
+                          return Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: (isNet ? Colors.orange : Colors.red)
+                                  .withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: (isNet ? Colors.orange : Colors.red)
+                                    .withValues(alpha: 0.2),
+                              ),
                             ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.error_outline,
-                                color: Colors.red,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  state.errorMessage ?? 'Error',
-                                  style: Theme.of(context).textTheme.bodyMedium,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  isNet
+                                      ? Icons.wifi_off_rounded
+                                      : Icons.error_outline,
+                                  color: isNet ? Colors.orange : Colors.red,
                                 ),
-                              ),
-                              const SizedBox(width: 8),
-                              TextButton(
-                                onPressed: () =>
-                                    context.read<AudioCubit>().retry(),
-                                child: Text(t.retry),
-                              ),
-                            ],
-                          ),
-                        ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    state.errorMessage ?? 'Error',
+                                    style: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                TextButton(
+                                  onPressed: () =>
+                                      context.read<AudioCubit>().retry(),
+                                  child: Text(t.retry),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
                       ),
                   ],
                 ),

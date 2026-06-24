@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
 
+/// نوع الخطأ — يُميّز بين خطأ الشبكة وغيره لعرض رسالة/أيقونة مناسبة.
+enum AudioErrorKind { none, network, source, unknown }
+
 enum AudioPhase {
   idle,
   downloading,
@@ -42,6 +45,7 @@ class AudioState extends Equatable {
   final Duration? sleepTimer; // null = off
   final int? pendingSurah; // surah awaiting user confirmation
   final Duration? pendingInitialPosition; // initial position for pending surah
+  final AudioErrorKind errorKind;
 
   const AudioState({
     required this.url,
@@ -60,6 +64,7 @@ class AudioState extends Equatable {
     required this.sleepTimer,
     this.pendingSurah,
     this.pendingInitialPosition,
+    this.errorKind = AudioErrorKind.none,
   });
 
   factory AudioState.initial() => const AudioState(
@@ -79,6 +84,7 @@ class AudioState extends Equatable {
     sleepTimer: null,
     pendingSurah: null,
     pendingInitialPosition: null,
+    errorKind: AudioErrorKind.none,
   );
 
   /// copyWith supports clearing nullable fields by passing explicit `null`.
@@ -101,6 +107,7 @@ class AudioState extends Equatable {
     Object? sleepTimer = _noChange,
     Object? pendingSurah = _noChange,
     Object? pendingInitialPosition = _noChange,
+    AudioErrorKind? errorKind,
   }) => AudioState(
     url: url == _noChange ? this.url : url as String?,
     isPlaying: isPlaying ?? this.isPlaying,
@@ -130,6 +137,7 @@ class AudioState extends Equatable {
     pendingInitialPosition: pendingInitialPosition == _noChange
         ? this.pendingInitialPosition
         : pendingInitialPosition as Duration?,
+    errorKind: errorKind ?? this.errorKind,
   );
 
   @override
@@ -150,6 +158,7 @@ class AudioState extends Equatable {
     sleepTimer,
     pendingSurah,
     pendingInitialPosition,
+    errorKind,
   ];
 
   bool get isLoading =>

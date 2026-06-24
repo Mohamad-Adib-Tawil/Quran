@@ -1,19 +1,23 @@
-import 'dart:async';
+import 'dart:async' show StreamSubscription, Timer, TimeoutException;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart'
     show ProcessingState; // for completion detection
+import 'package:quran/quran.dart' as quran_pkg;
 
 import '../../domain/repositories/audio_repository.dart';
 import '../../domain/repositories/audio_download_repository.dart';
 import 'audio_state.dart';
 import '../../../../services/audio_url_catalog_service.dart';
+import '../../../../services/quran_audio_handler.dart';
+import '../../../../services/connectivity_service.dart';
 
-/// Handles playback only. No network logic here.
 class AudioCubit extends Cubit<AudioState> {
   final AudioRepository _repo;
   final AudioDownloadRepository _downloadRepo;
   final AudioUrlCatalogService _catalog;
+  final QuranAudioHandler _handler;
+  final ConnectivityService _connectivity;
   StreamSubscription? _posSub;
   StreamSubscription? _durSub;
   StreamSubscription? _stateSub;
@@ -21,8 +25,13 @@ class AudioCubit extends Cubit<AudioState> {
   int? _lastRequestedSurah;
   Timer? _sleepTimerHandle;
 
-  AudioCubit(this._repo, this._downloadRepo, this._catalog)
-    : super(AudioState.initial()) {
+  AudioCubit(
+    this._repo,
+    this._downloadRepo,
+    this._catalog,
+    this._handler,
+    this._connectivity,
+  ) : super(AudioState.initial()) {
     _bind();
   }
 
@@ -39,6 +48,8 @@ class AudioCubit extends Cubit<AudioState> {
     });
     _durSub = _repo.durationStream.listen((dur) {
       emit(state.copyWith(duration: dur));
+      // تحديث مدة السورة في ويدجت شاشة القفل/الإشعارات
+      _handler.updateDuration(dur);
     });
     _stateSub = _repo.playerStateStream.listen((playerState) async {
       final playing = playerState.playing;
@@ -86,6 +97,40 @@ class AudioCubit extends Cubit<AudioState> {
     });
   }
 
+  /// تحديث ويدجت شاشة القفل والإشعارات بمعلومات السورة الحالية.
+  void _updateNowPlaying(int surah) {
+    try {
+      final arabicName = quran_pkg.getSurahNameArabic(surah);
+      final latinName = quran_pkg.getSurahName(surah);
+      _handler.updateNowPlaying(
+        surah: surah,
+        arabicName: arabicName,
+        latinName: latinName,
+        duration: state.duration,
+        // android.resource:// يعمل على Android؛ audio_service يتجاهله على iOS
+        artUri: Uri.parse(
+          'android.resource://com.ahmad_karasi.quran/drawable/ic_launcher_notification',
+        ),
+      );
+    } catch (_) {
+      // لا نوقف التشغيل لخطأ في الـ metadata
+    }
+  }
+
+  /// فحص الإنترنت قبل أي عملية تتطلب الشبكة.
+  /// يُعيد true إذا كان متصلاً، وإذا لا يُصدر حالة خطأ شبكة ويُعيد false.
+  Future<bool> _checkNetwork() async {
+    final online = await _connectivity.hasInternet();
+    if (!online) {
+      emit(state.copyWith(
+        phase: AudioPhase.error,
+        errorKind: AudioErrorKind.network,
+        errorMessage: 'لا يوجد اتصال بالإنترنت حالياً. يرجى المحاولة لاحقاً.',
+      ));
+    }
+    return online;
+  }
+
   /// ✅ Cancel all active subscriptions to prevent memory leaks
   Future<void> _cancelSubscriptions() async {
     await _posSub?.cancel();
@@ -121,9 +166,13 @@ class AudioCubit extends Cubit<AudioState> {
         loadedSurah: surah,
         position: initialPosition ?? Duration.zero,
         phase: AudioPhase.preparing,
+        errorKind: AudioErrorKind.none,
         // duration will arrive via durationStream
       ),
     );
+
+    // تحديث ويدجت شاشة القفل بمعلومات السورة
+    _updateNowPlaying(surah);
 
     return url;
   }
@@ -398,6 +447,9 @@ class AudioCubit extends Cubit<AudioState> {
         throw ArgumentError('رقم السورة غير صحيح: $surah');
       }
 
+      // فحص الاتصال بالإنترنت قبل البث المباشر
+      if (!await _checkNetwork()) return;
+
       final url = _catalog.urlForSurah(surah);
       if (url == null) {
         throw StateError('لا يوجد رابط صوت لهذه السورة في الكتالوج');
@@ -414,19 +466,42 @@ class AudioCubit extends Cubit<AudioState> {
         throw StateError('مصدر الصوت غير مسموح. يجب أن يبدأ بـ $allowedPrefix');
       }
 
+      // تحديث ويدجت شاشة القفل بمعلومات السورة
+      _updateNowPlaying(surah);
+
       // phase/isPlaying are driven by playerStateStream
-      emit(state.copyWith(errorMessage: null));
-      await _repo.setUrl(url);
+      emit(state.copyWith(errorMessage: null, errorKind: AudioErrorKind.none));
+
+      // مهلة 15 ثانية لمنع التعليق على نت بطيء
+      await _repo.setUrl(url).timeout(
+        const Duration(seconds: 15),
+        onTimeout: () => throw TimeoutException('انتهت مهلة التحميل'),
+      );
       emit(state.copyWith(url: url, currentSurah: surah, loadedSurah: surah));
       await _repo.play();
     } on ArgumentError catch (e) {
-      emit(state.copyWith(phase: AudioPhase.error, errorMessage: e.message));
+      emit(state.copyWith(
+        phase: AudioPhase.error,
+        errorKind: AudioErrorKind.source,
+        errorMessage: e.message,
+      ));
     } on StateError catch (e) {
-      emit(state.copyWith(phase: AudioPhase.error, errorMessage: e.message));
+      emit(state.copyWith(
+        phase: AudioPhase.error,
+        errorKind: AudioErrorKind.source,
+        errorMessage: e.message,
+      ));
+    } on TimeoutException {
+      emit(state.copyWith(
+        phase: AudioPhase.error,
+        errorKind: AudioErrorKind.network,
+        errorMessage: 'الاتصال بطيء، تعذّر تحميل السورة. حاول مرة أخرى.',
+      ));
     } catch (e) {
       emit(
         state.copyWith(
           phase: AudioPhase.error,
+          errorKind: AudioErrorKind.unknown,
           errorMessage: 'فشل تشغيل الصوت من الكتالوج: ${e.toString()}',
         ),
       );
@@ -448,6 +523,9 @@ class AudioCubit extends Cubit<AudioState> {
   }
 
   Future<void> _startDownloadFlow(int surah) async {
+    // فحص الاتصال قبل بدء التحميل
+    if (!await _checkNetwork()) return;
+
     // reset any previous download subscription
     await _dlSub?.cancel();
     emit(state.copyWith(phase: AudioPhase.downloading, downloadProgress: 0.0));
@@ -467,12 +545,15 @@ class AudioCubit extends Cubit<AudioState> {
       } else if (evt.status == DownloadStatus.failed ||
           evt.status == DownloadStatus.canceled) {
         await _dlSub?.cancel();
-        emit(
-          state.copyWith(
-            phase: AudioPhase.error,
-            errorMessage: 'تعذر تحميل السورة. حاول مرة أخرى.',
-          ),
-        );
+        // حدّد نوع الخطأ: شبكة أم مصدر
+        final online = await _connectivity.hasInternet();
+        emit(state.copyWith(
+          phase: AudioPhase.error,
+          errorKind: online ? AudioErrorKind.source : AudioErrorKind.network,
+          errorMessage: online
+              ? 'تعذّر تحميل السورة. حاول مرة أخرى لاحقاً.'
+              : 'انقطع الاتصال أثناء التحميل. تحقّق من الإنترنت وحاول لاحقاً.',
+        ));
       }
     });
     // kick off the download (progress listener will drive the rest)
@@ -480,7 +561,11 @@ class AudioCubit extends Cubit<AudioState> {
       await _downloadRepo.downloadSurah(surah);
     } catch (e) {
       await _dlSub?.cancel();
-      emit(state.copyWith(phase: AudioPhase.error, errorMessage: e.toString()));
+      emit(state.copyWith(
+        phase: AudioPhase.error,
+        errorKind: AudioErrorKind.unknown,
+        errorMessage: e.toString(),
+      ));
     }
   }
 
