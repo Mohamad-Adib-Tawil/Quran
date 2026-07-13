@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$CLAUDE_TOOL_INPUT_FILE_PATH\"; if [[ \"$FILE\" == *.dart ]]; then if [[ \"$FILE\" == */features/audio/* ]]; then echo \"[CLAUDE.md reminder] تعديل في audio — إذا تغيّرت واجهة أو phase أو flow، حدّث lib/features/audio/CLAUDE.md\"; elif [[ \"$FILE\" == */features/quran/* ]]; then echo \"[CLAUDE.md reminder] تعديل في quran — إذا تغيّرت واجهة QuranCubit أو navigation، حدّث lib/features/quran/CLAUDE.md\"; elif [[ \"$FILE\" == */features/home/* ]]; then echo \"[CLAUDE.md reminder] تعديل في home — إذا تغيّرت HomeCubit أو التبويبات، حدّث lib/features/home/CLAUDE.md\"; elif [[ \"$FILE\" == */features/settings/* ]]; then echo \"[CLAUDE.md reminder] تعديل في settings — إذا تغيّرت SettingsCubit أو الصفحات، حدّث lib/features/settings/CLAUDE.md\"; elif [[ \"$FILE\" == */features/root/* ]]; then echo \"[CLAUDE.md reminder] تعديل في root — إذا تغيّرت التبويبات أو Shell، حدّث lib/features/root/CLAUDE.md\"; elif [[ \"$FILE\" == */services/* ]]; then echo \"[CLAUDE.md reminder] تعديل في services — إذا تغيّرت واجهة خدمة أو Storage keys، حدّث lib/services/CLAUDE.md\"; elif [[ \"$FILE\" == */core/di/* ]] || [[ \"$FILE\" == */core/config/* ]] || [[ \"$FILE\" == */core/theme/* ]]; then echo \"[CLAUDE.md reminder] تعديل في core — إذا تغيّر DI أو Feature Flags أو Theme، حدّث lib/core/CLAUDE.md\"; fi; fi'"
+          }
+        ]
+      }
+    ]
+  }
+}
